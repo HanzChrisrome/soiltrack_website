@@ -1,17 +1,22 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { create } from "zustand";
 import { axiosInstance } from "../lib/axios";
 import { toast } from "react-hot-toast";
 import { AxiosError } from "axios";
 
 interface AuthState {
-  authUser: { id: string; email: string; username: string } | null;
+  authUser: {
+    id: string;
+    email: string;
+    userFname: string;
+    userLname: string;
+  } | null;
   isLoggingIn: boolean;
   isSigningUp: boolean;
   isCheckingAuth: boolean;
   isLoggingOut: boolean;
   isForgotPassword: boolean;
   isChangingPassword: boolean;
+
   checkAuth: () => Promise<void>;
   signup: (data: { email: string; password: string }) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
@@ -39,7 +44,6 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       const res = await axiosInstance.post("/auth/check");
       set({ authUser: res.data });
-      
     } catch (err) {
       console.error("Error during checkAuth:", err);
     } finally {
@@ -72,6 +76,8 @@ export const useAuthStore = create<AuthState>((set) => ({
         emailOrUsername,
         password,
       });
+
+      console.log("Login response:", res.data);
       set({ authUser: res.data });
       toast.success("Logged in successfully!");
     } catch (err) {

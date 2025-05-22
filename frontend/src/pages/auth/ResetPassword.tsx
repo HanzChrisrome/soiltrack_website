@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useAuthStore } from "../../store/useAuthStore";
 
 import { Eye, EyeOff, Loader2, Lock } from "lucide-react";
-import backgroundImage from "../../assets/background/DRAFT.png";
 import linearLogo from "/DARK HORIZONTAL.png";
 import { toast } from "react-hot-toast";
 import { useSearchParams } from "react-router-dom";
@@ -43,19 +42,8 @@ const ResetPassword = () => {
   };
 
   return (
-    <div
-      className="h-screen grid lg:grid-cols-2 p-8 bg-blue-500"
-      style={{
-        backgroundImage: `url(${backgroundImage})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }}
-    >
-      {/* Left Side */}
-      <div className="items-center justify-center hidden lg:block"></div>
-
-      {/* Right Side */}
-      <div className="flex items-center justify-center bg-white rounded-badge p-8">
+    <>
+    <div className="flex items-center justify-center bg-white rounded-badge p-8">
         <div className="flex flex-col w-full max-w-md p-8 space-y-8 justify-between">
           {/* Logo Section */}
           <div className="text-center">
@@ -151,7 +139,7 @@ const ResetPassword = () => {
           </form>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

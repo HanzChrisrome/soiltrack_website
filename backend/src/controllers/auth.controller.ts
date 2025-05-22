@@ -2,34 +2,37 @@ import { Request, Response } from "express";
 import supabase from "../lib/supabase";
 
 export const signUp = async (req: Request, res: Response): Promise<void> => {
-  const { username, email, password } = req.body;
-  console.log("Received signup request with:", username, email, password);
+  const { userFname, userLname, email, password } = req.body;
 
   try {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
     });
+
     if (error) {
       res.status(400).json({ message: error.message });
       console.error("Error during signup:", error);
       return;
     }
+
     const { user } = data;
     const { error: insertError } = await supabase
       .from("users")
       .upsert({
-        userId: user?.id,
-        userName: username,
+        user_id: user?.id,
+        user_fname: userFname,
+        user_lname: userLname,
         userEmail: email,
-        userRole: "Admin",
       })
       .single();
+
     if (insertError) {
       res.status(400).json({ message: insertError.message });
       console.error("Error during signup:", insertError);
       return;
     }
+
     res.status(200).json({
       message:
         "Signed up successfully! Please check your email to verify your account.",
@@ -46,28 +49,20 @@ export const login = async (req: Request, res: Response): Promise<void> => {
   console.log("Received login request with:", emailOrUsername, password);
 
   try {
-    const isEmail = emailOrUsername.includes("@");
-
-    const { data: userRoleData, error: roleError } = await supabase
+    const { data: userData, error: roleError } = await supabase
       .from("users")
-      .select("userId, userRole, userEmail, userName")
-      .eq(isEmail ? "userEmail" : "userName", emailOrUsername)
+      .select("user_id, user_email, user_fname, user_lname")
+      .eq("user_email", emailOrUsername)
       .single();
 
-    if (roleError || !userRoleData) {
+    if (roleError || !userData) {
       console.error("Error or no user found:", roleError);
       res.status(400).json({ message: "Invalid email or user does not exist" });
       return;
     }
 
-    if (userRoleData.userRole !== "Admin") {
-      console.log("User is not an admin:", emailOrUsername);
-      res.status(403).json({ message: "Access denied. Admins only." });
-      return;
-    }
-
     const { data, error } = await supabase.auth.signInWithPassword({
-      email: userRoleData.userEmail,
+      email: userData.user_email,
       password,
     });
 
@@ -77,13 +72,15 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    console.log("User data:", userData);
     const { user } = data;
     console.log("User logged in:", user);
 
     res.status(200).json({
       id: user.id,
       email: user.email,
-      username: userRoleData.userName,
+      userFname: userData.user_fname,
+      userLname: userData.user_lname,
     });
   } catch (error) {
     console.error("Error during login:", error);
@@ -104,8 +101,8 @@ export const checkAuth = async (req: Request, res: Response): Promise<void> => {
 
     const { data: userData, error: userError } = await supabase
       .from("users")
-      .select("userName, userEmail")
-      .eq("userId", user?.id)
+      .select("user_fname, user_lname, user_email")
+      .eq("user_id", user?.id)
       .single();
 
     if (userError) {
@@ -116,10 +113,10 @@ export const checkAuth = async (req: Request, res: Response): Promise<void> => {
 
     res.status(200).json({
       id: user?.id,
-      email: userData?.userEmail,
-      username: userData?.userName,
+      email: userData?.user_email,
+      userFname: userData?.user_fname,
+      userLname: userData?.user_lname,
     });
-    
   } catch (err) {
     res.status(500).json({ message: "Internal Server Error" });
   }

@@ -1,5 +1,6 @@
 import { Outlet } from "react-router-dom";
-import backgroundImage from "../assets/background/square-flower.jpg";
+import backgroundLightImage from "../assets/background/square-flower.jpg";
+import backgroundDarkImage from "../assets/background/darkBackground.png";
 import { MoonIcon, SunIcon } from "lucide-react";
 import useThemeStore from "../store/useThemeStore";
 import linearDarkLogo from "/DARK HORIZONTAL.png";
@@ -13,7 +14,7 @@ const AuthLayout = () => {
         {/* Left Side */}
         <div className="relative items-center justify-center hidden lg:block rounded-badge"
             style={{
-              backgroundImage: `url(${backgroundImage})`,
+              backgroundImage: `url(${theme === "darkTheme" ? backgroundDarkImage :  backgroundLightImage})`,
               backgroundSize: "cover",
               backgroundPosition: "center",
             }}

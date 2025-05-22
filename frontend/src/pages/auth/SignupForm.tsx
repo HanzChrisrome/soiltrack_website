@@ -115,7 +115,7 @@ const SignupForm = () => {
 
             <button
               type="submit"
-              className="btn bg-primary text-white w-full hover:bg-secondary"
+              className="btn bg-primary text-white"
               disabled={isSigningUp}
             >
               {isSigningUp ? (

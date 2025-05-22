@@ -1,11 +1,4 @@
-import {
-  BarChart3,
-  Boxes,
-  LayoutDashboard,
-  LogOut,
-  Settings,
-  UserCircle2,
-} from "lucide-react";
+import { Boxes, LayoutDashboard, LogOut, UserCircle2 } from "lucide-react";
 import Sidebar from "./Sidebar";
 import SidebarItem from "./SidebarItem";
 import { useAuthStore } from "../../store/useAuthStore";
@@ -38,12 +31,6 @@ export default function SidebarItemsList() {
           onClick={() => navigate("/dashboard")}
         />
         <SidebarItem
-          icon={<BarChart3 size={20} />}
-          text="Statistics"
-          active={false}
-          alert={false}
-        />
-        <SidebarItem
           icon={<UserCircle2 size={20} />}
           text="Users"
           active={currentPath === "/users"}
@@ -52,16 +39,10 @@ export default function SidebarItemsList() {
         />
         <SidebarItem
           icon={<Boxes size={20} />}
-          text="Inventory"
-          active={false}
+          text="Areas"
+          active={currentPath === "/area-page"}
           alert={false}
-        />
-        <hr className="my-3" />
-        <SidebarItem
-          icon={<Settings size={20} />}
-          text="Settings"
-          active={false}
-          alert={false}
+          onClick={() => navigate("/area-page")}
         />
         <SidebarItem
           icon={<LogOut size={20} />}

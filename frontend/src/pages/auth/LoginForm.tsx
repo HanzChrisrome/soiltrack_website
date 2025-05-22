@@ -11,6 +11,7 @@ const LoginForm = () => {
     emailOrUsername: "",
     password: "",
   });
+
   const { login, isLoggingIn } = useAuthStore();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -99,7 +100,7 @@ const LoginForm = () => {
           </button>
         </form>
       </div>
-      
+
       <div className="text-center font-semibold">
         <p>
           Don't have an account?{" "}
