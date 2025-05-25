@@ -4,10 +4,13 @@ import authRoutes from "./routes/auth.route";
 import userRoutes from "./routes/userPage.route";
 import readingsRoutes from "./routes/readings.route";
 import cors from "cors";
+import { debuglog } from "util";
+import { infoLog } from "./utils/logger";
 
 dotenv.config();
 const app = express();
 const port = process.env.PORT;
+const mode = process.env.MODE || "DEVELOPMENT";
 app.use(express.json());
 
 app.use(
@@ -22,5 +25,5 @@ app.use("/api/user", userRoutes);
 app.use("/api/readings", readingsRoutes);
 
 app.listen(port, () => {
-  console.log("Server is running on port " + port);
+  infoLog(`Server is running on port ${port} in ${mode} mode`);
 });

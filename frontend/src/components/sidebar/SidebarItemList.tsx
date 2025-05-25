@@ -30,6 +30,16 @@ export default function SidebarItemsList() {
           alert={false}
           onClick={() => navigate("/dashboard")}
         />
+
+        <SidebarItem
+          icon={<Boxes size={20} />}
+          text="Areas"
+          active={
+            currentPath === "/area-page" || currentPath === "/specific-area"
+          }
+          alert={false}
+          onClick={() => navigate("/area-page")}
+        />
         <SidebarItem
           icon={<UserCircle2 size={20} />}
           text="Users"
@@ -37,31 +47,14 @@ export default function SidebarItemsList() {
           alert={false}
           onClick={() => navigate("/users")}
         />
-        <SidebarItem
-          icon={<Boxes size={20} />}
-          text="Areas"
-          active={currentPath === "/area-page"}
-          alert={false}
-          onClick={() => navigate("/area-page")}
-        />
-        <SidebarItem
+        {/* <SidebarItem
           icon={<LogOut size={20} />}
           text="Logout"
           active={false}
           alert={false}
           onClick={() => setShowLogoutModal(true)} // Show modal on click
-        />
+        /> */}
       </Sidebar>
-
-      <ConfirmModal
-        title="Confirm Logout"
-        message="Are you sure you want to logout?"
-        isOpen={showLogoutModal}
-        onCancel={() => setShowLogoutModal(false)}
-        onConfirm={handleLogout}
-        confirmText="Logout"
-        cancelText="Cancel"
-      />
     </>
   );
 }

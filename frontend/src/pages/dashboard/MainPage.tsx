@@ -1,232 +1,189 @@
 // 3rd Party
-import { Gauge } from "lucide-react";
+import { Car, CircleUserRound, Gauge, Tractor, User } from "lucide-react";
 import "react-circular-progressbar/dist/styles.css";
 
 // Components
 import AreaPerformancesCard from "../../components/MainPage/RadarChart";
-import Divider from "../../components/widgets/Divider";
 import PerformanceCard from "../../components/AreaChart";
 import CardContainer from "../../components/widgets/CardContainer";
 import SoilDistributionCard from "../../components/MainPage/SoilDistributionCard";
-import useMainPage from "../../hooks/useMainPage";
+import useMainPageHook from "../../hooks/useMainPage";
+import { useAuthStore } from "../../store/useAuthStore";
+import { Divider } from "../../components/widgets/Widgets";
+import StatsCard from "../../components/MainPage/StatsCard";
+
+// Assets
+import containerBg from "/container background.png";
+import PatientTable from "../../components/MainPage/Table";
 
 const MainPage = () => {
-  const { overallAverage, soilTypes, cropTypes, plotPerformance } =
-    useMainPage();
+  const {
+    overallAverage,
+    soilTypes,
+    cropTypes,
+    plotPerformance,
+    userPlots,
+    userSummary,
+  } = useMainPageHook();
+
+  const { authUser } = useAuthStore();
 
   return (
-    <div className="min-h-screen">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-2xl font-bold">Good Morning!</h1>
-          <p className="text-sm text-base-content/70">
-            Optimize Your Farm Operations with Real-Time Insights
-          </p>
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="badge badge-warning text-sm p-4">
-            ☀️ 24° Today is partly sunny day
-          </div>
-        </div>
-        <button
-          className="btn btn-primary"
-          onClick={() => {
-            console.log(overallAverage);
-            console.log(soilTypes);
-            console.log(cropTypes);
-            console.log(plotPerformance);
+    <div className="h-full">
+      <div className="w-full">
+        <CardContainer
+          padding="p-8"
+          className="bg-cover bg-no-repeat bg-center text-base-100 rounded-xl mt-2"
+          style={{
+            backgroundImage: `url(${containerBg})`,
           }}
         >
-          TESTING BUTTON FUCKERS
-        </button>
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-2 items-stretch h-full">
-        {/* Left Column */}
-        <CardContainer className="lg:col-span-1">
-          <div className="flex items-center gap-2">
-            <Gauge className="h-6 text-primary" />
-            <h2 className="text-xl text-primary font-semibold">
-              Area Performances
-            </h2>
-          </div>
-          <p className="text-sm font-light text-base-content/70">
-            Here are the analyzed data plots.
-          </p>
-          <Divider dashed className="my-3" />
-          <div className="flex-1">
-            <AreaPerformancesCard />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center w-full">
+            <div className="flex flex-col gap-6 justify-between">
+              <div className="items-start">
+                <p className="text-sm text-accent leading-tight">Overview </p>
+                <h1 className="text-3xl font-bold leading-normal">
+                  Welcome back, {authUser?.user_fname}
+                </h1>
+                <p className="text-sm leading-tight">
+                  Here’s a quick overview of the plots in your municipality.
+                </p>
+              </div>
+              <div className="items-start">
+                <p className="text-sm text-accent leading-tight">
+                  MUNICIPALITY OF
+                </p>
+                <h1 className="text-2xl font-bold leading-normal">
+                  {`${
+                    authUser?.user_municipality
+                      ?.toLowerCase()
+                      .replace(/\b\w/g, (c) => c.toUpperCase()) || ""
+                  }, ${
+                    authUser?.user_province
+                      ?.toLowerCase()
+                      .replace(/\b\w/g, (c) => c.toUpperCase()) || ""
+                  }`.trim()}
+                </h1>
+              </div>
+            </div>
+            <div className="flex flex-col gap-2">
+              <p className="text-sm text-accent leading-tight">
+                Quick Summary Overview{" "}
+              </p>
+              <div className="flex flex-row gap-2">
+                <StatsCard
+                  icon={<Tractor className="w-6 h-6 text-accent" />}
+                  label="Total Plots"
+                  value={userPlots?.length || 0}
+                />
+                <StatsCard
+                  icon={<CircleUserRound className="w-6 h-6 text-accent" />}
+                  label="Total Users"
+                  value={userSummary?.length || 0}
+                />
+              </div>
+            </div>
           </div>
         </CardContainer>
-
-        {/* Right Column */}
-        <div className="col-span-3 h-full flex flex-col">
-          <div className="grid grid-cols-2 lg:grid-cols-2 gap-2 flex-1">
-            <SoilDistributionCard soilData={soilTypes ?? []} />
-
-            <CardContainer padding="p-10 items-center justify-center">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                <div>
-                  <p className="text-sm text-base-content/70 ">
-                    Most Common Crop Type
-                  </p>
-                  <h3 className="text-2xl font-bold text-primary">Clay Soil</h3>
-                  <p className="text-xs text-base-content/70">
-                    78% in your area is using this soil type.
-                  </p>
-                </div>
-
-                <div className="hidden md:block overflow-x-auto ">
-                  <table className="table table-xs">
-                    <thead>
-                      <tr className="text-xs text-base-content/60">
-                        <th>Soil Type</th>
-                        <th className="text-right">Usage</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td>Loam</td>
-                        <td className="text-right">12%</td>
-                      </tr>
-                      <tr>
-                        <td>Sandy</td>
-                        <td className="text-right">7%</td>
-                      </tr>
-                      <tr>
-                        <td>Silt</td>
-                        <td className="text-right">3%</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </CardContainer>
-          </div>
-
-          {/* First Row */}
-          <div className="grid grid-cols-2 gap-2">
-            {plotPerformance?.most_improved && (
-              <PerformanceCard
-                title="Area's with Good Performances"
-                chartSeries={[
-                  {
-                    name: "Improvement",
-                    data:
-                      plotPerformance?.most_improved?.daily_averages.map(
-                        (entry) => Math.floor(entry.total_avg)
-                      ) ?? [],
-                    color: "#3b82f6",
-                  },
-                ]}
-                chartCategories={
-                  plotPerformance?.most_improved?.daily_averages.map((entry) =>
-                    new Date(entry.date).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                    })
-                  ) ?? []
-                }
-                location={`${plotPerformance?.most_improved?.location}, ${plotPerformance?.most_improved?.user_municipality}`}
-                badgeText="Good"
-                badgeStyle="badge-success"
-              />
-            )}
-            {plotPerformance?.least_improved && (
-              <PerformanceCard
-                title="Area's with Decreased Performances"
-                chartSeries={[
-                  {
-                    name: "Least Improvement",
-                    data:
-                      plotPerformance?.least_improved?.daily_averages.map(
-                        (entry) => Math.floor(entry.total_avg)
-                      ) ?? [],
-                    color: "#ef4444",
-                  },
-                ]}
-                chartCategories={
-                  plotPerformance?.least_improved?.daily_averages.map((entry) =>
-                    new Date(entry.date).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                    })
-                  ) ?? []
-                }
-                location={`${plotPerformance?.least_improved?.location}, ${plotPerformance?.least_improved?.user_municipality}`}
-                badgeText="Good"
-                badgeStyle="badge-success"
-              />
-            )}
-          </div>
-        </div>
       </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
+        {/* {plotPerformance?.most_improved && (
+          <div className="flex flex-col">
+            <PerformanceCard
+              title="Area with Improved Performance"
+              plotOwner={plotPerformance?.most_improved?.user_name}
+              plotName={plotPerformance?.most_improved?.location}
+              chartSeries={[
+                {
+                  name: "Improvement",
+                  data:
+                    plotPerformance?.most_improved?.daily_averages.map(
+                      (entry) => Math.floor(entry.total_avg)
+                    ) ?? [],
+                  color: "#3b82f6",
+                },
+              ]}
+              chartCategories={
+                plotPerformance?.most_improved?.daily_averages.map((entry) =>
+                  new Date(entry.date).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                  })
+                ) ?? []
+              }
+              nutrientAverages={plotPerformance?.most_improved?.daily_averages.map(
+                (entry) => ({
+                  ...entry,
+                  avg_moisture: entry.avg_moisture ?? 0,
+                  avg_nitrogen: entry.avg_nitrogen ?? 0,
+                  avg_phosphorus: entry.avg_phosphorus ?? 0,
+                  avg_potassium: entry.avg_potassium ?? 0,
+                })
+              )}
+            />
+          </div>
+        )} */}
+        <div className="flex flex-col gap-4">
+          <CardContainer className="flex">
+            <div className="flex items-center justify-between w-full">
+              <div className="flex items-center">
+                <User className="w-5 h-5 mr-2 text-primary" />
+                <h1 className="text-lg font-semibold text-primary">
+                  Users List
+                </h1>
+              </div>
+              <div className="form-control w-full md:w-48 relative">
+                <input
+                  type="text"
+                  placeholder="Search by name"
+                  className="input input-bordered input-sm w-full focus:outline-none focus:ring-0 pr-8"
+                />
+                <span className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                  <User className="w-4 h-4" />
+                </span>
+              </div>
+            </div>
+            <PatientTable />
+          </CardContainer>
+        </div>
 
-      {/* <CardContainer className="mt-3">
-        <table className="table w-full">
-          <thead>
-            <tr className="bg-base-200 text-base-content text-sm">
-              <th>Name</th>
-              <th>Email</th>
-              <th>Role</th>
-              <th>Status</th>
-              <th className="text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td className="font-medium">Juan Dela Cruz</td>
-              <td>juan@example.com</td>
-              <td>Admin</td>
-              <td>
-                <span className="badge badge-success text-xs">Active</span>
-              </td>
-              <td className="text-right space-x-2">
-                <button className="btn btn-xs btn-outline btn-info">
-                  Edit
-                </button>
-                <button className="btn btn-xs btn-outline btn-error">
-                  Delete
-                </button>
-              </td>
-            </tr>
-            <tr>
-              <td className="font-medium">Maria Santos</td>
-              <td>maria@example.com</td>
-              <td>User</td>
-              <td>
-                <span className="badge badge-warning text-xs">Pending</span>
-              </td>
-              <td className="text-right space-x-2">
-                <button className="btn btn-xs btn-outline btn-info">
-                  Edit
-                </button>
-                <button className="btn btn-xs btn-outline btn-error">
-                  Delete
-                </button>
-              </td>
-            </tr>
-            <tr>
-              <td className="font-medium">Jose Rizal</td>
-              <td>rizal@example.com</td>
-              <td>Moderator</td>
-              <td>
-                <span className="badge badge-error text-xs">Disabled</span>
-              </td>
-              <td className="text-right space-x-2">
-                <button className="btn btn-xs btn-outline btn-info">
-                  Edit
-                </button>
-                <button className="btn btn-xs btn-outline btn-error">
-                  Delete
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </CardContainer> */}
+        {plotPerformance?.least_improved && (
+          <div className="flex flex-col">
+            <PerformanceCard
+              title="Area with Decreased Performance"
+              plotOwner={plotPerformance?.least_improved?.user_name}
+              plotName={plotPerformance?.least_improved?.location}
+              chartSeries={[
+                {
+                  name: "Least Improvement",
+                  data:
+                    plotPerformance?.least_improved?.daily_averages.map(
+                      (entry) => Math.floor(entry.total_avg)
+                    ) ?? [],
+                  color: "#ef4444",
+                },
+              ]}
+              chartCategories={
+                plotPerformance?.least_improved?.daily_averages.map((entry) =>
+                  new Date(entry.date).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                  })
+                ) ?? []
+              }
+              nutrientAverages={plotPerformance?.least_improved?.daily_averages.map(
+                (entry) => ({
+                  ...entry,
+                  avg_moisture: entry.avg_moisture ?? 0,
+                  avg_nitrogen: entry.avg_nitrogen ?? 0,
+                  avg_phosphorus: entry.avg_phosphorus ?? 0,
+                  avg_potassium: entry.avg_potassium ?? 0,
+                })
+              )}
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 };

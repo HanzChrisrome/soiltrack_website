@@ -1,123 +1,227 @@
 import { create } from "zustand";
-import { axiosInstance } from "../lib/axios";
-
-interface ImprovementPlot {
-  plot_id: number;
-  user_name: string;
-  location: string;
-  user_barangay: string;
-  user_municipality: string;
-  user_province: string;
-  improvement_score: number;
-  daily_averages: {
-    date: string;
-    avg_moisture: number | null;
-    avg_nutrients: number | null;
-    total_avg: number;
-  }[];
-}
-
-interface ImprovementSummary {
-  date_range: {
-    start_time: string;
-    end_time: string;
-  };
-  most_improved: ImprovementPlot;
-  least_improved: ImprovementPlot;
-}
-
-interface OverallAverage {
-  moisture: number;
-  nitrogen: number;
-  phosphorus: number;
-  potassium: number;
-}
-
-interface SoilTypeStat {
-  soil_type: string;
-  count: number;
-  percentage: number;
-}
-
-interface CropStat {
-  crop_name: string;
-  count: number;
-  percentage: number;
-}
+import {
+  getOverallAverage,
+  getSoilTypes,
+  getCropTypes,
+  getPlotPerformanceSummary,
+  getPlotsByMunicipality,
+  getPlotReadingsByDateRange,
+  getUserSummary,
+} from "../service/readingService";
+import axios from "axios";
+import {
+  CropStat,
+  DailyReading,
+  ImprovementSummary,
+  OverallAverage,
+  PlotReadingsTrend,
+  SoilTypeStat,
+  UserPlots,
+  UserSummary,
+} from "../models/readingStoreModels";
 
 interface ReadingState {
   overallAverage: OverallAverage | null;
   soilTypes: SoilTypeStat[] | null;
   cropTypes: CropStat[] | null;
+  userPlots: UserPlots[] | null;
   plotPerformance: ImprovementSummary | null;
+  plotReadingsByPlotId: Record<number, DailyReading[]> | null;
+  plotNutrientsTrends: Record<number, PlotReadingsTrend[]> | null;
+  userSummary: UserSummary[] | null;
+
   isGettingPlotSummary: boolean;
+  isLoadingOverallAverage: boolean;
+  isLoadingSoilTypes: boolean;
+  isLoadingCropTypes: boolean;
+  isLoadingPlotPerformance: boolean;
+  isLoadingPlotNutrients: boolean;
+
+  selectedPlotId: number | null;
+  getPlotReadings: (plotId: number) => DailyReading[] | null;
+  getPlotNutrientsTrend: (plotId: number) => PlotReadingsTrend[] | null;
+
   fetchOverallAverage: (startDate?: string, endDate?: string) => Promise<void>;
-  fetchSoilTypes: () => Promise<void>;
-  fetchCropTypes: () => Promise<void>;
+  fetchSoilTypes: (municipality: string, province: string) => Promise<void>;
+  fetchCropTypes: (municipality: string, province: string) => Promise<void>;
   fetchPlotPerformanceSummary: (
+    startDate: string,
+    endDate: string,
+    municipality: string,
+    province: string
+  ) => Promise<void>;
+  fetchPlotsByMunicipality: (
+    municipality: string,
+    province: string
+  ) => Promise<void>;
+  fetchNutrientsReadings: (
+    plotId: number,
     startDate: string,
     endDate: string
   ) => Promise<void>;
+  fetchUserSummary: (municipality: string, province: string) => Promise<void>;
+  fetchPlotNutrients: (
+    plotId: number,
+    startDate: string,
+    endDate: string
+  ) => Promise<void>;
+
+  setSelectedPlotId: (plotId: number | null) => void;
 }
 
-export const useReadingStore = create<ReadingState>((set) => ({
+const safeAsync = async <T>(
+  promise: Promise<{ data: T }>,
+  fallback: T
+): Promise<T> => {
+  try {
+    const res = await promise;
+    return res.data;
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      console.error("Axios error:", {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data,
+      });
+    } else {
+      console.error("Unexpected error:", error);
+    }
+    return fallback;
+  }
+};
+
+export const useReadingStore = create<ReadingState>((set, get) => ({
   overallAverage: null,
   plotPerformance: null,
-  isGettingPlotSummary: false,
+  userPlots: null,
   soilTypes: null,
   cropTypes: null,
+  plotReadingsByPlotId: {},
+  plotNutrientsTrends: {},
+  userSummary: null,
+
+  isGettingPlotSummary: false,
+  isLoadingOverallAverage: false,
+  isLoadingSoilTypes: false,
+  isLoadingCropTypes: false,
+  isLoadingPlotPerformance: false,
+  isLoadingPlotNutrients: false,
+
+  selectedPlotId: null,
 
   fetchOverallAverage: async (startDate?: string, endDate?: string) => {
-    set({ isGettingPlotSummary: true });
-
-    try {
-      const params = new URLSearchParams();
-      if (startDate) params.append("startDate", startDate);
-      if (endDate) params.append("endDate", endDate);
-
-      const res = await axiosInstance.get(
-        `/readings/overall-plot-average?${params.toString()}`
-      );
-      set({ overallAverage: res.data });
-    } catch (err) {
-      console.error("Error during checkAuth:", err);
-    } finally {
-      set({ isGettingPlotSummary: false });
-    }
+    set({ isLoadingOverallAverage: true });
+    const data = await safeAsync(getOverallAverage(startDate, endDate), null);
+    set({ overallAverage: data, isLoadingOverallAverage: false });
   },
 
-  fetchSoilTypes: async () => {
-    try {
-      const res = await axiosInstance.get("/readings/soil-distribution");
-      set({ soilTypes: res.data });
-    } catch (err) {
-      console.error("Error fetching soil types:", err);
-    }
+  fetchSoilTypes: async (municipality, province) => {
+    set({ isLoadingSoilTypes: true });
+    const data = await safeAsync(getSoilTypes(municipality, province), []);
+    set({ soilTypes: data, isLoadingSoilTypes: false });
   },
 
-  fetchCropTypes: async () => {
-    try {
-      const res = await axiosInstance.get("/readings/crop-distribution");
-      set({ cropTypes: res.data });
-    } catch (err) {
-      console.error("Error fetching crop types:", err);
-    }
+  fetchCropTypes: async (municipality, province) => {
+    set({ isLoadingCropTypes: true });
+    const data = await safeAsync(getCropTypes(municipality, province), []);
+    set({ cropTypes: data, isLoadingCropTypes: false });
   },
 
-  fetchPlotPerformanceSummary: async (startDate: string, endDate: string) => {
-    try {
-      const params = new URLSearchParams();
-      params.append("startDate", startDate);
-      params.append("endDate", endDate);
+  fetchPlotPerformanceSummary: async (
+    startDate,
+    endDate,
+    municipality,
+    province
+  ) => {
+    set({ isLoadingPlotPerformance: true });
+    const data = await safeAsync(
+      getPlotPerformanceSummary(startDate, endDate, municipality, province),
+      null
+    );
+    set({ plotPerformance: data, isLoadingPlotPerformance: false });
+  },
 
-      const res = await axiosInstance.get(
-        `/readings/plot-performance-summary?${params.toString()}`
-      );
+  fetchPlotsByMunicipality: async (municipality, province) => {
+    const data = await safeAsync(
+      getPlotsByMunicipality(municipality, province),
+      null
+    );
+    set({ userPlots: data });
+  },
 
-      console.info("Plot performance summary data:", res.data);
-      set({ plotPerformance: res.data });
-    } catch (err) {
-      console.error("Error fetching plot performance summary:", err);
+  fetchNutrientsReadings: async (plotId, startDate, endDate) => {
+    const state = get();
+
+    if (state.plotReadingsByPlotId && state.plotReadingsByPlotId[plotId])
+      return;
+
+    set({ isLoadingPlotNutrients: true });
+    const data = await safeAsync(
+      getPlotReadingsByDateRange(plotId, startDate, endDate),
+      []
+    );
+
+    set((state) => ({
+      plotReadingsByPlotId: {
+        ...state.plotReadingsByPlotId,
+        [plotId]: data,
+      },
+      isLoadingPlotNutrients: false,
+    }));
+  },
+
+  fetchPlotNutrients: async (plotId, startDate, endDate) => {
+    const state = get();
+    if (state.plotNutrientsTrends && state.plotNutrientsTrends[plotId]) return;
+
+    set({ isLoadingPlotNutrients: true });
+    console.log("Fetching nutrients for plot:", plotId, startDate, endDate);
+    const rawData = await safeAsync(
+      getPlotReadingsByDateRange(plotId, startDate, endDate, true),
+      []
+    );
+
+    if (!rawData || rawData.length === 0) {
+      console.warn("No nutrient data found for plot:", plotId);
+      set({ isLoadingPlotNutrients: false });
+      return;
     }
+
+    const transformedData = rawData.timestamps.map(
+      (timestamp: string, index: number) => ({
+        reading_date: timestamp,
+        moisture: rawData.moisture[index] ?? null,
+        nitrogen: rawData.nitrogen[index] ?? null,
+        phosphorus: rawData.phosphorus[index] ?? null,
+        potassium: rawData.potassium[index] ?? null,
+      })
+    );
+
+    set((state) => ({
+      plotNutrientsTrends: {
+        ...state.plotNutrientsTrends,
+        [plotId]: transformedData,
+      },
+      isLoadingPlotNutrients: false,
+    }));
+  },
+
+  fetchUserSummary: async (municipality, province) => {
+    const data = await safeAsync(getUserSummary(municipality, province), []);
+    set({ userSummary: data });
+  },
+
+  setSelectedPlotId: (plotId) => set({ selectedPlotId: plotId }),
+
+  getPlotReadings: (plotId) => {
+    const plotReadings = get().plotReadingsByPlotId;
+    return plotReadings && plotReadings[plotId] ? plotReadings[plotId] : null;
+  },
+
+  getPlotNutrientsTrend: (plotId) => {
+    const plotNutrients = get().plotNutrientsTrends;
+    return plotNutrients && plotNutrients[plotId]
+      ? plotNutrients[plotId]
+      : null;
   },
 }));

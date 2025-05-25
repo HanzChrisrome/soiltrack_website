@@ -1,11 +1,24 @@
-import React from "react";
 import ReactApexChart from "react-apexcharts";
+import CardContainer from "../widgets/CardContainer";
 
-const MostCropsBarChart = () => {
+interface DataItem {
+  name: string;
+  count: number;
+  percentage?: number;
+}
+
+interface DataBarChartProps {
+  data: DataItem[];
+}
+
+const DataBarChart: React.FC<DataBarChartProps> = ({ data }) => {
+  const categories = data.map((item) => item.name);
+  const counts = data.map((item) => item.count);
+
   const series = [
     {
-      name: "Crops Planted",
-      data: [400, 700, 850, 650, 300],
+      name: "Count",
+      data: counts,
     },
   ];
 
@@ -18,7 +31,7 @@ const MostCropsBarChart = () => {
     plotOptions: {
       bar: {
         horizontal: false,
-        columnWidth: "45%",
+        columnWidth: "50%",
         borderRadius: 6,
       },
     },
@@ -26,10 +39,10 @@ const MostCropsBarChart = () => {
       enabled: false,
     },
     xaxis: {
-      categories: ["Corn", "Wheat", "Rice", "Soybean", "Potato"],
+      categories,
       labels: {
         style: {
-          fontSize: "12px",
+          fontSize: "10px",
           colors: "#888888",
         },
       },
@@ -39,7 +52,7 @@ const MostCropsBarChart = () => {
     yaxis: {
       labels: {
         style: {
-          fontSize: "12px",
+          fontSize: "10px",
           colors: "#888888",
         },
       },
@@ -51,7 +64,7 @@ const MostCropsBarChart = () => {
       xaxis: { lines: { show: false } },
     },
     fill: {
-      colors: ["#134f14"], // solid dark green color
+      colors: ["#134f14"],
     },
     tooltip: {
       y: {
@@ -61,15 +74,15 @@ const MostCropsBarChart = () => {
   };
 
   return (
-    <div className="w-full h-full">
+    <CardContainer padding="p-0" className="mt-4 relative z-0">
       <ReactApexChart
         options={options}
         series={series}
         type="bar"
-        height={300}
+        height={200}
       />
-    </div>
+    </CardContainer>
   );
 };
 
-export default MostCropsBarChart;
+export default DataBarChart;

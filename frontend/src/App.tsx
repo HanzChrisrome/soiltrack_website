@@ -15,6 +15,7 @@ import ForgotPassword from "./pages/auth/ForgotPassword";
 import ResetPassword from "./pages/auth/ResetPassword";
 import useThemeStore from "./store/useThemeStore";
 import AreaPage from "./pages/dashboard/AreaPage";
+import SpecificPlotPage from "./pages/plots/SpecificPlotPage";
 
 const App = () => {
   const { authUser, checkAuth, isCheckingAuth } = useAuthStore();
@@ -45,6 +46,7 @@ const App = () => {
           <Route path="dashboard" element={<MainPage />} />
           <Route path="users" element={<UserPage />} />
           <Route path="area-page" element={<AreaPage />} />
+          <Route path="specific-area" element={<SpecificPlotPage />} />
         </Route>
 
         <Route

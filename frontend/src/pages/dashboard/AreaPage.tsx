@@ -1,45 +1,62 @@
-import React from "react";
 import MapView from "../../components/MapView";
-import CardContainer from "../../components/widgets/CardContainer";
-import { buildStyles, CircularProgressbar } from "react-circular-progressbar";
-import MostCropsBarChart from "../../components/CropsBarChart";
-import SoilDistributionCard from "../../components/MainPage/SoilDistributionCard";
 import useMainPage from "../../hooks/useMainPage";
+import ReusableCard from "../../components/AreaPage/ReusableCard";
+import DataBarChart from "../../components/AreaPage/DataBarChart";
+import DonutChart from "../../components/AreaPage/DonutChart";
+import { LandPlot, Leaf } from "lucide-react";
+import LabelCard from "../../components/AreaPage/LabelCard";
 
 const AreaPage = () => {
-  const { soilTypes } = useMainPage();
+  const { soilTypes, cropTypes, userPlots } = useMainPage();
 
   return (
-    <div className="min-h-screen">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-2xl font-bold">Good Morning!</h1>
-          <p className="text-sm text-base-content/70">
-            Optimize Your Farm Operations with Real-Time Insights
-          </p>
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="badge badge-warning text-sm p-4">
-            ☀️ 24° Today is partly sunny day
-          </div>
-        </div>
-      </div>
-
-      {/* Map Section */}
-      <div className="grid grid-cols-3 gap-x-3">
-        {/* FIRST GRID */}
-        <div className="col-span-2 h-full">
+    <div className="h-full mt-2">
+      <div className="grid lg:grid-cols-4 gap-3">
+        <div className="lg:col-span-3">
           <MapView />
         </div>
 
         {/* SECOND GRID */}
-        <div className="col-span-1 flex flex-col gap-3">
-          <CardContainer className="">
-            <h2 className="text-lg font-semibold">Most Crops Planted</h2>
-            <MostCropsBarChart />
-          </CardContainer>
-          <SoilDistributionCard soilData={soilTypes ?? []} />
+        <div className="flex flex-col gap-3">
+          {/* <button
+            className="btn btn-primary"
+            onClick={() => console.log("Soil types", soilTypes)}
+          >
+            Test Button
+          </button> */}
+
+          <div className="grid grid-cols-2 gap-3">
+            <LabelCard
+              icon={<LandPlot className="w-4 h-4" />}
+              title="Total Plots"
+              label={`${userPlots?.length ?? 0} plots`}
+            />
+          </div>
+          <ReusableCard
+            title="Most Planted Crops"
+            subtitle="Based on your users planted crops."
+            icon={<Leaf />}
+          >
+            <DonutChart
+              series={(cropTypes ?? []).map((crop) => crop.count)}
+              labels={(cropTypes ?? []).map((crop) => crop.crop_name)}
+              total={cropTypes ? cropTypes.length : 0}
+            />
+          </ReusableCard>
+          <ReusableCard
+            title="Most Used Soil"
+            subtitle="Based on your users assigned soil types."
+            icon={<LandPlot />}
+          >
+            <DataBarChart
+              data={(soilTypes ?? []).map((soil) => ({
+                name: soil.soil_type ?? "",
+                count: soil.count,
+                percentage: soil.percentage,
+              }))}
+            />
+          </ReusableCard>
+          {/* <SoilDistributionCard soilData={soilTypes ?? []} /> */}
         </div>
       </div>
     </div>

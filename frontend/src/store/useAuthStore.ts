@@ -5,10 +5,13 @@ import { AxiosError } from "axios";
 
 interface AuthState {
   authUser: {
-    id: string;
-    email: string;
-    userFname: string;
-    userLname: string;
+    user_id: string;
+    user_email: string;
+    user_fname: string;
+    user_lname: string;
+    user_municipality: string;
+    user_province: string;
+    user_barangay: string;
   } | null;
   isLoggingIn: boolean;
   isSigningUp: boolean;

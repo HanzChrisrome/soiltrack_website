@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import supabase from "../lib/supabase";
+import { errorLog } from "../utils/logger";
 
 export const signUp = async (req: Request, res: Response): Promise<void> => {
   const { userFname, userLname, email, password } = req.body;
@@ -49,39 +50,32 @@ export const login = async (req: Request, res: Response): Promise<void> => {
   console.log("Received login request with:", emailOrUsername, password);
 
   try {
-    const { data: userData, error: roleError } = await supabase
+    const { data: userData, error: userError } = await supabase
       .from("users")
-      .select("user_id, user_email, user_fname, user_lname")
+      .select(
+        "user_fname, user_lname, user_email, user_municipality, user_province, user_barangay"
+      )
       .eq("user_email", emailOrUsername)
       .single();
 
-    if (roleError || !userData) {
-      console.error("Error or no user found:", roleError);
+    if (userError || !userData) {
+      errorLog("Error or no user found:", userError);
       res.status(400).json({ message: "Invalid email or user does not exist" });
       return;
     }
 
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const { error } = await supabase.auth.signInWithPassword({
       email: userData.user_email,
       password,
     });
 
     if (error) {
       res.status(400).json({ message: error.message });
-      console.error("Error during login:", error);
+      errorLog("Error during login:", error);
       return;
     }
 
-    console.log("User data:", userData);
-    const { user } = data;
-    console.log("User logged in:", user);
-
-    res.status(200).json({
-      id: user.id,
-      email: user.email,
-      userFname: userData.user_fname,
-      userLname: userData.user_lname,
-    });
+    res.status(200).json(userData);
   } catch (error) {
     console.error("Error during login:", error);
     res.status(500).json({ message: "Internal Server Error" });
@@ -101,7 +95,9 @@ export const checkAuth = async (req: Request, res: Response): Promise<void> => {
 
     const { data: userData, error: userError } = await supabase
       .from("users")
-      .select("user_fname, user_lname, user_email")
+      .select(
+        "user_fname, user_lname, user_email, user_municipality, user_province, user_barangay"
+      )
       .eq("user_id", user?.id)
       .single();
 
@@ -111,12 +107,7 @@ export const checkAuth = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    res.status(200).json({
-      id: user?.id,
-      email: userData?.user_email,
-      userFname: userData?.user_fname,
-      userLname: userData?.user_lname,
-    });
+    res.status(200).json(userData);
   } catch (err) {
     res.status(500).json({ message: "Internal Server Error" });
   }
