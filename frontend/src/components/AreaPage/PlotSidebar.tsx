@@ -13,6 +13,7 @@ import {
 import GradientHeading from "../widgets/GradientComponent";
 import LabelCard from "./LabelCard";
 import { useNavigate } from "react-router-dom";
+import { Skeleton } from "../widgets/Widgets";
 
 type Plot = {
   id: number;
@@ -72,8 +73,12 @@ export default function PlotSidebar({
   visible,
   onClose,
 }: PlotSidebarProps) {
-  const { getPlotReadings, fetchNutrientsReadings, setSelectedPlotId } =
-    useReadingStore();
+  const {
+    getPlotReadings,
+    fetchNutrientsReadings,
+    setSelectedPlotId,
+    isLoadingPlotNutrients,
+  } = useReadingStore();
 
   const navigate = useNavigate();
 
@@ -120,7 +125,7 @@ export default function PlotSidebar({
                   <CardContainer padding="p-2">
                     <Layers className="w-5 h-5 text-green-700" />
                   </CardContainer>
-                  <GradientHeading size="text-2xl">{plot.name}</GradientHeading>
+                  <GradientHeading>{plot.name}</GradientHeading>
                   <CardContainer padding="px-3 py-1 ml-2">
                     <span className="text-sm"> Area size: {plot.area}</span>
                   </CardContainer>
@@ -162,65 +167,70 @@ export default function PlotSidebar({
                 />
               </div>
               <div className="grid grid-cols-2 gap-3 mt-3">
-                <NutrientsCard
-                  title="Moisture"
-                  badgeStyle="badge-success"
-                  chartSeries={[
-                    {
-                      name: "Moisture",
-                      data: getSeriesData((r) => r.moisture),
-                      color: "#3B82F6", // Blue
-                    },
-                  ]}
-                  chartCategories={readingsArray.map((r) =>
-                    dayjs(r.date).format("MMM D")
-                  )}
-                />
-
-                <NutrientsCard
-                  title="Nitrogen"
-                  badgeStyle="badge-warning"
-                  chartSeries={[
-                    {
-                      name: "Nitrogen",
-                      data: getSeriesData((r) => r.nitrogen),
-                      color: "#FACC15", // Yellow
-                    },
-                  ]}
-                  chartCategories={readingsArray.map((r) =>
-                    dayjs(r.date).format("MMM D")
-                  )}
-                />
-
-                <NutrientsCard
-                  title="Potassium"
-                  badgeStyle="badge-pink"
-                  chartSeries={[
-                    {
-                      name: "Potassium",
-                      data: getSeriesData((r) => r.potassium),
-                      color: "#EC4899", // Pink
-                    },
-                  ]}
-                  chartCategories={readingsArray.map((r) =>
-                    dayjs(r.date).format("MMM D")
-                  )}
-                />
-
-                <NutrientsCard
-                  title="Phosphorus"
-                  badgeStyle="badge-purple"
-                  chartSeries={[
-                    {
-                      name: "Phosphorus",
-                      data: getSeriesData((r) => r.phosphorus),
-                      color: "#8B5CF6", // Violet
-                    },
-                  ]}
-                  chartCategories={readingsArray.map((r) =>
-                    dayjs(r.date).format("MMM D")
-                  )}
-                />
+                {isLoadingPlotNutrients ? (
+                  Array.from({ length: 4 }).map((_, idx) => (
+                    <Skeleton key={idx} className="h-48 w-full" />
+                  ))
+                ) : (
+                  <>
+                    <NutrientsCard
+                      title="Moisture"
+                      badgeStyle="badge-success"
+                      chartSeries={[
+                        {
+                          name: "Moisture",
+                          data: getSeriesData((r) => r.moisture),
+                          color: "#3B82F6",
+                        },
+                      ]}
+                      chartCategories={readingsArray.map((r) =>
+                        dayjs(r.date).format("MMM D")
+                      )}
+                    />
+                    <NutrientsCard
+                      title="Nitrogen"
+                      badgeStyle="badge-warning"
+                      chartSeries={[
+                        {
+                          name: "Nitrogen",
+                          data: getSeriesData((r) => r.nitrogen),
+                          color: "#FACC15",
+                        },
+                      ]}
+                      chartCategories={readingsArray.map((r) =>
+                        dayjs(r.date).format("MMM D")
+                      )}
+                    />
+                    <NutrientsCard
+                      title="Potassium"
+                      badgeStyle="badge-pink"
+                      chartSeries={[
+                        {
+                          name: "Potassium",
+                          data: getSeriesData((r) => r.potassium),
+                          color: "#EC4899",
+                        },
+                      ]}
+                      chartCategories={readingsArray.map((r) =>
+                        dayjs(r.date).format("MMM D")
+                      )}
+                    />
+                    <NutrientsCard
+                      title="Phosphorus"
+                      badgeStyle="badge-purple"
+                      chartSeries={[
+                        {
+                          name: "Phosphorus",
+                          data: getSeriesData((r) => r.phosphorus),
+                          color: "#8B5CF6",
+                        },
+                      ]}
+                      chartCategories={readingsArray.map((r) =>
+                        dayjs(r.date).format("MMM D")
+                      )}
+                    />
+                  </>
+                )}
               </div>
             </>
           ) : (

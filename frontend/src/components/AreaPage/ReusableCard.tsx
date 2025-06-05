@@ -22,7 +22,7 @@ const ReusableCard: React.FC<ReusableCardProps> = ({
       <div className="flex items-center justify-between relative">
         <div className="flex flex-row justify-between items-center w-full">
           <div className="flex flex-col items-start">
-            <GradientHeading size="text-lg">{title}</GradientHeading>
+            <GradientHeading className="text-lg">{title}</GradientHeading>
             {subtitle && (
               <span className="text-xs text-gray-500">{subtitle}</span>
             )}

@@ -1,126 +1,175 @@
-import { useEffect } from "react";
-import NutrientChart from "../../components/SpecificPlot/NutrientCharts";
-import CardContainer from "../../components/widgets/CardContainer";
 import { useReadingStore } from "../../store/useReadingStore";
+import NutrientTrends from "../../components/SpecificPlot/NutrientTrends";
+import CardContainer from "../../components/widgets/CardContainer";
+import LabelCard from "../../components/AreaPage/LabelCard";
+import { TractorIcon, User, User2Icon } from "lucide-react";
+import * as turf from "@turf/turf";
+import PlotMap from "../../components/SpecificPlot/MapPlot";
+import { useEffect } from "react";
+import HeatmapViewContent from "../../components/SpecificPlot/HeatmapViewContent";
+import {
+  getTodayHeatMap,
+  getWeeklyHeatmapData,
+} from "../../utils/NutrientTrendsUtil";
+import GradientHeading from "../../components/widgets/GradientComponent";
 
 const SpecificPlotPage = () => {
-  const { selectedPlotId, fetchPlotNutrients, getPlotNutrientsTrend } =
-    useReadingStore();
+  const {
+    selectedPlotId,
+    userPlots,
+    getPlotNutrientsTrend,
+    fetchPlotNutrients,
+  } = useReadingStore();
+
+  const selectedPlot = userPlots?.find(
+    (plot) => plot.plot_id === selectedPlotId
+  );
 
   useEffect(() => {
     if (!selectedPlotId) return;
-
-    const endDate = new Date();
-    const startDate = new Date();
-    startDate.setMonth(endDate.getMonth() - 3);
-
     const formatDate = (date: Date) => date.toISOString().split("T")[0];
-    const formattedStartDate = formatDate(startDate);
-    const formattedEndDate = formatDate(endDate);
+    const now = new Date();
+    const start = new Date();
+    start.setMonth(now.getMonth() - 3);
+    const startDate = formatDate(start);
+    const endDate = formatDate(now);
 
-    const hasData = getPlotNutrientsTrend(selectedPlotId);
-    if (!hasData) {
-      fetchPlotNutrients(selectedPlotId, formattedStartDate, formattedEndDate);
+    const fetchData = async () => {
+      const hasData = getPlotNutrientsTrend(selectedPlotId);
+      if (!hasData) {
+        await fetchPlotNutrients(selectedPlotId, startDate, endDate);
+      }
+    };
+    fetchData();
+  }, [selectedPlotId, getPlotNutrientsTrend, fetchPlotNutrients]);
+
+  const trendDataRaw =
+    selectedPlotId !== null ? getPlotNutrientsTrend(selectedPlotId) : undefined;
+
+  if (!selectedPlotId) return null;
+
+  const getAreaInHectares = (coords: number[][]): string => {
+    if (!Array.isArray(coords) || coords.length < 3) return "0.00";
+
+    const lngLatCoords = coords.map(([lat, lng]) => [lng, lat]);
+
+    if (
+      lngLatCoords[0][0] !== lngLatCoords[lngLatCoords.length - 1][0] ||
+      lngLatCoords[0][1] !== lngLatCoords[lngLatCoords.length - 1][1]
+    ) {
+      lngLatCoords.push([...lngLatCoords[0]]);
     }
-  }, [selectedPlotId, fetchPlotNutrients, getPlotNutrientsTrend]);
 
-  const trendDataRaw = selectedPlotId
-    ? getPlotNutrientsTrend(selectedPlotId)
-    : null;
+    const polygon = turf.polygon([lngLatCoords]);
+    const areaSqMeters = turf.area(polygon);
+    const hectares = areaSqMeters / 10000;
 
-  if (!trendDataRaw) return null;
-
-  const todayISO = new Date().toISOString().split("T")[0];
-
-  const filteredTrendData = trendDataRaw.filter((entry) =>
-    entry.reading_date.startsWith(todayISO)
-  );
+    return hectares.toFixed(2);
+  };
+  const areaHectares = getAreaInHectares(selectedPlot?.polygons || []);
 
   return (
-    <div className="h-full">
-      <div className="w-full">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 mt-2">
-          <div className="col-span-2">
-            {filteredTrendData.length > 0 && (
-              <CardContainer padding="p-3">
-                <div className="flex justify-between items-center mb-4">
-                  <h1>Nutrients Trends</h1>
-                  <div className="flex items-center">
-                    <CardContainer
-                      padding="px-1 py-0.5"
-                      className="flex flex-row items-center gap-1 bg-primary border-none rounded-xl"
-                    >
-                      {["1D", "7D", "1M", "3M"].map((option) => {
-                        const isSelected = option === "3M";
-                        return isSelected ? (
-                          <CardContainer
-                            key={option}
-                            padding="px-3 py-1"
-                            className="bg-accent border border-none"
-                          >
-                            <span className="text-sm text-primary">
-                              {option}
-                            </span>
-                          </CardContainer>
-                        ) : (
-                          <div key={option} className="px-3 py-1">
-                            <span className="text-sm text-base-100">
-                              {option}
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </CardContainer>
-                  </div>
-                </div>
-
-                <div className="flex flex-col">
-                  {["moisture", "nitrogen", "phosphorus", "potassium"].map(
-                    (nutrient) => {
-                      const nutrientData = filteredTrendData.map((entry) =>
-                        Number(entry[nutrient as keyof typeof entry] ?? 0)
-                      );
-                      const categories = filteredTrendData.map((entry) =>
-                        new Date(entry.reading_date).toLocaleTimeString(
-                          "en-US",
-                          {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                            hour12: false,
-                          }
-                        )
-                      );
-
-                      const colorMap: Record<string, string> = {
-                        moisture: "#3b82f6",
-                        nitrogen: "#10b981",
-                        phosphorus: "#f59e0b",
-                        potassium: "#ef4444",
-                      };
-
-                      return (
-                        <NutrientChart
-                          key={nutrient}
-                          title={
-                            nutrient.charAt(0).toUpperCase() + nutrient.slice(1)
-                          }
-                          chartSeries={[
-                            {
-                              name: nutrient,
-                              data: nutrientData,
-                              color: colorMap[nutrient],
-                            },
-                          ]}
-                          chartCategories={categories}
-                        />
-                      );
-                    }
-                  )}
-                </div>
-              </CardContainer>
-            )}
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 mt-2">
+      <div className="flex flex-col gap-2">
+        {/* <CardContainer className="bg-base-300">
+          <div className="flex flex-col gap-2">
+            <GradientHeading className="text-2xl font-bold">
+              Plot Details
+            </GradientHeading>
+            <p className="text-sm text-neutral">
+              Here you can view the details of the selected plot, including its
+              nutrient trends and performance over time.
+            </p>
           </div>
+        </CardContainer> */}
+        <CardContainer className="">
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center justify-between">
+              <GradientHeading className="text-2xl font-bold">
+                Plot Nutrients
+              </GradientHeading>
+              <CardContainer padding="px-2 py-0.5">
+                <span className="text-sm text-neutral">
+                  Over the last 7 days
+                </span>
+              </CardContainer>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-1">
+                <span className="inline-block w-3 h-3 rounded-full bg-blue-500" />
+                <span className="text-xs text-neutral">Moisture</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="inline-block w-3 h-3 rounded-full bg-yellow-400" />
+                <span className="text-xs text-neutral">Nitrogen</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="inline-block w-3 h-3 rounded-full bg-violet-500" />
+                <span className="text-xs text-neutral">Phosphorus</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="inline-block w-3 h-3 rounded-full bg-pink-400" />
+                <span className="text-xs text-neutral">Potassium</span>
+              </div>
+            </div>
+          </div>
+          <HeatmapViewContent
+            variant="daily"
+            data={getTodayHeatMap(trendDataRaw || [])}
+          />
+        </CardContainer>
+
+        <CardContainer>
+          <div className="flex items-start">
+            <div className="flex flex-col items-start w-full">
+              <h1 className="text-xl font-semibold leading-none">
+                {selectedPlot?.user_fname} {selectedPlot?.user_lname}
+              </h1>
+              <span className="text-sm text-neutral">
+                {selectedPlot?.user_email || "Not specified"}
+              </span>
+            </div>
+            <div className="flex items-center w-full gap-2 justify-end">
+              <h3 className="text-md font-normal text-neutral">Plot Owner</h3>
+              <div className="p-1 bg-white rounded flex items-center justify-center">
+                <CardContainer padding="p-0.5">
+                  <User2Icon className="w-4 h-4 text-primary" />
+                </CardContainer>
+              </div>
+            </div>
+          </div>
+          <hr className="my-3 border-t border-base-200" />
+          <p className="text-sm text-neutral">
+            The area is located in the{" "}
+            <span className="font-semibold text-primary">
+              {selectedPlot?.plot_address}
+            </span>
+            . This plot covers an area of{" "}
+            <span className="font-semibold text-primary">
+              {areaHectares} hectares
+            </span>
+            . The coordinates of the plot are displayed on the map below.
+          </p>
+          <div className="mt-3 z-10">
+            <PlotMap coords={selectedPlot?.polygons || []} />
+          </div>
+        </CardContainer>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+          <LabelCard
+            icon={<User className="w-6 h-6 text-primary" />}
+            label={selectedPlot?.crop_name || "Not specified"}
+            title="Crop Planted"
+          />
+          <LabelCard
+            icon={<TractorIcon className="w-6 h-6 text-primary" />}
+            label={selectedPlot?.soil_type || "Not specified"}
+            title="Soil Type"
+          />
         </div>
+      </div>
+      <div className="col-span-2">
+        <NutrientTrends plotId={selectedPlotId} />
       </div>
     </div>
   );

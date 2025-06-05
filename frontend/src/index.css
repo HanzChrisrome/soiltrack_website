@@ -28,3 +28,8 @@ body {
   font-size: 12px;
   padding: 0;
 }
+
+.apexchart-center .apexcharts-canvas {
+  margin: 0 auto !important;
+  display: block !important;
+}

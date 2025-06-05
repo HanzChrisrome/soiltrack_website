@@ -4,6 +4,7 @@ export interface UserPlots {
   plot_name: string;
   soil_type: string;
   polygons: [number, number][];
+  plot_address: string;
   isValveOn: boolean;
   crop_name: string;
   user_fname: string;

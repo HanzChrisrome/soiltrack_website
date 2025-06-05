@@ -1,22 +1,29 @@
 import { Boxes, LayoutDashboard, LogOut, UserCircle2 } from "lucide-react";
 import Sidebar from "./Sidebar";
 import SidebarItem from "./SidebarItem";
-import { useAuthStore } from "../../store/useAuthStore";
-import { useState } from "react";
-import ConfirmModal from "../modal/ConfirmModal";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useWidgetStore } from "../../store/useWidgetStore";
+import { useAuthStore } from "../../store/useAuthStore";
 
 export default function SidebarItemsList() {
-  const { logout } = useAuthStore();
-  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { logout } = useAuthStore();
 
   const currentPath = location.pathname;
+  const { openModal } = useWidgetStore();
 
   const handleLogout = () => {
-    logout();
-    setShowLogoutModal(false);
+    console.log("Logout clicked");
+    openModal({
+      title: "Are you sure you want to logout?",
+      confirmText: "Logout",
+      icon: <LogOut className="w-4 h-4 text-white" />,
+      cancelText: "Cancel",
+      onConfirm: () => {
+        logout();
+      },
+    });
   };
 
   return (
@@ -30,16 +37,6 @@ export default function SidebarItemsList() {
           alert={false}
           onClick={() => navigate("/dashboard")}
         />
-
-        <SidebarItem
-          icon={<Boxes size={20} />}
-          text="Areas"
-          active={
-            currentPath === "/area-page" || currentPath === "/specific-area"
-          }
-          alert={false}
-          onClick={() => navigate("/area-page")}
-        />
         <SidebarItem
           icon={<UserCircle2 size={20} />}
           text="Users"
@@ -47,13 +44,20 @@ export default function SidebarItemsList() {
           alert={false}
           onClick={() => navigate("/users")}
         />
-        {/* <SidebarItem
+        <SidebarItem
+          icon={<Boxes size={20} />}
+          text="Areas"
+          active={currentPath === "/area-page"}
+          alert={false}
+          onClick={() => navigate("/area-page")}
+        />
+        <SidebarItem
           icon={<LogOut size={20} />}
           text="Logout"
           active={false}
           alert={false}
-          onClick={() => setShowLogoutModal(true)} // Show modal on click
-        /> */}
+          onClick={() => handleLogout}
+        />
       </Sidebar>
     </>
   );

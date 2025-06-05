@@ -27,7 +27,7 @@ interface ReadingState {
   userPlots: UserPlots[] | null;
   plotPerformance: ImprovementSummary | null;
   plotReadingsByPlotId: Record<number, DailyReading[]> | null;
-  plotNutrientsTrends: Record<number, PlotReadingsTrend[]> | null;
+
   userSummary: UserSummary[] | null;
 
   isGettingPlotSummary: boolean;
@@ -54,17 +54,29 @@ interface ReadingState {
     municipality: string,
     province: string
   ) => Promise<void>;
+
+  //FOR THE SUMMARIZE NUTRIENT TRENDS IN THE MAPVIEW
   fetchNutrientsReadings: (
     plotId: number,
     startDate: string,
     endDate: string
   ) => Promise<void>;
   fetchUserSummary: (municipality: string, province: string) => Promise<void>;
+
+  //FOR THE NUTRIENT TRENDS IN SPECIFIC PLOTS PAGE
+  plotNutrientsTrends: Record<number, PlotReadingsTrend[]> | null;
+  customPlotNutrientsTrends: PlotReadingsTrend[] | null;
   fetchPlotNutrients: (
     plotId: number,
     startDate: string,
     endDate: string
   ) => Promise<void>;
+  fetchCustomDatePlotNutrients: (
+    plotId: number,
+    startDate: string,
+    endDate: string
+  ) => Promise<void>;
+  setCustomPlotNutrientsTrends: (data: PlotReadingsTrend[] | null) => void;
 
   setSelectedPlotId: (plotId: number | null) => void;
 }
@@ -98,6 +110,7 @@ export const useReadingStore = create<ReadingState>((set, get) => ({
   cropTypes: null,
   plotReadingsByPlotId: {},
   plotNutrientsTrends: {},
+  customPlotNutrientsTrends: null,
   userSummary: null,
 
   isGettingPlotSummary: false,
@@ -224,4 +237,42 @@ export const useReadingStore = create<ReadingState>((set, get) => ({
       ? plotNutrients[plotId]
       : null;
   },
+
+  fetchCustomDatePlotNutrients: async (plotId, startDate, endDate) => {
+    set({ isLoadingPlotNutrients: true });
+    console.log(
+      "Fetching custom nutrients for plot:",
+      plotId,
+      startDate,
+      endDate
+    );
+    const rawData = await safeAsync(
+      getPlotReadingsByDateRange(plotId, startDate, endDate, true),
+      []
+    );
+
+    if (!rawData || rawData.length === 0) {
+      console.warn("No nutrient data found for plot:", plotId);
+      set({ isLoadingPlotNutrients: false });
+      return;
+    }
+
+    const transformedData = rawData.timestamps.map(
+      (timestamp: string, index: number) => ({
+        reading_date: timestamp,
+        moisture: rawData.moisture[index] ?? null,
+        nitrogen: rawData.nitrogen[index] ?? null,
+        phosphorus: rawData.phosphorus[index] ?? null,
+        potassium: rawData.potassium[index] ?? null,
+      })
+    );
+
+    set({
+      customPlotNutrientsTrends: transformedData,
+      isLoadingPlotNutrients: false,
+    });
+  },
+
+  setCustomPlotNutrientsTrends: (data) =>
+    set({ customPlotNutrientsTrends: data }),
 }));

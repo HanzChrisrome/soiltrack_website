@@ -1,21 +1,7 @@
 import ReactApexChart from "react-apexcharts";
 import type { ApexOptions } from "apexcharts";
-import {
-  Maximize2,
-  TrendingDown,
-  TrendingUp,
-  ChevronUp,
-  LandPlotIcon,
-  Layers,
-} from "lucide-react";
-import {
-  Disclosure,
-  DisclosureButton,
-  DisclosurePanel,
-} from "@headlessui/react";
 import CardContainer from "./widgets/CardContainer";
 import SmallNutrientsChart from "./MainPage/SmallNutrientsChart";
-import { motion } from "framer-motion";
 
 interface ChartSeries {
   name: string;
@@ -32,28 +18,21 @@ interface NutrientDataEntry {
 }
 
 interface PerformanceCardProps {
-  title: string;
-  plotOwner: string;
-  plotName: string;
   chartSeries: ChartSeries[];
   chartCategories?: string[];
   nutrientAverages?: NutrientDataEntry[];
 }
 
 const PerformanceCard = ({
-  title,
-  plotOwner,
-  plotName,
   chartSeries,
   chartCategories = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-
   nutrientAverages = [],
 }: PerformanceCardProps) => {
   const nutrientCharts = [
     { label: "Moisture", key: "avg_moisture", color: "#0ea5e9" },
-    { label: "Nitrogen", key: "avg_nitrogen", color: "#16a34a" },
-    { label: "Phosphorus", key: "avg_phosphorus", color: "#facc15" },
-    { label: "Potassium", key: "avg_potassium", color: "#f97316" },
+    { label: "Nitrogen", key: "avg_nitrogen", color: "#facc15" },
+    { label: "Phosphorus", key: "avg_phosphorus", color: "#a78bfa" },
+    { label: "Potassium", key: "avg_potassium", color: "#f472b6" },
   ];
 
   const chartOptions: ApexOptions = {
@@ -128,32 +107,7 @@ const PerformanceCard = ({
   };
 
   return (
-    <CardContainer>
-      <div className="flex items-center gap-2 justify-between">
-        <div className="flex items-center gap-2">
-          <h2 className="text-xl font-semibold text-primary">{title}</h2>
-        </div>
-        <button
-          type="button"
-          className="rounded-md border border-base-300 p-1 hover:bg-base-200 transition"
-          aria-label="Expand chart"
-        >
-          <span className="sr-only">Expand chart</span>
-          <Maximize2 className="h-5 w-5 text-base-content" />
-        </button>
-      </div>
-
-      <p className="text-sm font-sembiold text-base-content/70 flex items-center gap-1">
-        <LandPlotIcon className="h-4 w-4 text-primary" />
-        {plotOwner}
-        <span
-          className="mx-2 h-4 border-l border-neutral inline-block"
-          aria-hidden="true"
-        ></span>
-        <Layers className="h-4 w-4 text-primary" />
-        {plotName}
-      </p>
-
+    <>
       <CardContainer padding="p-3" className="mt-3">
         <ReactApexChart
           options={chartOptions}
@@ -188,7 +142,7 @@ const PerformanceCard = ({
           ))}
         </div>
       )}
-    </CardContainer>
+    </>
   );
 };
 

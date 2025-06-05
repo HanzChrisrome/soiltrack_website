@@ -2,22 +2,27 @@ import ReactApexChart from "react-apexcharts";
 import type { ApexOptions } from "apexcharts";
 import CardContainer from "../widgets/CardContainer";
 
+interface ChartPoint {
+  x: string; // ISO timestamp
+  y: number;
+}
+
 interface ChartSeries {
   name: string;
-  data: number[];
+  data: ChartPoint[];
   color?: string;
 }
 
 interface NutrientChartProps {
   title: string;
   chartSeries: ChartSeries[];
-  chartCategories?: string[];
+  selectedRange: "1D" | "7D" | "1M" | "3M" | "Custom";
 }
 
 const NutrientChart = ({
   title,
   chartSeries,
-  chartCategories = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+  selectedRange,
 }: NutrientChartProps) => {
   const chartOptions: ApexOptions = {
     chart: {
@@ -26,6 +31,9 @@ const NutrientChart = ({
       sparkline: { enabled: false },
       zoom: { enabled: true },
       toolbar: { show: false },
+    },
+    dataLabels: {
+      enabled: false,
     },
     stroke: {
       curve: "smooth",
@@ -41,21 +49,34 @@ const NutrientChart = ({
       },
     },
     xaxis: {
-      categories: chartCategories,
+      type: "datetime",
+      tickAmount:
+        selectedRange === "3M"
+          ? 5
+          : selectedRange === "1M"
+          ? 7
+          : selectedRange === "7D"
+          ? 7
+          : 6,
       labels: {
-        show: true,
-        offsetY: 3,
+        rotate: -45,
         style: {
           fontSize: "10px",
           colors: "#6b7280",
         },
+        datetimeFormatter: {
+          hour: selectedRange === "1D" ? "HH:mm" : "MMM dd HH:mm",
+          day: "MMM dd",
+          month: "MMM",
+          year: "yyyy",
+        },
       },
       axisBorder: {
-        show: true,
+        show: false,
         color: "#e5e7eb",
       },
       axisTicks: {
-        show: true,
+        show: false,
         color: "#e5e7eb",
       },
     },
@@ -84,6 +105,14 @@ const NutrientChart = ({
     },
     colors: chartSeries.map((s) => s.color || "#22c55e"),
     tooltip: {
+      x: {
+        format:
+          selectedRange === "1D"
+            ? "HH:mm"
+            : selectedRange === "7D"
+            ? "MMM dd HH:mm"
+            : "MMM dd",
+      },
       y: {
         formatter: (value: number) => `${value}%`,
       },
@@ -91,7 +120,7 @@ const NutrientChart = ({
   };
 
   return (
-    <CardContainer padding="p-3" className="mt-2 bg-base-100">
+    <CardContainer padding="p-3" className="bg-base-100">
       <div className="flex items-center gap-2 justify-between">
         <div className="flex items-center gap-2">
           <h2 className="text-xl font-semibold text-primary">{title}</h2>
@@ -100,7 +129,7 @@ const NutrientChart = ({
 
       <ReactApexChart
         options={chartOptions}
-        series={chartSeries.map(({ name, data }) => ({ name, data }))}
+        series={chartSeries}
         type="area"
         height={200}
       />

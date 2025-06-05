@@ -1,129 +1,136 @@
 // 3rd Party
-import { Car, CircleUserRound, Gauge, Tractor, User } from "lucide-react";
+import { ArrowUpRight, Cpu, Grid2X2, UserCheck } from "lucide-react";
 import "react-circular-progressbar/dist/styles.css";
 
 // Components
-import AreaPerformancesCard from "../../components/MainPage/RadarChart";
-import PerformanceCard from "../../components/AreaChart";
 import CardContainer from "../../components/widgets/CardContainer";
-import SoilDistributionCard from "../../components/MainPage/SoilDistributionCard";
 import useMainPageHook from "../../hooks/useMainPage";
 import { useAuthStore } from "../../store/useAuthStore";
-import { Divider } from "../../components/widgets/Widgets";
-import StatsCard from "../../components/MainPage/StatsCard";
 
 // Assets
-import containerBg from "/container background.png";
-import PatientTable from "../../components/MainPage/Table";
+import AreaPerformancesCard from "../../components/MainPage/RadarChart";
+import GradientHeading from "../../components/widgets/GradientComponent";
+import PerformanceView from "../../components/MainPage/PerformanceView";
 
 const MainPage = () => {
-  const {
-    overallAverage,
-    soilTypes,
-    cropTypes,
-    plotPerformance,
-    userPlots,
-    userSummary,
-  } = useMainPageHook();
+  const { userPlots, userSummary } = useMainPageHook();
 
   const { authUser } = useAuthStore();
 
   return (
-    <div className="h-full">
-      <div className="w-full">
-        <CardContainer
-          padding="p-8"
-          className="bg-cover bg-no-repeat bg-center text-base-100 rounded-xl mt-2"
-          style={{
-            backgroundImage: `url(${containerBg})`,
-          }}
-        >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center w-full">
-            <div className="flex flex-col gap-6 justify-between">
-              <div className="items-start">
-                <p className="text-sm text-accent leading-tight">Overview </p>
-                <h1 className="text-3xl font-bold leading-normal">
-                  Welcome back, {authUser?.user_fname}
-                </h1>
-                <p className="text-sm leading-tight">
-                  Here’s a quick overview of the plots in your municipality.
-                </p>
-              </div>
-              <div className="items-start">
-                <p className="text-sm text-accent leading-tight">
-                  MUNICIPALITY OF
-                </p>
-                <h1 className="text-2xl font-bold leading-normal">
-                  {`${
-                    authUser?.user_municipality
-                      ?.toLowerCase()
-                      .replace(/\b\w/g, (c) => c.toUpperCase()) || ""
-                  }, ${
-                    authUser?.user_province
-                      ?.toLowerCase()
-                      .replace(/\b\w/g, (c) => c.toUpperCase()) || ""
-                  }`.trim()}
-                </h1>
-              </div>
-            </div>
-            <div className="flex flex-col gap-2">
-              <p className="text-sm text-accent leading-tight">
-                Quick Summary Overview{" "}
+    <div className="">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-5">
+        <CardContainer className="flex flex-col h-full">
+          <div className="items-start">
+            <h1 className="text-2xl text-neutral-800 font-semibold leading-none">
+              Welcome back,{" "}
+            </h1>
+            <GradientHeading className="text-4xl text-neutral-800 font-bold leading-tight">
+              {authUser?.user_fname?.split(" ")[0] || ""}{" "}
+              {authUser?.user_lname || ""}
+            </GradientHeading>
+            <p className="text-sm text-neutral leading-tight">
+              Here’s a quick overview of the plots in your municipality.
+            </p>
+          </div>
+        </CardContainer>
+
+        <CardContainer className="flex flex-col h-full">
+          <div className="flex items-start justify-between">
+            <div className="flex flex-col items-start">
+              <p className="text-lg font-semibold text-primary mb-2 leading-none">
+                Total Plots
               </p>
-              <div className="flex flex-row gap-2">
-                <StatsCard
-                  icon={<Tractor className="w-6 h-6 text-accent" />}
-                  label="Total Plots"
-                  value={userPlots?.length || 0}
-                />
-                <StatsCard
-                  icon={<CircleUserRound className="w-6 h-6 text-accent" />}
-                  label="Total Users"
-                  value={userSummary?.length || 0}
-                />
-              </div>
+              <span className="text-xs w-3/4 font-normal text-neutral">
+                Total plots that belong and is associated to your municipality
+                in{" "}
+                {`${
+                  authUser?.user_municipality
+                    ?.toLowerCase()
+                    .replace(/\b\w/g, (c) => c.toUpperCase()) || ""
+                }
+            `}
+              </span>
             </div>
+            <ArrowUpRight className="w-8 h-8 text-primary cursor-pointer" />
+          </div>
+
+          <div className="flex items-center justify-between mt-4">
+            <div className="flex items-center">
+              <GradientHeading className="text-6xl font-bold">
+                {userPlots?.length || 0}
+              </GradientHeading>
+            </div>
+            <CardContainer padding="p-2">
+              <Grid2X2 className="w-8 h-8 text-primary" />
+            </CardContainer>
+          </div>
+        </CardContainer>
+        <CardContainer className="flex flex-col h-full">
+          <div className="flex items-start justify-between">
+            <div className="flex flex-col items-start">
+              <p className="text-lg font-semibold text-primary mb-2 leading-none">
+                Total Users
+              </p>
+              <span className="text-xs w-3/4 font-normal text-neutral">
+                Total users that belong and is associated to your municipality
+                in{" "}
+                {`${
+                  authUser?.user_municipality
+                    ?.toLowerCase()
+                    .replace(/\b\w/g, (c) => c.toUpperCase()) || ""
+                }
+            `}
+              </span>
+            </div>
+            <ArrowUpRight className="w-8 h-8 text-primary cursor-pointer" />
+          </div>
+
+          <div className="flex items-center justify-between mt-4">
+            <div className="flex items-center">
+              <GradientHeading className="text-6xl font-bold">
+                {userSummary?.length || 0}
+              </GradientHeading>
+            </div>
+            <CardContainer padding="p-2">
+              <UserCheck className="w-8 h-8 text-primary" />
+            </CardContainer>
+          </div>
+        </CardContainer>
+        <CardContainer className="flex flex-col h-full">
+          <div className="flex items-start justify-between">
+            <div className="flex flex-col items-start">
+              <p className="text-lg font-semibold text-primary mb-2 leading-none">
+                Total IOT Devices
+              </p>
+              <span className="text-xs w-3/4 font-normal text-neutral">
+                Total IOT devices that is distributed and is associated to your
+                municipality in{" "}
+                {`${
+                  authUser?.user_municipality
+                    ?.toLowerCase()
+                    .replace(/\b\w/g, (c) => c.toUpperCase()) || ""
+                }
+            `}
+              </span>
+            </div>
+            <ArrowUpRight className="w-8 h-8 text-primary cursor-pointer" />
+          </div>
+
+          <div className="flex items-center justify-between mt-4">
+            <div className="flex items-center">
+              <GradientHeading className="text-6xl font-bold">
+                {userSummary?.length || 0}
+              </GradientHeading>
+            </div>
+            <CardContainer padding="p-2">
+              <Cpu className="w-8 h-8 text-primary" />
+            </CardContainer>
           </div>
         </CardContainer>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
-        {/* {plotPerformance?.most_improved && (
-          <div className="flex flex-col">
-            <PerformanceCard
-              title="Area with Improved Performance"
-              plotOwner={plotPerformance?.most_improved?.user_name}
-              plotName={plotPerformance?.most_improved?.location}
-              chartSeries={[
-                {
-                  name: "Improvement",
-                  data:
-                    plotPerformance?.most_improved?.daily_averages.map(
-                      (entry) => Math.floor(entry.total_avg)
-                    ) ?? [],
-                  color: "#3b82f6",
-                },
-              ]}
-              chartCategories={
-                plotPerformance?.most_improved?.daily_averages.map((entry) =>
-                  new Date(entry.date).toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
-                  })
-                ) ?? []
-              }
-              nutrientAverages={plotPerformance?.most_improved?.daily_averages.map(
-                (entry) => ({
-                  ...entry,
-                  avg_moisture: entry.avg_moisture ?? 0,
-                  avg_nitrogen: entry.avg_nitrogen ?? 0,
-                  avg_phosphorus: entry.avg_phosphorus ?? 0,
-                  avg_potassium: entry.avg_potassium ?? 0,
-                })
-              )}
-            />
-          </div>
-        )} */}
-        <div className="flex flex-col gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 items-stretch gap-2 mt-2">
+        {/* <div className="flex flex-col gap-4">
           <CardContainer className="flex">
             <div className="flex items-center justify-between w-full">
               <div className="flex items-center">
@@ -145,44 +152,13 @@ const MainPage = () => {
             </div>
             <PatientTable />
           </CardContainer>
+        </div> */}
+        <CardContainer padding="p-6" className="flex flex-col h-full">
+          <AreaPerformancesCard />
+        </CardContainer>
+        <div className="col-span-1 md:col-span-2 flex flex-col h-full">
+          <PerformanceView />
         </div>
-
-        {plotPerformance?.least_improved && (
-          <div className="flex flex-col">
-            <PerformanceCard
-              title="Area with Decreased Performance"
-              plotOwner={plotPerformance?.least_improved?.user_name}
-              plotName={plotPerformance?.least_improved?.location}
-              chartSeries={[
-                {
-                  name: "Least Improvement",
-                  data:
-                    plotPerformance?.least_improved?.daily_averages.map(
-                      (entry) => Math.floor(entry.total_avg)
-                    ) ?? [],
-                  color: "#ef4444",
-                },
-              ]}
-              chartCategories={
-                plotPerformance?.least_improved?.daily_averages.map((entry) =>
-                  new Date(entry.date).toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
-                  })
-                ) ?? []
-              }
-              nutrientAverages={plotPerformance?.least_improved?.daily_averages.map(
-                (entry) => ({
-                  ...entry,
-                  avg_moisture: entry.avg_moisture ?? 0,
-                  avg_nitrogen: entry.avg_nitrogen ?? 0,
-                  avg_phosphorus: entry.avg_phosphorus ?? 0,
-                  avg_potassium: entry.avg_potassium ?? 0,
-                })
-              )}
-            />
-          </div>
-        )}
       </div>
     </div>
   );

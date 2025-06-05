@@ -1,4 +1,5 @@
 import React from "react";
+import CardContainer from "./CardContainer";
 
 type IconButtonProps = {
   icon?: React.ReactNode;
@@ -13,6 +14,18 @@ type TooltipIconButtonProps = {
   children: React.ReactNode;
   onClick?: () => void;
   className?: string;
+};
+
+type SkeletonProps = {
+  className?: string;
+};
+
+type ToggleSelectorProps = {
+  options: string[];
+  selected: string;
+  onSelect: (option: string) => void;
+  className?: string;
+  labelMap?: Record<string, string>;
 };
 
 export const Divider = ({ dashed = false, className = "" }) => {
@@ -68,5 +81,48 @@ export const TooltipIconButton: React.FC<TooltipIconButtonProps> = ({
         {tooltip}
       </span>
     </div>
+  );
+};
+
+export const Skeleton = ({ className = "" }: SkeletonProps) => {
+  return <div className={`animate-pulse bg-base-300 rounded ${className}`} />;
+};
+
+export const ToggleSelector = ({
+  options,
+  selected,
+  onSelect,
+  className = "",
+  labelMap,
+}: ToggleSelectorProps) => {
+  return (
+    <CardContainer
+      padding="px-1 py-0.5"
+      className={`flex flex-row items-center gap-1 bg-primary border-none rounded-xl ${className}`}
+    >
+      {options.map((option) => {
+        const isSelected = option === selected;
+        return isSelected ? (
+          <CardContainer
+            key={option}
+            padding="px-3 py-1"
+            className="text-sm text-primary"
+          >
+            {" "}
+            {labelMap?.[option] || option}{" "}
+          </CardContainer>
+        ) : (
+          <div
+            key={option}
+            className="px-3 py-1 cursor-pointer"
+            onClick={() => onSelect(option)}
+          >
+            <span className="text-sm text-base-100">
+              {labelMap?.[option] || option}
+            </span>
+          </div>
+        );
+      })}
+    </CardContainer>
   );
 };

@@ -17,7 +17,7 @@ export default function CardContainer({
 }: CardContainerProps) {
   return (
     <div
-      className={`card border border-base-200 rounded-lg bg-base-100 shadow-sm ${padding} ${className}`}
+      className={`card rounded-lg bg-base-100 shadow-sm ${padding} ${className}`}
       style={style}
       onClick={onClick}
     >
