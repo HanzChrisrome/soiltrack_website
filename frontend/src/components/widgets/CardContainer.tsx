@@ -3,9 +3,10 @@ import { CSSProperties, ReactNode } from "react";
 interface CardContainerProps {
   children: ReactNode;
   className?: string;
-  padding?: string; // Tailwind padding class, e.g., "p-4", "px-6 py-2"
+  padding?: string;
   style?: CSSProperties;
   onClick?: () => void;
+  rounded?: boolean; // optional prop to toggle border radius
 }
 
 export default function CardContainer({
@@ -14,10 +15,13 @@ export default function CardContainer({
   padding = "p-6",
   style = {},
   onClick = () => {},
+  rounded = true,
 }: CardContainerProps) {
   return (
     <div
-      className={`card rounded-lg bg-base-100 shadow-sm ${padding} ${className}`}
+      className={`bg-base-100 shadow-sm overflow-hidden ${padding} ${
+        rounded ? "rounded-lg" : ""
+      } ${className}`}
       style={style}
       onClick={onClick}
     >

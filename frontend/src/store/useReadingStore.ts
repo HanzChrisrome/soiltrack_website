@@ -6,9 +6,7 @@ import {
   getPlotPerformanceSummary,
   getPlotsByMunicipality,
   getPlotReadingsByDateRange,
-  getUserSummary,
 } from "../service/readingService";
-import axios from "axios";
 import {
   CropStat,
   DailyReading,
@@ -17,8 +15,8 @@ import {
   PlotReadingsTrend,
   SoilTypeStat,
   UserPlots,
-  UserSummary,
 } from "../models/readingStoreModels";
+import safeAsync from "../utils/safeAsync";
 
 interface ReadingState {
   overallAverage: OverallAverage | null;
@@ -27,8 +25,6 @@ interface ReadingState {
   userPlots: UserPlots[] | null;
   plotPerformance: ImprovementSummary | null;
   plotReadingsByPlotId: Record<number, DailyReading[]> | null;
-
-  userSummary: UserSummary[] | null;
 
   isGettingPlotSummary: boolean;
   isLoadingOverallAverage: boolean;
@@ -55,13 +51,11 @@ interface ReadingState {
     province: string
   ) => Promise<void>;
 
-  //FOR THE SUMMARIZE NUTRIENT TRENDS IN THE MAPVIEW
   fetchNutrientsReadings: (
     plotId: number,
     startDate: string,
     endDate: string
   ) => Promise<void>;
-  fetchUserSummary: (municipality: string, province: string) => Promise<void>;
 
   //FOR THE NUTRIENT TRENDS IN SPECIFIC PLOTS PAGE
   plotNutrientsTrends: Record<number, PlotReadingsTrend[]> | null;
@@ -80,27 +74,6 @@ interface ReadingState {
 
   setSelectedPlotId: (plotId: number | null) => void;
 }
-
-const safeAsync = async <T>(
-  promise: Promise<{ data: T }>,
-  fallback: T
-): Promise<T> => {
-  try {
-    const res = await promise;
-    return res.data;
-  } catch (error: unknown) {
-    if (axios.isAxiosError(error)) {
-      console.error("Axios error:", {
-        message: error.message,
-        status: error.response?.status,
-        data: error.response?.data,
-      });
-    } else {
-      console.error("Unexpected error:", error);
-    }
-    return fallback;
-  }
-};
 
 export const useReadingStore = create<ReadingState>((set, get) => ({
   overallAverage: null,
@@ -162,14 +135,18 @@ export const useReadingStore = create<ReadingState>((set, get) => ({
     set({ userPlots: data });
   },
 
-  fetchNutrientsReadings: async (plotId, startDate, endDate) => {
+  fetchNutrientsReadings: async (
+    plotId: number,
+    startDate: string,
+    endDate: string
+  ): Promise<void> => {
     const state = get();
 
     if (state.plotReadingsByPlotId && state.plotReadingsByPlotId[plotId])
       return;
 
     set({ isLoadingPlotNutrients: true });
-    const data = await safeAsync(
+    const data: DailyReading[] = await safeAsync(
       getPlotReadingsByDateRange(plotId, startDate, endDate),
       []
     );
@@ -183,7 +160,11 @@ export const useReadingStore = create<ReadingState>((set, get) => ({
     }));
   },
 
-  fetchPlotNutrients: async (plotId, startDate, endDate) => {
+  fetchPlotNutrients: async (
+    plotId: number,
+    startDate: string,
+    endDate: string
+  ): Promise<void> => {
     const state = get();
     if (state.plotNutrientsTrends && state.plotNutrientsTrends[plotId]) return;
 
@@ -217,11 +198,6 @@ export const useReadingStore = create<ReadingState>((set, get) => ({
       },
       isLoadingPlotNutrients: false,
     }));
-  },
-
-  fetchUserSummary: async (municipality, province) => {
-    const data = await safeAsync(getUserSummary(municipality, province), []);
-    set({ userSummary: data });
   },
 
   setSelectedPlotId: (plotId) => set({ selectedPlotId: plotId }),

@@ -2,16 +2,18 @@
 import { ReactNode } from "react";
 import { useAuthStore } from "../../store/useAuthStore";
 import { TooltipIconButton } from "../widgets/Widgets";
-import { Bell, LogOut, Settings } from "lucide-react";
+import { Bell, LogOut, Settings, TestTubeIcon } from "lucide-react";
 import { useWidgetStore } from "../../store/useWidgetStore";
 import soiltrackLogo from "/DARK HORIZONTAL.png";
+import useUserPageHook from "../../hooks/useUserPage";
 
 interface TopNavBarProps {
   children: ReactNode;
 }
 
 export default function TopNavBar({ children }: TopNavBarProps) {
-  const { logout, authUser } = useAuthStore();
+  const { logout } = useAuthStore();
+  const { userSummary } = useUserPageHook();
   const { openModal } = useWidgetStore();
 
   const handleLogout = () => {
@@ -34,6 +36,14 @@ export default function TopNavBar({ children }: TopNavBarProps) {
       <ul className="flex items-center space-x-2">{children}</ul>
       {/* User Info and Logout */}
       <div className="flex items-center space-x-2">
+        <TooltipIconButton
+          onClick={() => console.log("User summary: ", userSummary)}
+          tooltip="Notifications"
+        >
+          <div className="p-3 bg-white rounded-full">
+            <TestTubeIcon className="w-4 h-4 text-neutral" />
+          </div>
+        </TooltipIconButton>
         <TooltipIconButton tooltip="Notifications">
           <div className="p-3 bg-white rounded-full">
             <Bell className="w-4 h-4 text-neutral" />

@@ -11,34 +11,32 @@ import { useAuthStore } from "../../store/useAuthStore";
 import AreaPerformancesCard from "../../components/MainPage/RadarChart";
 import GradientHeading from "../../components/widgets/GradientComponent";
 import PerformanceView from "../../components/MainPage/PerformanceView";
+import useUserPageHook from "../../hooks/useUserPage";
 
 const MainPage = () => {
-  const { userPlots, userSummary } = useMainPageHook();
-
+  const { userPlots } = useMainPageHook();
   const { authUser } = useAuthStore();
+  const { userSummary } = useUserPageHook();
 
   return (
-    <div className="">
+    <div className="py-5">
+      <div className="items-start">
+        <h1 className="text-2xl text-neutral-800 font-semibold leading-none">
+          Welcome back,{" "}
+        </h1>
+        <GradientHeading className="text-4xl text-neutral-800 font-bold leading-tight">
+          {authUser?.user_fname?.split(" ")[0] || ""}{" "}
+          {authUser?.user_lname || ""}
+        </GradientHeading>
+        <p className="text-sm text-neutral leading-tight">
+          Here’s a quick overview of the plots in your municipality.
+        </p>
+      </div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-5">
-        <CardContainer className="flex flex-col h-full">
-          <div className="items-start">
-            <h1 className="text-2xl text-neutral-800 font-semibold leading-none">
-              Welcome back,{" "}
-            </h1>
-            <GradientHeading className="text-4xl text-neutral-800 font-bold leading-tight">
-              {authUser?.user_fname?.split(" ")[0] || ""}{" "}
-              {authUser?.user_lname || ""}
-            </GradientHeading>
-            <p className="text-sm text-neutral leading-tight">
-              Here’s a quick overview of the plots in your municipality.
-            </p>
-          </div>
-        </CardContainer>
-
         <CardContainer className="flex flex-col h-full">
           <div className="flex items-start justify-between">
             <div className="flex flex-col items-start">
-              <p className="text-lg font-semibold text-primary mb-2 leading-none">
+              <p className="text-xl font-semibold text-primary mb-2 leading-none">
                 Total Plots
               </p>
               <span className="text-xs w-3/4 font-normal text-neutral">
@@ -130,29 +128,6 @@ const MainPage = () => {
         </CardContainer>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 items-stretch gap-2 mt-2">
-        {/* <div className="flex flex-col gap-4">
-          <CardContainer className="flex">
-            <div className="flex items-center justify-between w-full">
-              <div className="flex items-center">
-                <User className="w-5 h-5 mr-2 text-primary" />
-                <h1 className="text-lg font-semibold text-primary">
-                  Users List
-                </h1>
-              </div>
-              <div className="form-control w-full md:w-48 relative">
-                <input
-                  type="text"
-                  placeholder="Search by name"
-                  className="input input-bordered input-sm w-full focus:outline-none focus:ring-0 pr-8"
-                />
-                <span className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
-                  <User className="w-4 h-4" />
-                </span>
-              </div>
-            </div>
-            <PatientTable />
-          </CardContainer>
-        </div> */}
         <CardContainer padding="p-6" className="flex flex-col h-full">
           <AreaPerformancesCard />
         </CardContainer>

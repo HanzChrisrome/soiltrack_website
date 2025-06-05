@@ -1,7 +1,9 @@
 {
-  "files": [],
-  "references": [
-    { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" }
-  ]
+  "extends": "./tsconfig.app.json",
+  "compilerOptions": {
+    "outDir": "./dist/out-tsc",
+    "types": ["leaflet", "leaflet-draw"],
+    "typeRoots": ["./node_modules/@types", "./src/types"]
+  },
+  "include": ["src"]
 }

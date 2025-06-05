@@ -18,9 +18,12 @@ export interface UserPlots {
 export interface UserSummary {
   user_id: string;
   user_name: string;
-  user_barangay: string;
+  user_email: string;
+  user_address: string;
   plot_count: number;
   mac_address: string;
+  device_status: string;
+  created_at: string;
 }
 
 export interface PlotReadingsTrend {

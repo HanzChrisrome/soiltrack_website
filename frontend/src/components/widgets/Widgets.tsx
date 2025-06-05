@@ -1,5 +1,18 @@
-import React from "react";
+import React, { InputHTMLAttributes, ReactNode } from "react";
 import CardContainer from "./CardContainer";
+
+interface IconInputProps extends InputHTMLAttributes<HTMLInputElement> {
+  icon: ReactNode;
+  className?: string;
+  inputClassName?: string;
+}
+
+type SidebarProps = {
+  visible: boolean;
+  onClose: () => void;
+  children: ReactNode;
+  widthClass?: string;
+};
 
 type IconButtonProps = {
   icon?: React.ReactNode;
@@ -124,5 +137,54 @@ export const ToggleSelector = ({
         );
       })}
     </CardContainer>
+  );
+};
+
+export const Sidebar: React.FC<SidebarProps> = ({
+  visible,
+  onClose,
+  children,
+  widthClass = "sm:w-[750px]",
+}) => {
+  return (
+    <>
+      <div
+        className={`fixed inset-0 bg-black bg-opacity-40 z-50 transition-opacity duration-300 ${
+          visible ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
+        onClick={onClose}
+      ></div>
+
+      <div
+        className={`fixed top-0 right-0 h-full w-full ${widthClass} bg-white shadow-lg z-50
+        transform transition-transform duration-300
+        ${visible ? "translate-x-0" : "translate-x-full"}`}
+      >
+        <div className="p-6 h-full overflow-y-auto">{children}</div>
+      </div>
+    </>
+  );
+};
+
+export const IconInput: React.FC<IconInputProps> = ({
+  icon,
+  placeholder,
+  type = "text",
+  className = "",
+  inputClassName = "",
+  ...props
+}) => {
+  return (
+    <div
+      className={`flex items-center gap-2 px-4 py-3 bg-base-100 border border-base-300 rounded-lg ${className}`}
+    >
+      <div className="text-base-content opacity-70">{icon}</div>
+      <input
+        {...props}
+        type={type}
+        placeholder={placeholder}
+        className={`flex-1 bg-transparent outline-none text-md ${inputClassName} placeholder:text-base`}
+      />
+    </div>
   );
 };

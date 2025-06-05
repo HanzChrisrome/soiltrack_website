@@ -1,7 +1,7 @@
 // TopNavBarItemsList.tsx
 import { LayoutDashboard, Boxes, UserCircle2 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
-import TopNavBar from "./topNav";
+import TopNavBar from "./TopNav";
 import TabNavItem from "./TopNavItem";
 
 export default function TopNavBarItemsList() {

@@ -1,4 +1,3 @@
-import React, { useEffect } from "react";
 import ReactApexChart from "react-apexcharts";
 import type { ApexOptions } from "apexcharts";
 import { useReadingStore } from "../../store/useReadingStore";
@@ -6,22 +5,7 @@ import { LucideActivity } from "lucide-react";
 import GradientHeading from "../widgets/GradientComponent";
 
 export default function AreaPerformancesCard() {
-  const { overallAverage, fetchOverallAverage } = useReadingStore();
-
-  useEffect(() => {
-    const now = new Date();
-    const startOfMonth = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      1
-    ).toISOString();
-    const endOfMonth = new Date(
-      now.getFullYear(),
-      now.getMonth() + 1,
-      0
-    ).toISOString();
-    fetchOverallAverage(startOfMonth, endOfMonth);
-  }, []);
+  const { overallAverage } = useReadingStore();
 
   if (!overallAverage) {
     return (

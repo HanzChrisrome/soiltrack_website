@@ -2,6 +2,8 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@import "leaflet/dist/leaflet.css";
+@import "leaflet-draw/dist/leaflet.draw.css";
 
 html {
   scrollbar-gutter: stable;
@@ -12,7 +14,7 @@ body {
 }
 
 * {
-  letter-spacing: -0.3px;
+  letter-spacing: -0.1px;
 }
 
 .too-tight-text {
@@ -27,6 +29,17 @@ body {
   font-weight: bold;
   font-size: 12px;
   padding: 0;
+}
+
+.leaflet-draw-toolbar {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px; /* spacing between buttons */
+}
+
+.leaflet-draw-toolbar a {
+  display: block;
+  margin: 0 !important;
 }
 
 .apexchart-center .apexcharts-canvas {

@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import authRoutes from "./routes/auth.route";
 import userRoutes from "./routes/userPage.route";
 import readingsRoutes from "./routes/readings.route";
+import userPageRoutes from "./routes/userPage.route";
 import cors from "cors";
 import { debuglog } from "util";
 import { infoLog } from "./utils/logger";
@@ -23,6 +24,7 @@ app.use(
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/readings", readingsRoutes);
+app.use("/api/user-readings", userPageRoutes);
 
 app.listen(port, () => {
   infoLog(`Server is running on port ${port} in ${mode} mode`);

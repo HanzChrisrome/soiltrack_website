@@ -71,10 +71,3 @@ export const getPlotReadingsByDateRange = (
     return axiosInstance.get(`/readings/get-nutrients?${params.toString()}`);
   }
 };
-
-export const getUserSummary = (municipality: string, province: string) => {
-  const params = new URLSearchParams();
-  params.append("municipality", municipality);
-  params.append("province", province);
-  return axiosInstance.get(`/readings/user-summary?${params.toString()}`);
-};

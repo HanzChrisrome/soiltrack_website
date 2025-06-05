@@ -1,6 +1,17 @@
-import { useEffect } from "react";
+/* eslint-disable react-hooks/exhaustive-deps */
+import { useEffect, useMemo } from "react";
 import { useReadingStore } from "../store/useReadingStore";
 import { useAuthStore } from "../store/useAuthStore";
+
+const getDateRange = () => {
+  const endDate = new Date();
+  const startDate = new Date();
+  startDate.setDate(endDate.getDate() - 6);
+  return {
+    start: startDate.toISOString().split("T")[0],
+    end: endDate.toISOString().split("T")[0],
+  };
+};
 
 const useMainPageHook = () => {
   const {
@@ -13,68 +24,60 @@ const useMainPageHook = () => {
     fetchPlotPerformanceSummary,
     userPlots,
     fetchPlotsByMunicipality,
-    userSummary,
-    fetchUserSummary,
-    overAllAverage,
     fetchOverallAverage,
   } = useReadingStore();
 
   const { authUser } = useAuthStore();
+  const { start, end } = useMemo(getDateRange, []);
+
+  const locationReady =
+    !!authUser?.user_municipality && !!authUser?.user_province;
 
   useEffect(() => {
-    if (!authUser?.user_municipality || !authUser?.user_province) return;
+    if (
+      !locationReady ||
+      (overallAverage && Object.keys(overallAverage).length > 0)
+    )
+      return;
 
-    const shouldFetchUserSummary = !userSummary || userSummary.length === 0;
-    const shouldFetchPlots = !userPlots || userPlots.length === 0;
-    const shouldFetchPlotPerformance =
-      !plotPerformance || Object.keys(plotPerformance).length === 0;
-    const shouldFetchSoilTypes = !soilTypes || soilTypes.length === 0;
-    const shouldFetchCropTypes = !cropTypes || cropTypes.length === 0;
+    fetchOverallAverage(start, end);
+  }, [locationReady, overallAverage, fetchOverallAverage, start, end]);
 
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() - 6);
-    const endDate = new Date();
+  useEffect(() => {
+    if (!locationReady || (userPlots && userPlots.length > 0)) return;
 
-    if (shouldFetchUserSummary) {
-      fetchUserSummary(authUser.user_municipality, authUser.user_province);
-    }
+    fetchPlotsByMunicipality(
+      authUser.user_municipality,
+      authUser.user_province
+    );
+  }, [locationReady, userPlots, fetchPlotsByMunicipality]);
 
-    if (shouldFetchPlots) {
-      fetchPlotsByMunicipality(
-        authUser.user_municipality,
-        authUser.user_province
-      );
-    }
+  useEffect(() => {
+    if (
+      !locationReady ||
+      (plotPerformance && Object.keys(plotPerformance).length > 0)
+    )
+      return;
 
-    if (shouldFetchPlotPerformance) {
-      fetchPlotPerformanceSummary(
-        startDate.toISOString().split("T")[0],
-        endDate.toISOString().split("T")[0],
-        authUser.user_municipality,
-        authUser.user_province
-      );
-    }
+    fetchPlotPerformanceSummary(
+      start,
+      end,
+      authUser.user_municipality,
+      authUser.user_province
+    );
+  }, [locationReady, plotPerformance, fetchPlotPerformanceSummary, start, end]);
 
-    if (shouldFetchSoilTypes) {
-      fetchSoilTypes(authUser.user_municipality, authUser.user_province);
-    }
+  useEffect(() => {
+    if (!locationReady || (soilTypes && soilTypes.length > 0)) return;
 
-    if (shouldFetchCropTypes) {
-      fetchCropTypes(authUser.user_municipality, authUser.user_province);
-    }
-  }, [
-    authUser,
-    userSummary,
-    userPlots,
-    soilTypes,
-    cropTypes,
-    plotPerformance,
-    fetchUserSummary,
-    fetchPlotsByMunicipality,
-    fetchPlotPerformanceSummary,
-    fetchSoilTypes,
-    fetchCropTypes,
-  ]);
+    fetchSoilTypes(authUser.user_municipality, authUser.user_province);
+  }, [locationReady, soilTypes, fetchSoilTypes]);
+
+  useEffect(() => {
+    if (!locationReady || (cropTypes && cropTypes.length > 0)) return;
+
+    fetchCropTypes(authUser.user_municipality, authUser.user_province);
+  }, [locationReady, cropTypes, fetchCropTypes]);
 
   return {
     overallAverage,
@@ -82,7 +85,6 @@ const useMainPageHook = () => {
     cropTypes,
     plotPerformance,
     userPlots,
-    userSummary,
   };
 };
 
