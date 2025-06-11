@@ -25,6 +25,8 @@ const useMainPageHook = () => {
     userPlots,
     fetchPlotsByMunicipality,
     fetchOverallAverage,
+    analysisGeneratedCount,
+    fetchAnalysisGeneratedCount,
   } = useReadingStore();
 
   const { authUser } = useAuthStore();
@@ -79,12 +81,24 @@ const useMainPageHook = () => {
     fetchCropTypes(authUser.user_municipality, authUser.user_province);
   }, [locationReady, cropTypes, fetchCropTypes]);
 
+  useEffect(() => {
+    if (!locationReady || analysisGeneratedCount > 0) return;
+
+    const today = new Date().toISOString().split("T")[0];
+    fetchAnalysisGeneratedCount(
+      authUser.user_municipality,
+      authUser.user_province,
+      today
+    );
+  }, [locationReady, fetchAnalysisGeneratedCount]);
+
   return {
     overallAverage,
     soilTypes,
     cropTypes,
     plotPerformance,
     userPlots,
+    analysisGeneratedCount,
   };
 };
 

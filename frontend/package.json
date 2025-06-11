@@ -34,11 +34,13 @@
     "react-slideshow-image": "^4.3.2",
     "react-toast": "^1.0.3",
     "recharts": "^2.15.3",
+    "uuid": "^11.1.0",
     "zustand": "^5.0.3"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",
     "@types/leaflet": "^1.9.18",
+    "@types/leaflet-draw": "^1.0.12",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
     "@vitejs/plugin-react": "^4.3.4",

@@ -97,7 +97,7 @@ const SmallNutrientsChart = ({
   };
 
   return (
-    <CardContainer padding="p-4">
+    <CardContainer padding="p-4" className="border border-base-300 mt-3">
       <div className="flex items-center gap-2 justify-between">
         <h2 className="text-md font-semibold text-primary">{title}</h2>
         <CardContainer padding="p-1">

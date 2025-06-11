@@ -1,6 +1,6 @@
 import { Outlet } from "react-router-dom";
 import ConfirmModal from "../components/modal/ConfirmModal";
-import TopNavBarItemsList from "../components/topNavBar/topNavList";
+import TopNavBarItemsList from "../components/topNavBar/TopNavList";
 
 const HomePage = () => {
   return (

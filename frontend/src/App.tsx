@@ -16,7 +16,7 @@ import ResetPassword from "./pages/auth/ResetPassword";
 import useThemeStore from "./store/useThemeStore";
 import AreaPage from "./pages/dashboard/AreaPage";
 import SpecificPlotPage from "./pages/plots/SpecificPlotPage";
-import AddUserPage from "./pages/dashboard/AddUserPage";
+import AddUserPage from "./components/UserPage/AddUserWidget";
 
 const App = () => {
   const { authUser, checkAuth, isCheckingAuth } = useAuthStore();

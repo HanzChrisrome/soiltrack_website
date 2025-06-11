@@ -5,9 +5,6 @@ import {
   ArrowUp,
   ArrowDown,
   ChevronsUpDown,
-  Tractor,
-  ShieldAlert,
-  Users2,
   X,
 } from "lucide-react";
 import CardContainer from "../../components/widgets/CardContainer";
@@ -16,7 +13,7 @@ import useUserPageHook from "../../hooks/useUserPage";
 import { format } from "date-fns";
 import { UserSummary } from "../../models/readingStoreModels";
 import { Sidebar } from "../../components/widgets/Widgets";
-import { useNavigate } from "react-router-dom";
+import AddUserWidget from "../../components/UserPage/AddUserWidget";
 
 type SortableColumn =
   | "user_name"
@@ -52,7 +49,6 @@ const UserPage = () => {
   const [sortColumn, setSortColumn] = useState<SortableColumn | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const navigate = useNavigate();
 
   const handleSort = (column: SortableColumn) => {
     if (sortColumn === column) {
@@ -64,34 +60,24 @@ const UserPage = () => {
   };
 
   const sortedUsers = useMemo(() => {
-    // Get the list of users or empty array if none
     const users: UserSummary[] = userSummary || [];
 
-    // If no column is selected for sorting, just return the users as is
     if (!sortColumn) return users;
 
-    // Make a copy of users array so we don't change the original data
     return [...users].sort((a, b) => {
-      // Get the values for the column we want to sort by
       const aVal = a[sortColumn];
       const bVal = b[sortColumn];
 
-      // Handle null or undefined values: push them to the end
-      if (aVal == null) return 1; // 'a' should come after 'b'
-      if (bVal == null) return -1; // 'b' should come after 'a'
+      if (aVal == null) return 1;
+      if (bVal == null) return -1;
 
-      // If sorting by a number column (like total plots)
       if (sortColumn === "plot_count") {
-        // For ascending, subtract aVal from bVal
-        // For descending, subtract bVal from aVal (reverse)
         return sortDirection === "asc"
           ? (aVal as number) - (bVal as number)
           : (bVal as number) - (aVal as number);
       }
 
-      // If sorting by a date column (like join date)
       if (sortColumn === "created_at") {
-        // Convert the date strings to timestamps and subtract for comparison
         return sortDirection === "asc"
           ? new Date(aVal as string).getTime() -
               new Date(bVal as string).getTime()
@@ -99,7 +85,6 @@ const UserPage = () => {
               new Date(aVal as string).getTime();
       }
 
-      // For string columns (like name or email), use localeCompare to sort alphabetically
       return sortDirection === "asc"
         ? String(aVal).localeCompare(String(bVal)) // ascending (A → Z)
         : String(bVal).localeCompare(String(aVal)); // descending (Z → A)
@@ -130,10 +115,10 @@ const UserPage = () => {
           </p>
         </div>
         <div className="inline-flex items-center gap-2">
-          <button className="btn bg-base-100 btn-md flex items-center rounded-full gap-2 py-0 px-6 hover:bg-base-200">
+          {/* <button className="btn bg-base-100 btn-md flex items-center rounded-full gap-2 py-0 px-6 hover:bg-base-200">
             <Download className="w-4" />
             <span className="font-normal">Export</span>
-          </button>
+          </button> */}
           <button
             onClick={() => {
               setIsSidebarOpen(true);
@@ -245,42 +230,7 @@ const UserPage = () => {
             <X className="w-6 h-6 text-gray-600" />
           </button>
         </div>
-        <CardContainer
-          className="hover:cursor-pointer border border-base-200 bg-base-100 hover:bg-base-200 p-12 mt-5"
-          onClick={() => console.log("Add Farmer Clicked")}
-        >
-          <div className="flex flex-col items-center">
-            <Tractor className="w-16 h-16 text-primary mb-3" />
-            <h3 className="text-xl font-semibold">Assign a Device to a User</h3>
-            <p className="text-base text-gray-600">
-              Assigning of IOT Device to users
-            </p>
-          </div>
-        </CardContainer>
-        <CardContainer
-          className="hover:cursor-pointer bg-base-300 hover:bg-base-200 p-12 mt-3"
-          onClick={() => navigate("/add-user")}
-        >
-          <div className="flex flex-col items-center">
-            <Users2 className="w-16 h-16 text-primary mb-3" />
-            <h3 className="text-xl font-semibold">Add new Farmer/User</h3>
-            <p className="text-base text-gray-600">
-              Add a new user or farmer and request for a device.
-            </p>
-          </div>
-        </CardContainer>
-        <CardContainer
-          className="hover:cursor-pointer bg-base-300 hover:bg-base-200 p-12 mt-3"
-          onClick={() => console.log("Add Farmer Clicked")}
-        >
-          <div className="flex flex-col items-center">
-            <ShieldAlert className="w-16 h-16 text-primary mb-3" />
-            <h3 className="text-xl font-semibold">Add new Admin</h3>
-            <p className="text-base text-gray-600">
-              Add a admin to manage your farms municipality and users.
-            </p>
-          </div>
-        </CardContainer>
+        <AddUserWidget />
       </Sidebar>
     </div>
   );

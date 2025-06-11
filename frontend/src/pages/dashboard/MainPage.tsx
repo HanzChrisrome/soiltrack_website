@@ -14,18 +14,15 @@ import PerformanceView from "../../components/MainPage/PerformanceView";
 import useUserPageHook from "../../hooks/useUserPage";
 
 const MainPage = () => {
-  const { userPlots } = useMainPageHook();
+  const { userPlots, analysisGeneratedCount } = useMainPageHook();
   const { authUser } = useAuthStore();
   const { userSummary } = useUserPageHook();
 
   return (
     <div className="py-5">
       <div className="items-start">
-        <h1 className="text-2xl text-neutral-800 font-semibold leading-none">
-          Welcome back,{" "}
-        </h1>
         <GradientHeading className="text-4xl text-neutral-800 font-bold leading-tight">
-          {authUser?.user_fname?.split(" ")[0] || ""}{" "}
+          Hi, {authUser?.user_fname?.split(" ")[0] || ""}{" "}
           {authUser?.user_lname || ""}
         </GradientHeading>
         <p className="text-sm text-neutral leading-tight">
@@ -119,6 +116,37 @@ const MainPage = () => {
             <div className="flex items-center">
               <GradientHeading className="text-6xl font-bold">
                 {userSummary?.length || 0}
+              </GradientHeading>
+            </div>
+            <CardContainer padding="p-2">
+              <Cpu className="w-8 h-8 text-primary" />
+            </CardContainer>
+          </div>
+        </CardContainer>
+        <CardContainer className="flex flex-col h-full">
+          <div className="flex items-start justify-between">
+            <div className="flex flex-col items-start">
+              <p className="text-lg font-semibold text-primary mb-2 leading-none">
+                Users that generated analysis
+              </p>
+              <span className="text-xs w-3/4 font-normal text-neutral">
+                Total users that generated analysis and is associated to your
+                municipality in{" "}
+                {`${
+                  authUser?.user_municipality
+                    ?.toLowerCase()
+                    .replace(/\b\w/g, (c) => c.toUpperCase()) || ""
+                }
+            `}
+              </span>
+            </div>
+            <ArrowUpRight className="w-8 h-8 text-primary cursor-pointer" />
+          </div>
+
+          <div className="flex items-center justify-between mt-4">
+            <div className="flex items-center">
+              <GradientHeading className="text-6xl font-bold">
+                {analysisGeneratedCount || 0}
               </GradientHeading>
             </div>
             <CardContainer padding="p-2">

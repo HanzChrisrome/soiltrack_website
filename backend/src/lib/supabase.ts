@@ -4,8 +4,12 @@ import * as dotenv from "dotenv";
 dotenv.config();
 
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL as string;
-const supabaseKey = process.env.REACT_APP_ANON_KEY as string;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY as string;
 
-const supabase = createClient(supabaseUrl, supabaseKey);
+if (!supabaseUrl || !supabaseServiceKey) {
+  throw new Error("Missing Supabase environment variables");
+}
+
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 export default supabase;

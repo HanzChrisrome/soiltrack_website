@@ -88,3 +88,13 @@ export interface CropStat {
   count: number;
   percentage: number;
 }
+
+export interface AnalysisSummary {
+  id: number;
+  plot_id: number;
+  analysis_date: string;
+  analysis: Record<string, unknown>;
+  analysis_type: string;
+  created_at: string;
+  language_type: string;
+}

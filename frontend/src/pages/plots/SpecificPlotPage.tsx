@@ -7,10 +7,7 @@ import * as turf from "@turf/turf";
 import PlotMap from "../../components/SpecificPlot/MapPlot";
 import { useEffect } from "react";
 import HeatmapViewContent from "../../components/SpecificPlot/HeatmapViewContent";
-import {
-  getTodayHeatMap,
-  getWeeklyHeatmapData,
-} from "../../utils/NutrientTrendsUtil";
+import { getTodayHeatMap } from "../../utils/NutrientTrendsUtil";
 import GradientHeading from "../../components/widgets/GradientComponent";
 
 const SpecificPlotPage = () => {
@@ -69,32 +66,21 @@ const SpecificPlotPage = () => {
   const areaHectares = getAreaInHectares(selectedPlot?.polygons || []);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 mt-2">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 py-4">
       <div className="flex flex-col gap-2">
-        {/* <CardContainer className="bg-base-300">
-          <div className="flex flex-col gap-2">
-            <GradientHeading className="text-2xl font-bold">
-              Plot Details
-            </GradientHeading>
-            <p className="text-sm text-neutral">
-              Here you can view the details of the selected plot, including its
-              nutrient trends and performance over time.
-            </p>
-          </div>
-        </CardContainer> */}
         <CardContainer className="">
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
               <GradientHeading className="text-2xl font-bold">
                 Plot Nutrients
               </GradientHeading>
-              <CardContainer padding="px-2 py-0.5">
+              <CardContainer padding="px-2 py-0.5 border border-base-200">
                 <span className="text-sm text-neutral">
                   Over the last 7 days
                 </span>
               </CardContainer>
             </div>
-
+            <hr className="my-2 border-t border-base-200" />
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-1">
                 <span className="inline-block w-3 h-3 rounded-full bg-blue-500" />
@@ -119,6 +105,23 @@ const SpecificPlotPage = () => {
             data={getTodayHeatMap(trendDataRaw || [])}
           />
         </CardContainer>
+        {/* <CardContainer className="relative overflow-hidden h-98" padding="p-0">
+          <img
+            src="/ai_is_here_2.png"
+            alt="AI Insight"
+            className="w-full h-auto object-cover"
+          />
+          <div className="absolute bottom-6 left-0 w-full px-4 py-2 flex justify-center">
+            <div
+              tabIndex={0}
+              role="button"
+              className="btn w-full flex flex-row items-center gap-2 px-3 py-2 font-normal bg-base-100 border border-base-200 shadow-sm rounded-lg cursor-pointer hover:bg-base-300 transition"
+            >
+              Analysis has been generated
+              <MoveRight className="w-4 h-4 text-primary" />
+            </div>
+          </div>
+        </CardContainer> */}
 
         <CardContainer>
           <div className="flex items-start">

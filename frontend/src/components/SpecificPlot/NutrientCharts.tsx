@@ -1,6 +1,8 @@
 import ReactApexChart from "react-apexcharts";
 import type { ApexOptions } from "apexcharts";
 import CardContainer from "../widgets/CardContainer";
+import { Skeleton } from "../widgets/Widgets";
+import { TrendingDown, TrendingUp } from "lucide-react";
 
 interface ChartPoint {
   x: string; // ISO timestamp
@@ -17,13 +19,54 @@ interface NutrientChartProps {
   title: string;
   chartSeries: ChartSeries[];
   selectedRange: "1D" | "7D" | "1M" | "3M" | "Custom";
+  isLoading?: boolean;
 }
+
+const calculateChange = (series: ChartSeries) => {
+  const data = series.data;
+  if (data.length < 2) return null;
+
+  const sortedData = [...data].sort(
+    (a, b) => new Date(a.x).getTime() - new Date(b.x).getTime()
+  );
+  const first = sortedData[0].y;
+  const last = sortedData[sortedData.length - 1].y;
+
+  if (first === 0) return null; // avoid division by zero
+
+  const absoluteChange = last - first;
+  const percentChange = (absoluteChange / first) * 100;
+
+  return {
+    absolute: absoluteChange,
+    percent: percentChange,
+    isIncrease: percentChange > 0,
+  };
+};
 
 const NutrientChart = ({
   title,
   chartSeries,
   selectedRange,
+  isLoading = false,
 }: NutrientChartProps) => {
+  // Convert UTC ISO string to Philippine Time ISO string (UTC+8)
+  const convertToPHT = (isoString: string): string => {
+    const date = new Date(isoString);
+    // Add 8 hours in milliseconds
+    const phtDate = new Date(date.getTime() + 8 * 60 * 60 * 1000);
+    return phtDate.toISOString();
+  };
+
+  // Map chartSeries data points to PHT timestamps
+  const convertedSeries = chartSeries.map((series) => ({
+    ...series,
+    data: series.data.map((point) => ({
+      ...point,
+      x: convertToPHT(point.x),
+    })),
+  }));
+
   const chartOptions: ApexOptions = {
     chart: {
       type: "area",
@@ -82,6 +125,9 @@ const NutrientChart = ({
     },
     yaxis: {
       show: true,
+      min: 0,
+      max: 200,
+      tickAmount: 4,
       labels: {
         show: true,
         offsetX: -10,
@@ -103,36 +149,64 @@ const NutrientChart = ({
         bottom: 0,
       },
     },
-    colors: chartSeries.map((s) => s.color || "#22c55e"),
+    colors: convertedSeries.map((s) => s.color || "#22c55e"),
     tooltip: {
       x: {
-        format:
-          selectedRange === "1D"
-            ? "HH:mm"
-            : selectedRange === "7D"
-            ? "MMM dd HH:mm"
-            : "MMM dd",
+        show: false,
+        format: "MMM dd yyyy HH:mm:ss",
       },
       y: {
         formatter: (value: number) => `${value}%`,
       },
     },
+
+    legend: {
+      show: false,
+    },
   };
 
+  const changes = convertedSeries.map((series) => ({
+    name: series.name,
+    change: calculateChange(series),
+  }));
+
   return (
-    <CardContainer padding="p-3" className="bg-base-100">
-      <div className="flex items-center gap-2 justify-between">
-        <div className="flex items-center gap-2">
-          <h2 className="text-xl font-semibold text-primary">{title}</h2>
-        </div>
+    <CardContainer padding="p-5" className="border border-base-300">
+      <div className="flex items-center gap-2 justify-between flex-wrap">
+        <h2 className="text-xl font-semibold text-primary">{title}</h2>
+        {!isLoading &&
+          changes.map((c) =>
+            c.change ? (
+              <CardContainer padding="px-2 py-1" className="" key={c.name}>
+                <span
+                  className={`text-sm font-medium flex items-center gap-1 ${
+                    c.change.isIncrease ? "text-green-500" : "text-red-500"
+                  }`}
+                >
+                  {c.change.isIncrease ? (
+                    <TrendingUp size={16} />
+                  ) : (
+                    <TrendingDown size={16} />
+                  )}{" "}
+                  {Math.abs(c.change.percent).toFixed(1)}%
+                </span>
+              </CardContainer>
+            ) : null
+          )}
       </div>
 
-      <ReactApexChart
-        options={chartOptions}
-        series={chartSeries}
-        type="area"
-        height={200}
-      />
+      {isLoading ? (
+        <div className="h-[200px] w-full mt-4">
+          <Skeleton className="h-full w-full" />
+        </div>
+      ) : (
+        <ReactApexChart
+          options={chartOptions}
+          series={convertedSeries}
+          type="area"
+          height={200}
+        />
+      )}
     </CardContainer>
   );
 };

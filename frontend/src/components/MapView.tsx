@@ -194,7 +194,7 @@ export default function MapView() {
               fillOpacity: 0.4,
             }}
             eventHandlers={{
-              click: () =>
+              click: () => {
                 setSelectedPlot({
                   id: poly.id,
                   name: poly.name,
@@ -203,7 +203,8 @@ export default function MapView() {
                   area: poly.area,
                   color: poly.color,
                   ownerName: poly.ownerName,
-                }),
+                });
+              },
             }}
           >
             <Tooltip direction="center" permanent>

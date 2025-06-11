@@ -40,7 +40,7 @@ const ConfirmModal = () => {
         <div className="flex flex-col gap-5 items-center justify-center">
           <TriangleAlert size={50} className="text-error" />
           <div className="leading-tight items-center text-center">
-            <GradientHeading size="text-3xl">{title}</GradientHeading>
+            <GradientHeading className="text-3xl">{title}</GradientHeading>
             {message ? <p className="text-md">{message}</p> : null}
           </div>
         </div>

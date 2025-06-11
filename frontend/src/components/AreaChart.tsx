@@ -108,7 +108,7 @@ const PerformanceCard = ({
 
   return (
     <>
-      <CardContainer padding="p-3" className="mt-3">
+      <CardContainer padding="p-3" className="mt-3 border border-base-300">
         <ReactApexChart
           options={chartOptions}
           series={chartSeries.map(({ name, data }) => ({ name, data }))}

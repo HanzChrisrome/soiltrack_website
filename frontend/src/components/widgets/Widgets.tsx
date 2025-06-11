@@ -5,6 +5,7 @@ interface IconInputProps extends InputHTMLAttributes<HTMLInputElement> {
   icon: ReactNode;
   className?: string;
   inputClassName?: string;
+  error?: string;
 }
 
 type SidebarProps = {
@@ -27,6 +28,7 @@ type TooltipIconButtonProps = {
   children: React.ReactNode;
   onClick?: () => void;
   className?: string;
+  tooltipRoundedClass?: string;
 };
 
 type SkeletonProps = {
@@ -75,6 +77,7 @@ export const TooltipIconButton: React.FC<TooltipIconButtonProps> = ({
   children,
   onClick,
   className = "",
+  tooltipRoundedClass = "rounded",
 }) => {
   return (
     <div
@@ -90,7 +93,9 @@ export const TooltipIconButton: React.FC<TooltipIconButtonProps> = ({
             })
           : children}
       </div>
-      <span className="absolute left-1/2 -translate-x-1/2 top-full mt-1 px-2 py-1 rounded bg-gray-800 text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+      <span
+        className={`absolute left-1/2 -translate-x-1/2 top-full mt-1 px-2 py-1 ${tooltipRoundedClass} bg-gray-800 text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10`}
+      >
         {tooltip}
       </span>
     </div>
@@ -98,7 +103,7 @@ export const TooltipIconButton: React.FC<TooltipIconButtonProps> = ({
 };
 
 export const Skeleton = ({ className = "" }: SkeletonProps) => {
-  return <div className={`animate-pulse bg-base-300 rounded ${className}`} />;
+  return <div className={`animate-pulse bg-base-200 rounded ${className}`} />;
 };
 
 export const ToggleSelector = ({
@@ -172,19 +177,35 @@ export const IconInput: React.FC<IconInputProps> = ({
   type = "text",
   className = "",
   inputClassName = "",
+  error = "",
   ...props
 }) => {
+  if (
+    props.value !== undefined &&
+    props.onChange === undefined &&
+    !props.readOnly
+  ) {
+    console.warn(
+      "Warning: You provided a `value` prop to IconInput without an `onChange` handler or `readOnly`. This will render a read-only input."
+    );
+  }
+
   return (
-    <div
-      className={`flex items-center gap-2 px-4 py-3 bg-base-100 border border-base-300 rounded-lg ${className}`}
-    >
-      <div className="text-base-content opacity-70">{icon}</div>
-      <input
-        {...props}
-        type={type}
-        placeholder={placeholder}
-        className={`flex-1 bg-transparent outline-none text-md ${inputClassName} placeholder:text-base`}
-      />
+    <div className="flex flex-col gap-1 w-full">
+      <div
+        className={`flex items-center gap-2 px-4 py-3 bg-base-100 border rounded-lg ${
+          error ? "border-red-500" : "border-base-300"
+        } ${className}`}
+      >
+        <div className="text-base-content opacity-70">{icon}</div>
+        <input
+          {...props}
+          type={type}
+          placeholder={placeholder}
+          className={`flex-1 bg-transparent outline-none text-md ${inputClassName} placeholder:text-base`}
+        />
+      </div>
+      {error && <span className="text-sm text-red-500">{error}</span>}
     </div>
   );
 };

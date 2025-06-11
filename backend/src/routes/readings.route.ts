@@ -228,4 +228,54 @@ router.get("/user-summary", async (req: Request, res: Response) => {
   res.json(data);
 });
 
+router.get("/ai-summary", async (req: Request, res: Response) => {
+  const { plotId } = req.query;
+  infoLog("Received AI summary request");
+
+  if (!plotId) {
+    res.status(400).json({ message: "Missing plotId" });
+    return;
+  }
+
+  const { data, error } = await supabase.rpc("get_plot_ai_analysis", {
+    plot_id_input: plotId,
+  });
+
+  if (error) {
+    errorLog("Error fetching AI summary:", error);
+    res.status(500).json({ message: error.message });
+    return;
+  }
+
+  res.json(data);
+});
+
+router.get("/analysis-generated-count", async (req: Request, res: Response) => {
+  const { municipality, province, date } = req.query;
+  infoLog("Received analysis generated count request");
+
+  if (!municipality || !province || !date) {
+    res.status(400).json({ message: "Missing municipality, province or date" });
+    return;
+  }
+
+  const { data, error } = await supabase.rpc(
+    "get_daily_analysis_user_counts_filtered",
+    {
+      target_municipality: municipality,
+      target_province: province,
+      target_date: date,
+    }
+  );
+
+  if (error) {
+    errorLog("Error fetching analysis generated count:", error);
+    res.status(500).json({ message: error.message });
+    return;
+  }
+
+  console.log("Analysis generated count data:", data);
+  res.json(data);
+});
+
 export default router;

@@ -71,3 +71,23 @@ export const getPlotReadingsByDateRange = (
     return axiosInstance.get(`/readings/get-nutrients?${params.toString()}`);
   }
 };
+
+export const getAiSummaryByPlotId = (plotId: number) => {
+  const params = new URLSearchParams();
+  params.append("plotId", plotId.toString());
+  return axiosInstance.get(`/readings/ai-summary?${params.toString()}`);
+};
+
+export const getAnalysisGeneratedCount = (
+  municipality: string,
+  province: string,
+  date: string
+) => {
+  const params = new URLSearchParams();
+  params.append("municipality", municipality);
+  params.append("province", province);
+  params.append("date", date);
+  return axiosInstance.get(
+    `/readings/analysis-generated-count?${params.toString()}`
+  );
+};
