@@ -15,6 +15,18 @@ type AuthUser = {
   role_name: string;
 };
 
+type SupabaseUserData = {
+  user_id: string;
+  user_email: string;
+  user_fname: string;
+  user_lname: string;
+  user_municipality: string;
+  user_province: string;
+  user_barangay: string;
+  role_id: number;
+  roles?: { role_name: string } | { role_name: string }[];
+};
+
 interface AuthState {
   authUser: AuthUser | null;
   isAuthLoaded: boolean;
@@ -54,11 +66,11 @@ export const useAuthStore = create<AuthState>((set) => ({
       const { data } = await supabase.auth.getUser();
 
       if (!data.user) {
-        set({ authUser: null, isAuthLoaded: true }); // ✅ even when no user
+        set({ authUser: null, isAuthLoaded: true });
         return;
       }
 
-      const { data: userData, error: userError } = await supabase
+      const { data: userLoggedIn, error: userError } = await supabase
         .from("users")
         .select(
           "user_id, user_email, user_fname, user_lname, user_municipality, user_province, user_barangay, role_id, roles(role_name)"
@@ -68,9 +80,15 @@ export const useAuthStore = create<AuthState>((set) => ({
 
       if (userError) {
         console.error("Error fetching user:", userError);
-        set({ authUser: null, isAuthLoaded: true }); // ✅ set even on error
+        set({ authUser: null, isAuthLoaded: true });
         return;
       }
+
+      const userData = userLoggedIn as SupabaseUserData;
+
+      const roleName = Array.isArray(userData.roles)
+        ? userData.roles[0]?.role_name
+        : userData.roles?.role_name;
 
       const user: AuthUser = {
         user_id: userData.user_id,
@@ -81,7 +99,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         user_province: userData.user_province,
         user_barangay: userData.user_barangay,
         role_id: userData.role_id,
-        role_name: userData.roles?.[0]?.role_name || "User",
+        role_name: roleName ?? "User",
       };
 
       set({ authUser: user, isAuthLoaded: true });
@@ -113,7 +131,28 @@ export const useAuthStore = create<AuthState>((set) => ({
   login: async (emailOrUsername: string, password: string) => {
     set({ isLoggingIn: true });
 
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const { data, error: userError } = await supabase
+      .from("users")
+      .select(
+        "user_id, user_email, user_fname, user_lname, user_municipality, user_province, user_barangay, role_id, roles(role_name)"
+      )
+      .eq("user_email", emailOrUsername)
+      .in("role_id", [1, 2])
+      .single();
+
+    if (userError) {
+      console.error(
+        "Full Supabase error object:",
+        JSON.stringify(userError, null, 2)
+      );
+      toast.error("No user found with this email or username.");
+      set({ authUser: null, isLoggingIn: false });
+      return;
+    }
+
+    const userData = data as SupabaseUserData;
+
+    const { error } = await supabase.auth.signInWithPassword({
       email: emailOrUsername,
       password,
     });
@@ -124,23 +163,9 @@ export const useAuthStore = create<AuthState>((set) => ({
       return;
     }
 
-    const { data: userData, error: userError } = await supabase
-      .from("users")
-      .select(
-        "user_id, user_email, user_fname, user_lname, user_municipality, user_province, user_barangay, role_id, roles(role_name)"
-      )
-      .eq("user_id", data.user?.id)
-      .in("role_id", [1, 2])
-      .single();
-
-    if (userError) {
-      console.error(
-        "Full Supabase error object:",
-        JSON.stringify(userError, null, 2)
-      );
-      set({ authUser: null, isLoggingIn: false });
-      return;
-    }
+    const roleName = Array.isArray(userData.roles)
+      ? userData.roles[0]?.role_name
+      : userData.roles?.role_name;
 
     const user: AuthUser = {
       user_id: userData.user_id,
@@ -151,7 +176,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       user_province: userData.user_province,
       user_barangay: userData.user_barangay,
       role_id: userData.role_id,
-      role_name: userData.roles?.[0]?.role_name || "User",
+      role_name: roleName ?? "User",
     };
 
     set({ authUser: user, isLoggingIn: false });
