@@ -118,6 +118,8 @@ router.get("/plots-by-municipality", async (req: Request, res: Response) => {
     return;
   }
 
+  console.log("Plots by municipality data:", data);
+
   const safeData = Array.isArray(data) ? data : [];
 
   const normalizedData = safeData.map((plot: any) => ({

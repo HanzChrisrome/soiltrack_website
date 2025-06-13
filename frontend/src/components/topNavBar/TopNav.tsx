@@ -17,8 +17,8 @@ interface TopNavBarProps {
 
 export default function TopNavBar({ children }: TopNavBarProps) {
   const { logout, authUser } = useAuthStore();
-  const { userSummary } = useUserPageHook();
-  const { analysisGeneratedCount } = useMainPageHook();
+  // const { userSummary } = useUserPageHook();
+  // const { analysisGeneratedCount } = useMainPageHook();
   const { aiAnalysisByPlotId } = useReadingStore();
   const { openModal } = useWidgetStore();
 

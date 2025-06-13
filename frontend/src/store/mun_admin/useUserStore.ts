@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import safeAsync from "../../utils/safeAsync";
 import { UserSummary } from "../../models/readingStoreModels";
 import {
   getUserSummary,
@@ -33,21 +32,21 @@ export const useUserStore = create<UserState>((set) => ({
   isInsertingUser: false,
 
   fetchUserSummary: async (municipality, province) => {
-    const data = await safeAsync(getUserSummary(municipality, province), []);
-    set({ userSummary: data });
+    // const data = await safeAsync(getUserSummary(municipality, province), []);
+    // set({ userSummary: data });
   },
 
   insertUserAccount: async (userFname, userLname, userEmail, polygonCoords) => {
-    try {
-      set({ isInsertingUser: true });
-      await insertUserAccount(userFname, userLname, userEmail, polygonCoords);
-    } catch (error: unknown) {
-      const message = getAxiosErrorMessage(error);
-      toast.error(message || "Failed to insert user!", {
-        position: "bottom-right",
-      });
-    } finally {
-      set({ isInsertingUser: false });
-    }
+    // try {
+    //   set({ isInsertingUser: true });
+    //   await insertUserAccount(userFname, userLname, userEmail, polygonCoords);
+    // } catch (error: unknown) {
+    //   const message = getAxiosErrorMessage(error);
+    //   toast.error(message || "Failed to insert user!", {
+    //     position: "bottom-right",
+    //   });
+    // } finally {
+    //   set({ isInsertingUser: false });
+    // }
   },
 }));

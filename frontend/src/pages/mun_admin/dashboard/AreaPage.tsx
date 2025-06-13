@@ -1,13 +1,17 @@
 import MapView from "../../../components/mun_admin/MapView";
-import useMainPage from "../../../hooks/useMainPage";
 import ReusableCard from "../../../components/mun_admin/AreaPage/ReusableCard";
 import DataBarChart from "../../../components/mun_admin/AreaPage/DataBarChart";
 import DonutChart from "../../../components/mun_admin/AreaPage/DonutChart";
 import { LandPlot, Leaf } from "lucide-react";
 import LabelCard from "../../../components/mun_admin/AreaPage/LabelCard";
+import { useReadingStore } from "../../../store/mun_admin/useReadingStore";
+import { useMainPageHook } from "../../../hooks/useMainPage";
 
 const AreaPage = () => {
-  const { soilTypes, cropTypes, userPlots } = useMainPage();
+  useMainPageHook();
+
+  //STORE DATA
+  const { soilTypes, cropTypes, userPlots } = useReadingStore();
 
   return (
     <div className="h-full mt-2">
@@ -18,13 +22,6 @@ const AreaPage = () => {
 
         {/* SECOND GRID */}
         <div className="flex flex-col gap-3">
-          {/* <button
-            className="btn btn-primary"
-            onClick={() => console.log("Soil types", soilTypes)}
-          >
-            Test Button
-          </button> */}
-
           <div className="grid grid-cols-2 gap-3">
             <LabelCard
               icon={<LandPlot className="w-4 h-4" />}

@@ -17,16 +17,17 @@ import useThemeStore from "./store/useThemeStore";
 import AreaPage from "./pages/mun_admin/dashboard/AreaPage";
 import SpecificPlotPage from "./pages/mun_admin/plots/SpecificPlotPage";
 import AddUserPage from "./components/mun_admin/UserPage/AddUserWidget";
+import SuperAdminDashboard from "./pages/sup_admin/Dashboard";
 
 const App = () => {
-  const { authUser, checkAuth, isCheckingAuth } = useAuthStore();
+  const { authUser, checkAuth, isAuthLoaded } = useAuthStore();
   const { theme } = useThemeStore();
 
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);
 
-  if (isCheckingAuth && !authUser)
+  if (!isAuthLoaded) {
     return (
       <div
         data-theme={theme}
@@ -35,6 +36,7 @@ const App = () => {
         <Loader className="size-10 animate-spin" />
       </div>
     );
+  }
 
   return (
     <div data-theme={theme}>
@@ -43,12 +45,29 @@ const App = () => {
           path="/"
           element={authUser ? <HomePage /> : <Navigate to="/login" />}
         >
-          <Route index element={<Navigate to="dashboard" />} />
+          <Route
+            index
+            element={
+              authUser?.role_name === "SUPER ADMIN" ? (
+                <Navigate to="super-admin-dashboard" />
+              ) : (
+                <Navigate to="dashboard" />
+              )
+            }
+          />
+
+          {/* MUNICIPALITY ADMIN ROUTES */}
           <Route path="dashboard" element={<MainPage />} />
           <Route path="users" element={<UserPage />} />
           <Route path="area-page" element={<AreaPage />} />
           <Route path="specific-area" element={<SpecificPlotPage />} />
           <Route path="add-user" element={<AddUserPage />} />
+
+          {/* SUPER ADMIN ROUTES */}
+          <Route
+            path="super-admin-dashboard"
+            element={<SuperAdminDashboard />}
+          />
         </Route>
 
         <Route

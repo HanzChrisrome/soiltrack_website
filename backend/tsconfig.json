@@ -13,6 +13,6 @@
       "*": ["node_modules/*"] // Enable TypeScript to resolve dependencies
     }
   },
-  "include": ["src/**/*.ts"], // Include all files in the "src" folder
+  "include": ["src/**/*.ts", "src/lib/supabase.ts"], // Include all files in the "src" folder
   "exclude": ["node_modules"] // Exclude node_modules folder
 }

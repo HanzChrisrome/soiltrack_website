@@ -2,7 +2,7 @@ import CardContainer from "../../widgets/CardContainer";
 import NutrientsCard from "./NutrientsChart";
 import { useReadingStore } from "../../../store/mun_admin/useReadingStore";
 import dayjs from "dayjs";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   ExpandIcon,
   LandPlot,
@@ -14,6 +14,7 @@ import GradientHeading from "../../widgets/GradientComponent";
 import LabelCard from "./LabelCard";
 import { useNavigate } from "react-router-dom";
 import { Skeleton, TooltipIconButton } from "../../widgets/Widgets";
+import { DailyReading } from "../../../models/readingStoreModels";
 
 type Plot = {
   id: number;
@@ -31,43 +32,6 @@ type PlotSidebarProps = {
   onClose: () => void;
 };
 
-type DailyReading = {
-  date: string;
-  moisture: number | null;
-  nitrogen: number | null;
-  phosphorus: number | null;
-  potassium: number | null;
-};
-
-function transformPlotReadings(
-  raw: {
-    dates: string[];
-    moisture: number[];
-    nitrogen: number[];
-    phosphorus: number[];
-    potassium: number[];
-  } | null
-): DailyReading[] {
-  if (
-    !raw ||
-    !raw.dates ||
-    !raw.moisture ||
-    !raw.nitrogen ||
-    !raw.phosphorus ||
-    !raw.potassium
-  ) {
-    return [];
-  }
-
-  return raw.dates.map((date, idx) => ({
-    date,
-    moisture: raw.moisture[idx] ?? null,
-    nitrogen: raw.nitrogen[idx] ?? null,
-    phosphorus: raw.phosphorus[idx] ?? null,
-    potassium: raw.potassium[idx] ?? null,
-  }));
-}
-
 export default function PlotSidebar({
   plot,
   visible,
@@ -77,37 +41,42 @@ export default function PlotSidebar({
     isLoadingPlotNutrients,
     aiAnalysisByPlotId,
     isLoadingAiAnalysis,
-    getPlotReadings,
-    fetchNutrientsReadings,
     setSelectedPlotId,
     fetchAiAnalysis,
+    fetchPlotNutrients,
+    plotNutrientsTrends,
   } = useReadingStore();
 
   const navigate = useNavigate();
+  const [readings, setReadings] = useState<DailyReading[] | null>(null);
 
   useEffect(() => {
-    if (plot && visible) {
-      const endDate = dayjs().format("YYYY-MM-DD");
-      const startDate = dayjs().subtract(6, "day").format("YYYY-MM-DD");
-      fetchNutrientsReadings(plot.id, startDate, endDate);
-      fetchAiAnalysis(plot.id);
+    async function fetchData() {
+      if (plot && visible) {
+        const endDate = dayjs().format("YYYY-MM-DD");
+        const startDate = dayjs().subtract(6, "day").format("YYYY-MM-DD");
+        fetchPlotNutrients(plot.id, startDate, endDate);
+        fetchAiAnalysis(plot.id);
+        const nutrientData = plotNutrientsTrends?.[plot.id] ?? null;
+        setReadings(nutrientData);
+      }
     }
-  }, [plot, visible, fetchNutrientsReadings, fetchAiAnalysis]);
+
+    fetchData();
+  }, [plot, visible, fetchPlotNutrients, fetchAiAnalysis, plotNutrientsTrends]);
+
+  const readingsArray = readings ?? [];
+
+  function getSeriesData(
+    mapFn: (r: DailyReading) => number | null
+  ): (number | null)[] {
+    const dataWithNulls = readingsArray.map(mapFn);
+    if (!dataWithNulls.some((v) => v !== null)) return [];
+    return dataWithNulls;
+  }
 
   const aiSummary =
     plot?.id && aiAnalysisByPlotId ? aiAnalysisByPlotId[plot.id] : null;
-  const rawReadings = plot?.id ? getPlotReadings(plot.id) : null;
-  const readingsArray: DailyReading[] = transformPlotReadings(
-    rawReadings && !Array.isArray(rawReadings) ? rawReadings : null
-  );
-
-  function getSeriesData(
-    mapFn: (r: (typeof readingsArray)[number]) => number | null
-  ): (number | null)[] {
-    const dataWithNulls = readingsArray.map(mapFn);
-    if (!dataWithNulls.some((v: number | null) => v !== null)) return [];
-    return dataWithNulls;
-  }
 
   return (
     <>
@@ -160,6 +129,7 @@ export default function PlotSidebar({
                   </button>
                 </CardContainer>
               </div>
+
               <div className="grid grid-cols-3 gap-3">
                 <LabelCard
                   icon={<LandPlot className="w-4 h-4" />}
@@ -177,6 +147,7 @@ export default function PlotSidebar({
                   label={plot.ownerName}
                 />
               </div>
+
               {isLoadingAiAnalysis ? (
                 <Skeleton className="h-24 w-full" />
               ) : (
@@ -194,8 +165,9 @@ export default function PlotSidebar({
                   )}
                 </CardContainer>
               )}
+
               <div className="grid grid-cols-2 gap-3 mt-3">
-                {isLoadingPlotNutrients ? (
+                {isLoadingPlotNutrients || !readings ? (
                   Array.from({ length: 4 }).map((_, idx) => (
                     <Skeleton key={idx} className="h-48 w-full" />
                   ))
@@ -207,12 +179,12 @@ export default function PlotSidebar({
                       chartSeries={[
                         {
                           name: "Moisture",
-                          data: getSeriesData((r) => r.moisture),
+                          data: getSeriesData((r) => r.avg_moisture),
                           color: "#3B82F6",
                         },
                       ]}
                       chartCategories={readingsArray.map((r) =>
-                        dayjs(r.date).format("MMM D")
+                        dayjs(r.reading_date).format("MMM D")
                       )}
                     />
                     <NutrientsCard
@@ -221,12 +193,12 @@ export default function PlotSidebar({
                       chartSeries={[
                         {
                           name: "Nitrogen",
-                          data: getSeriesData((r) => r.nitrogen),
+                          data: getSeriesData((r) => r.avg_nitrogen),
                           color: "#FACC15",
                         },
                       ]}
                       chartCategories={readingsArray.map((r) =>
-                        dayjs(r.date).format("MMM D")
+                        dayjs(r.reading_date).format("MMM D")
                       )}
                     />
                     <NutrientsCard
@@ -235,12 +207,12 @@ export default function PlotSidebar({
                       chartSeries={[
                         {
                           name: "Potassium",
-                          data: getSeriesData((r) => r.potassium),
+                          data: getSeriesData((r) => r.avg_potassium),
                           color: "#EC4899",
                         },
                       ]}
                       chartCategories={readingsArray.map((r) =>
-                        dayjs(r.date).format("MMM D")
+                        dayjs(r.reading_date).format("MMM D")
                       )}
                     />
                     <NutrientsCard
@@ -249,12 +221,12 @@ export default function PlotSidebar({
                       chartSeries={[
                         {
                           name: "Phosphorus",
-                          data: getSeriesData((r) => r.phosphorus),
+                          data: getSeriesData((r) => r.avg_phosphorus),
                           color: "#8B5CF6",
                         },
                       ]}
                       chartCategories={readingsArray.map((r) =>
-                        dayjs(r.date).format("MMM D")
+                        dayjs(r.reading_date).format("MMM D")
                       )}
                     />
                   </>

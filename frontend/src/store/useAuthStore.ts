@@ -1,7 +1,7 @@
 import { create } from "zustand";
-import { axiosInstance } from "../lib/axios";
 import { toast } from "react-hot-toast";
 import { AxiosError } from "axios";
+import supabase from "../lib/supabase";
 
 type AuthUser = {
   user_id: string;
@@ -17,6 +17,7 @@ type AuthUser = {
 
 interface AuthState {
   authUser: AuthUser | null;
+  isAuthLoaded: boolean;
   isLoggingIn: boolean;
   isSigningUp: boolean;
   isCheckingAuth: boolean;
@@ -38,6 +39,7 @@ interface AuthState {
 
 export const useAuthStore = create<AuthState>((set) => ({
   authUser: null,
+  isAuthLoaded: false,
   isLoggingIn: false,
   isSigningUp: false,
   isCheckingAuth: false,
@@ -47,29 +49,45 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   checkAuth: async () => {
     set({ isCheckingAuth: true });
-    console.log("Checking authentication...");
 
     try {
-      const res = await axiosInstance.post("/auth/check");
-      const data = res.data;
+      const { data } = await supabase.auth.getUser();
 
-      console.log("Auth user data:", data);
+      if (!data.user) {
+        set({ authUser: null, isAuthLoaded: true }); // ✅ even when no user
+        return;
+      }
+
+      const { data: userData, error: userError } = await supabase
+        .from("users")
+        .select(
+          "user_id, user_email, user_fname, user_lname, user_municipality, user_province, user_barangay, role_id, roles(role_name)"
+        )
+        .eq("user_id", data.user.id)
+        .single();
+
+      if (userError) {
+        console.error("Error fetching user:", userError);
+        set({ authUser: null, isAuthLoaded: true }); // ✅ set even on error
+        return;
+      }
 
       const user: AuthUser = {
-        user_id: data.user_id,
-        user_email: data.user_email,
-        user_fname: data.user_fname,
-        user_lname: data.user_lname,
-        user_municipality: data.user_municipality,
-        user_province: data.user_province,
-        user_barangay: data.user_barangay,
-        role_id: data.role_id,
-        role_name: data.roles?.role_name || "User",
+        user_id: userData.user_id,
+        user_email: userData.user_email,
+        user_fname: userData.user_fname,
+        user_lname: userData.user_lname,
+        user_municipality: userData.user_municipality,
+        user_province: userData.user_province,
+        user_barangay: userData.user_barangay,
+        role_id: userData.role_id,
+        role_name: userData.roles?.[0]?.role_name || "User",
       };
 
-      set({ authUser: user });
+      set({ authUser: user, isAuthLoaded: true });
     } catch (err) {
       console.error("Error during checkAuth:", err);
+      set({ authUser: null, isAuthLoaded: true });
     } finally {
       set({ isCheckingAuth: false });
     }
@@ -95,37 +113,48 @@ export const useAuthStore = create<AuthState>((set) => ({
   login: async (emailOrUsername: string, password: string) => {
     set({ isLoggingIn: true });
 
-    try {
-      const res = await axiosInstance.post("/auth/login", {
-        emailOrUsername,
-        password,
-      });
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: emailOrUsername,
+      password,
+    });
 
-      const data = res.data;
-
-      const user: AuthUser = {
-        user_id: data.user_id,
-        user_email: data.user_email,
-        user_fname: data.user_fname,
-        user_lname: data.user_lname,
-        user_municipality: data.user_municipality,
-        user_province: data.user_province,
-        user_barangay: data.user_barangay,
-        role_id: data.role_id,
-        role_name: data.roles?.role_name || "User",
-      };
-
-      set({ authUser: user });
-      toast.success("Logged in successfully!");
-    } catch (err) {
-      const error = err as AxiosError;
-      const errorMessage =
-        (error.response?.data as { message: string }).message ||
-        "Failed to log in!";
-      toast.error(errorMessage);
-    } finally {
-      set({ isLoggingIn: false });
+    if (error) {
+      toast.error(error.message || "Failed to log in!");
+      set({ authUser: null, isLoggingIn: false });
+      return;
     }
+
+    const { data: userData, error: userError } = await supabase
+      .from("users")
+      .select(
+        "user_id, user_email, user_fname, user_lname, user_municipality, user_province, user_barangay, role_id, roles(role_name)"
+      )
+      .eq("user_id", data.user?.id)
+      .in("role_id", [1, 2])
+      .single();
+
+    if (userError) {
+      console.error(
+        "Full Supabase error object:",
+        JSON.stringify(userError, null, 2)
+      );
+      set({ authUser: null, isLoggingIn: false });
+      return;
+    }
+
+    const user: AuthUser = {
+      user_id: userData.user_id,
+      user_email: userData.user_email,
+      user_fname: userData.user_fname,
+      user_lname: userData.user_lname,
+      user_municipality: userData.user_municipality,
+      user_province: userData.user_province,
+      user_barangay: userData.user_barangay,
+      role_id: userData.role_id,
+      role_name: userData.roles?.[0]?.role_name || "User",
+    };
+
+    set({ authUser: user, isLoggingIn: false });
   },
 
   forgotPassword: async (email: string) => {
@@ -169,17 +198,12 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ isLoggingOut: true });
     toast.loading("Logging out...");
 
-    try {
-      await axiosInstance.post("/auth/logout");
-      set({ authUser: null });
-      toast.dismiss();
-      toast.success("Logged out successfully!");
-    } catch (err) {
-      console.error("Error during logout:", err);
-      toast.dismiss();
-      toast.error("Failed to log out!");
-    } finally {
-      set({ isLoggingOut: false });
-    }
+    const { error } = await supabase.auth.signOut();
+
+    if (error) toast.error(error.message || "Failed to log out!");
+
+    set({ authUser: null, isLoggingOut: false });
+    toast.dismiss();
+    toast.success("Logged out successfully!");
   },
 }));

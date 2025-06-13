@@ -4,19 +4,22 @@ import "react-circular-progressbar/dist/styles.css";
 
 // Components
 import CardContainer from "../../../components/widgets/CardContainer";
-import useMainPageHook from "../../../hooks/useMainPage";
 import { useAuthStore } from "../../../store/useAuthStore";
 
 // Assets
 import AreaPerformancesCard from "../../../components/mun_admin/MainPage/RadarChart";
 import GradientHeading from "../../../components/widgets/GradientComponent";
 import PerformanceView from "../../../components/mun_admin/MainPage/PerformanceView";
-import useUserPageHook from "../../../hooks/useUserPage";
+import { useMainPageHook } from "../../../hooks/useMainPage";
+import { useReadingStore } from "../../../store/mun_admin/useReadingStore";
+import { useUserStore } from "../../../store/mun_admin/useUserStore";
 
 const MainPage = () => {
-  const { userPlots, analysisGeneratedCount } = useMainPageHook();
   const { authUser } = useAuthStore();
-  const { userSummary } = useUserPageHook();
+  useMainPageHook();
+
+  const { userPlots, analysisGeneratedCount } = useReadingStore();
+  const { userSummary } = useUserStore();
 
   return (
     <div className="py-5">

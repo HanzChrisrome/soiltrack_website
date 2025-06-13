@@ -1,5 +1,3 @@
-import { axiosInstance } from "../lib/axios";
-
 //src/service/userPageService.ts
 
 async function reverseGeocode(lat: number, lon: number): Promise<string> {
@@ -46,7 +44,7 @@ export const getUserSummary = (municipality: string, province: string) => {
   const params = new URLSearchParams();
   params.append("municipality", municipality);
   params.append("province", province);
-  return axiosInstance.get(`/user-readings/user-summary?${params.toString()}`);
+  return null;
 };
 
 export const insertUserAccount = async (
@@ -72,5 +70,5 @@ export const insertUserAccount = async (
     polygonAddresses,
   };
 
-  return axiosInstance.post("/user-readings/insert-user", data);
+  return null;
 };

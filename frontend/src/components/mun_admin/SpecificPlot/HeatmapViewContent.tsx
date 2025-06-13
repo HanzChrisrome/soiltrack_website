@@ -52,6 +52,8 @@ const HeatmapViewContent = (props: HeatmapViewContentProps) => {
       )
     );
 
+    console.log("Daily Heatmap Data:", seriesData);
+
     return <HeatmapChart data={seriesData} variant={props.variant} />;
   } else {
     const { data, nutrient } = props;
@@ -69,6 +71,8 @@ const HeatmapViewContent = (props: HeatmapViewContentProps) => {
           })
         )
     );
+
+    console.log("Weekly Heatmap Data:", seriesData);
 
     return <HeatmapChart data={seriesData} variant={props.variant} />;
   }

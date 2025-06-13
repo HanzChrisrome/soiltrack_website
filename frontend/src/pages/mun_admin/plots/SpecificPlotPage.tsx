@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useReadingStore } from "../../../store/mun_admin/useReadingStore";
 import NutrientTrends from "../../../components/mun_admin/SpecificPlot/NutrientTrends";
 import CardContainer from "../../../components/widgets/CardContainer";
@@ -9,13 +10,14 @@ import { useEffect } from "react";
 import HeatmapViewContent from "../../../components/mun_admin/SpecificPlot/HeatmapViewContent";
 import { getTodayHeatMap } from "../../../utils/NutrientTrendsUtil";
 import GradientHeading from "../../../components/widgets/GradientComponent";
+import { PlotReadingsTrend } from "../../../models/readingStoreModels";
 
 const SpecificPlotPage = () => {
   const {
     selectedPlotId,
     userPlots,
-    getPlotNutrientsTrend,
-    fetchPlotNutrients,
+    chartNutrientTrends,
+    fetchChartNutrients,
   } = useReadingStore();
 
   const selectedPlot = userPlots?.find(
@@ -32,16 +34,29 @@ const SpecificPlotPage = () => {
     const endDate = formatDate(now);
 
     const fetchData = async () => {
-      const hasData = getPlotNutrientsTrend(selectedPlotId);
+      const hasData =
+        chartNutrientTrends && chartNutrientTrends[selectedPlotId]?.length > 0;
       if (!hasData) {
-        await fetchPlotNutrients(selectedPlotId, startDate, endDate);
+        await fetchChartNutrients(selectedPlotId, startDate, endDate);
       }
     };
     fetchData();
-  }, [selectedPlotId, getPlotNutrientsTrend, fetchPlotNutrients]);
+  }, [selectedPlotId, chartNutrientTrends, fetchChartNutrients]);
 
   const trendDataRaw =
-    selectedPlotId !== null ? getPlotNutrientsTrend(selectedPlotId) : undefined;
+    selectedPlotId !== null && chartNutrientTrends
+      ? chartNutrientTrends[selectedPlotId]
+      : undefined;
+
+  const trendData: PlotReadingsTrend[] | undefined = trendDataRaw
+    ? trendDataRaw.map((item: any) => ({
+        reading_date: item.reading_date,
+        moisture: item.avg_moisture ?? null,
+        nitrogen: item.avg_nitrogen ?? null,
+        phosphorus: item.avg_phosphorus ?? null,
+        potassium: item.avg_potassium ?? null,
+      }))
+    : undefined;
 
   if (!selectedPlotId) return null;
 
@@ -64,6 +79,8 @@ const SpecificPlotPage = () => {
     return hectares.toFixed(2);
   };
   const areaHectares = getAreaInHectares(selectedPlot?.polygons || []);
+
+  console.log(getTodayHeatMap(trendData || []));
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 py-4">
@@ -102,26 +119,9 @@ const SpecificPlotPage = () => {
           </div>
           <HeatmapViewContent
             variant="daily"
-            data={getTodayHeatMap(trendDataRaw || [])}
+            data={getTodayHeatMap(trendData || [])}
           />
         </CardContainer>
-        {/* <CardContainer className="relative overflow-hidden h-98" padding="p-0">
-          <img
-            src="/ai_is_here_2.png"
-            alt="AI Insight"
-            className="w-full h-auto object-cover"
-          />
-          <div className="absolute bottom-6 left-0 w-full px-4 py-2 flex justify-center">
-            <div
-              tabIndex={0}
-              role="button"
-              className="btn w-full flex flex-row items-center gap-2 px-3 py-2 font-normal bg-base-100 border border-base-200 shadow-sm rounded-lg cursor-pointer hover:bg-base-300 transition"
-            >
-              Analysis has been generated
-              <MoveRight className="w-4 h-4 text-primary" />
-            </div>
-          </div>
-        </CardContainer> */}
 
         <CardContainer>
           <div className="flex items-start">

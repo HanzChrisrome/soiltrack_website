@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // components/SpecificPlot/NutrientTrends.tsx
 
 import { useEffect, useState } from "react";
@@ -8,6 +10,7 @@ import CardContainer from "../../widgets/CardContainer";
 import NutrientChart from "./NutrientCharts";
 import GradientHeading from "../../widgets/GradientComponent";
 import { FilterIcon } from "lucide-react";
+import { PlotReadingsTrend } from "../../../models/readingStoreModels";
 
 type NutrientTrendsProps = {
   plotId: number;
@@ -15,11 +18,11 @@ type NutrientTrendsProps = {
 
 const NutrientTrends = ({ plotId }: NutrientTrendsProps) => {
   const {
-    fetchPlotNutrients,
-    getPlotNutrientsTrend,
+    fetchChartNutrients,
     fetchCustomDatePlotNutrients,
     setCustomPlotNutrientsTrends,
     customPlotNutrientsTrends,
+    chartNutrientTrends,
   } = useReadingStore();
 
   const isLoading = useReadingStore((state) => state.isLoadingPlotNutrients);
@@ -64,9 +67,10 @@ const NutrientTrends = ({ plotId }: NutrientTrendsProps) => {
         setCustomPlotNutrientsTrends(null);
       }
 
-      const hasData = getPlotNutrientsTrend(plotId);
+      const hasData =
+        chartNutrientTrends && chartNutrientTrends[plotId]?.length > 0;
       if (!hasData) {
-        await fetchPlotNutrients(plotId, startDate, endDate);
+        await fetchChartNutrients(plotId, startDate, endDate);
       }
     };
 
@@ -76,33 +80,38 @@ const NutrientTrends = ({ plotId }: NutrientTrendsProps) => {
     customStartDate,
     customEndDate,
     plotId,
-    fetchPlotNutrients,
-    getPlotNutrientsTrend,
     fetchCustomDatePlotNutrients,
     setCustomPlotNutrientsTrends,
+    fetchChartNutrients,
+    chartNutrientTrends,
   ]);
 
-  const trendDataForHeatMap = getPlotNutrientsTrend(plotId);
+  const trendDataForHeatMap = chartNutrientTrends?.[plotId] || [];
   const trendDataRaw =
     selectedRange === "Custom"
       ? customPlotNutrientsTrends
-      : getPlotNutrientsTrend(plotId);
+      : chartNutrientTrends?.[plotId];
+
+  console.log("Trend Data Raw:", trendDataRaw);
+
+  const trendData: PlotReadingsTrend[] | undefined = trendDataRaw
+    ? trendDataRaw.map((item: any) => ({
+        reading_date: item.reading_date,
+        moisture: item.avg_moisture ?? null,
+        nitrogen: item.avg_nitrogen ?? null,
+        phosphorus: item.avg_phosphorus ?? null,
+        potassium: item.avg_potassium ?? null,
+      }))
+    : undefined;
 
   const now = new Date();
-  let filteredTrendData = trendDataRaw ?? [];
+  let filteredTrendData = trendData ?? [];
 
-  if (selectedRange !== "Custom" && trendDataRaw) {
+  if (selectedRange !== "Custom" && trendData) {
     if (selectedRange === "1D") {
-      // const nowISO = new Date().toISOString();
-
-      // filteredTrendData = trendDataRaw.filter((entry) => {
-      //   const entryISO = new Date(entry.reading_date).toISOString();
-      //   return entryISO <= nowISO && entryISO.startsWith(nowISO.split("T")[0]);
-      // });
-
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-      filteredTrendData = trendDataRaw.filter((entry) => {
+      filteredTrendData = trendData.filter((entry) => {
         const entryDate = new Date(entry.reading_date);
         const entryDay = new Date(
           entryDate.getFullYear(),
@@ -121,7 +130,7 @@ const NutrientTrends = ({ plotId }: NutrientTrendsProps) => {
       const cutoffDate = new Date();
       cutoffDate.setDate(now.getDate() - days);
 
-      filteredTrendData = trendDataRaw.filter((entry) => {
+      filteredTrendData = trendData.filter((entry) => {
         const entryDate = new Date(entry.reading_date);
         return entryDate >= cutoffDate;
       });

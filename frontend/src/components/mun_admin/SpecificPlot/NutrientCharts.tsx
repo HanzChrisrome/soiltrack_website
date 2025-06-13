@@ -32,7 +32,7 @@ const calculateChange = (series: ChartSeries) => {
   const first = sortedData[0].y;
   const last = sortedData[sortedData.length - 1].y;
 
-  if (first === 0) return null; // avoid division by zero
+  if (first === 0) return null;
 
   const absoluteChange = last - first;
   const percentChange = (absoluteChange / first) * 100;
