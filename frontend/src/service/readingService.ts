@@ -19,8 +19,6 @@ export const getOverallAverage = async (
     end_time: endDate,
   });
 
-  console.log("Overall average data:", data);
-
   if (error) {
     console.error("Error fetching overall plot average:", error);
     throw new Error(error.message);
@@ -77,11 +75,12 @@ export const getPlotPerformanceSummary = async (
   municipality: string,
   province: string
 ) => {
+  console.info("Fetching plot performance summary");
+
   if (!startDate || !endDate || !municipality || !province) {
     console.warn("Missing parameters for plot performance summary");
     return;
   }
-  console.info("Fetching plot performance summary");
 
   const { data, error } = await supabase.rpc("get_plot_improvement_summary", {
     start_time: startDate,
@@ -102,6 +101,8 @@ export const getPlotsByMunicipality = async (
   municipality: string,
   province: string
 ) => {
+  console.info("Fetching plots by municipality");
+
   if (!municipality || !province) {
     console.warn("Missing municipality or province for plots");
     return;
@@ -188,6 +189,8 @@ export const getPlotReadingsByDateRange = async (
 export const getAiSummaryByPlotId = async (
   plotId: number
 ): Promise<AnalysisSummary | null> => {
+  console.info("Fetching AI summary for plot ID:", plotId);
+
   if (!plotId) {
     console.warn("Missing plotId for AI summary");
     return null;
@@ -210,6 +213,13 @@ export const getAnalysisGeneratedCount = async (
   province: string,
   date: string
 ) => {
+  console.info(
+    "Fetching analysis generated count for:",
+    municipality,
+    province,
+    date
+  );
+
   if (!municipality || !province || !date) {
     console.warn("Missing parameters for analysis generated count");
     return;
