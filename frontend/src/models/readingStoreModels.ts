@@ -28,18 +28,18 @@ export interface UserSummary {
 
 export interface PlotReadingsTrend {
   reading_date: string;
-  moisture: number | null;
-  nitrogen: number | null;
-  phosphorus: number | null;
-  potassium: number | null;
-}
-
-export interface DailyReading {
-  reading_date: string;
   avg_moisture: number | null;
   avg_nitrogen: number | null;
   avg_phosphorus: number | null;
   avg_potassium: number | null;
+}
+
+export interface ChartSummaryTrend {
+  read_time: string;
+  soil_moisture: number | null;
+  readed_nitrogen: number | null;
+  readed_phosphorus: number | null;
+  readed_potassium: number | null;
 }
 
 export interface ImprovementPlot {

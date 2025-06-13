@@ -5,21 +5,16 @@ import { useUserStore } from "../store/mun_admin/useUserStore";
 
 const useUserPageHook = () => {
   const { authUser } = useAuthStore();
-  const { userSummary, fetchUserSummary } = useUserStore();
+  const { fetchUserSummary } = useUserStore();
 
   const locationReady =
     !!authUser?.user_municipality && !!authUser?.user_province;
 
   useEffect(() => {
     if (!locationReady) return;
-    if (userSummary && userSummary.length > 0) return;
 
     fetchUserSummary(authUser.user_municipality, authUser.user_province);
-  }, [authUser, locationReady, userSummary, fetchUserSummary]);
-
-  return {
-    userSummary,
-  };
+  }, [authUser, fetchUserSummary, locationReady]);
 };
 
 export default useUserPageHook;

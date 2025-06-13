@@ -50,10 +50,8 @@ const NutrientChart = ({
   selectedRange,
   isLoading = false,
 }: NutrientChartProps) => {
-  // Convert UTC ISO string to Philippine Time ISO string (UTC+8)
   const convertToPHT = (isoString: string): string => {
     const date = new Date(isoString);
-    // Add 8 hours in milliseconds
     const phtDate = new Date(date.getTime() + 8 * 60 * 60 * 1000);
     return phtDate.toISOString();
   };

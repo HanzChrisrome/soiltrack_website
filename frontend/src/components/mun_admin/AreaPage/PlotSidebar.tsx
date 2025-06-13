@@ -14,7 +14,7 @@ import GradientHeading from "../../widgets/GradientComponent";
 import LabelCard from "./LabelCard";
 import { useNavigate } from "react-router-dom";
 import { Skeleton, TooltipIconButton } from "../../widgets/Widgets";
-import { DailyReading } from "../../../models/readingStoreModels";
+import { PlotReadingsTrend } from "../../../models/readingStoreModels";
 
 type Plot = {
   id: number;
@@ -48,7 +48,7 @@ export default function PlotSidebar({
   } = useReadingStore();
 
   const navigate = useNavigate();
-  const [readings, setReadings] = useState<DailyReading[] | null>(null);
+  const [readings, setReadings] = useState<PlotReadingsTrend[] | null>(null);
 
   useEffect(() => {
     async function fetchData() {
@@ -68,7 +68,7 @@ export default function PlotSidebar({
   const readingsArray = readings ?? [];
 
   function getSeriesData(
-    mapFn: (r: DailyReading) => number | null
+    mapFn: (r: PlotReadingsTrend) => number | null
   ): (number | null)[] {
     const dataWithNulls = readingsArray.map(mapFn);
     if (!dataWithNulls.some((v) => v !== null)) return [];
@@ -110,7 +110,7 @@ export default function PlotSidebar({
                     tooltip="View more details"
                     onClick={() => {
                       setSelectedPlotId(plot.id);
-                      navigate("/specific-area");
+                      navigate(`/specific-area/${plot.id}`);
                     }}
                     tooltipRoundedClass="rounded-sm"
                   >

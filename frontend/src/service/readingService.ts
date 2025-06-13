@@ -142,6 +142,8 @@ export const getPlotReadingsByDateRange = async (
   endDate: string,
   isForTrends?: boolean
 ) => {
+  console.info("Fetching plot readings by date range");
+
   if (!plotId || !startDate || !endDate) {
     console.warn("Missing parameters for plot readings");
     return;

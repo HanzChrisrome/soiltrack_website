@@ -9,10 +9,11 @@ import {
   getAiSummaryByPlotId,
   getAnalysisGeneratedCount,
 } from "../../service/readingService";
+
 import {
   AnalysisSummary,
+  ChartSummaryTrend,
   CropStat,
-  DailyReading,
   ImprovementSummary,
   OverallAverage,
   PlotReadingsTrend,
@@ -21,16 +22,23 @@ import {
 } from "../../models/readingStoreModels";
 
 interface ReadingState {
+  // Data
   overallAverage: OverallAverage | null;
   soilTypes: SoilTypeStat[] | null;
   cropTypes: CropStat[] | null;
   userPlots: UserPlots[] | null;
   analysisGeneratedCount: number;
   plotPerformance: ImprovementSummary | null;
-  plotReadingsByPlotId: Record<number, DailyReading[]> | null;
+  plotReadingsByPlotId: Record<number, PlotReadingsTrend[]>;
+  plotNutrientsTrends: Record<number, PlotReadingsTrend[]>;
+  chartNutrientTrends: Record<number, ChartSummaryTrend[]>;
+  customPlotNutrientsTrends: ChartSummaryTrend[] | null;
+  aiAnalysisByPlotId: Record<number, AnalysisSummary>;
 
-  //LOADING FLAGS
-  isGettingPlotSummary: boolean;
+  // UI State
+  selectedPlotId: number | null;
+
+  // Loading Flags
   isLoadingOverallAverage: boolean;
   isLoadingSoilTypes: boolean;
   isLoadingCropTypes: boolean;
@@ -38,12 +46,11 @@ interface ReadingState {
   isLoadingPlotNutrients: boolean;
   isLoadingAiAnalysis: boolean;
 
-  //FLAGS FOR THE PLOTS PAGE
-  hasFetchedAnalysis: boolean;
+  // Fetch Control Flags
   hasFetchedOverallAverage: boolean;
+  hasFetchedAnalysis: boolean;
 
-  selectedPlotId: number | null;
-
+  // Actions
   fetchOverallAverage: (startDate?: string, endDate?: string) => Promise<void>;
   fetchSoilTypes: (municipality: string, province: string) => Promise<void>;
   fetchCropTypes: (municipality: string, province: string) => Promise<void>;
@@ -58,61 +65,52 @@ interface ReadingState {
     province: string
   ) => Promise<void>;
 
-  //FOR THE NUTRIENT TRENDS IN SPECIFIC PLOTS PAGE
-  plotNutrientsTrends: Record<number, DailyReading[]> | null;
-  chartNutrientTrends: Record<number, PlotReadingsTrend[]> | null;
-  customPlotNutrientsTrends: PlotReadingsTrend[] | null;
   fetchPlotNutrients: (
     plotId: number,
     startDate: string,
-    endDate: string
+    endDate: string,
+    isForTrends?: boolean
   ) => Promise<void>;
+
   fetchChartNutrients: (
     plotId: number,
     startDate: string,
     endDate: string
   ) => Promise<void>;
+
   fetchCustomDatePlotNutrients: (
     plotId: number,
     startDate: string,
     endDate: string
   ) => Promise<void>;
-  setCustomPlotNutrientsTrends: (data: PlotReadingsTrend[] | null) => void;
+
+  fetchAiAnalysis: (plotId: number) => Promise<void>;
   fetchAnalysisGeneratedCount: (
     municipality: string,
     province: string,
     date: string
   ) => Promise<void>;
 
-  //FOR THE FETCHING OF AI ANALYSIS
-  aiAnalysisByPlotId: Record<number, AnalysisSummary> | null;
-  fetchAiAnalysis: (plotId: number) => Promise<void>;
-
+  setCustomPlotNutrientsTrends: (data: ChartSummaryTrend[] | null) => void;
   setSelectedPlotId: (plotId: number | null) => void;
 }
 
 export const useReadingStore = create<ReadingState>((set, get) => ({
+  // Initial State
   overallAverage: null,
-  plotPerformance: null,
-  userPlots: null,
   soilTypes: null,
   cropTypes: null,
+  userPlots: null,
+  plotPerformance: null,
   analysisGeneratedCount: 0,
   plotReadingsByPlotId: {},
-
-  aiAnalysisByPlotId: {},
-  customPlotNutrientsTrends: null,
-  userSummary: null,
-
-  //CHART DATA
   plotNutrientsTrends: {},
   chartNutrientTrends: {},
+  customPlotNutrientsTrends: null,
+  aiAnalysisByPlotId: {},
+  selectedPlotId: null,
 
-  //FETCHING FLAGS
-  hasFetchedAnalysis: false,
-  hasFetchedOverallAverage: false,
-
-  isGettingPlotSummary: false,
+  // Loading
   isLoadingOverallAverage: false,
   isLoadingSoilTypes: false,
   isLoadingCropTypes: false,
@@ -120,13 +118,16 @@ export const useReadingStore = create<ReadingState>((set, get) => ({
   isLoadingPlotNutrients: false,
   isLoadingAiAnalysis: false,
 
-  selectedPlotId: null,
+  // Flags
+  hasFetchedOverallAverage: false,
+  hasFetchedAnalysis: false,
 
-  fetchOverallAverage: async (startDate?: string, endDate?: string) => {
-    const state = get();
-    if (state.hasFetchedOverallAverage) return;
+  // Actions
 
+  fetchOverallAverage: async (startDate, endDate) => {
+    if (get().hasFetchedOverallAverage) return;
     set({ isLoadingOverallAverage: true });
+
     const data = await getOverallAverage(startDate, endDate);
     set({
       overallAverage: data,
@@ -136,10 +137,9 @@ export const useReadingStore = create<ReadingState>((set, get) => ({
   },
 
   fetchSoilTypes: async (municipality, province) => {
-    const state = get();
-    if (state.hasFetchedOverallAverage) return;
-
+    if (get().hasFetchedOverallAverage) return;
     set({ isLoadingSoilTypes: true });
+
     const data = await getSoilTypes(municipality, province);
     set({
       soilTypes: data,
@@ -149,10 +149,9 @@ export const useReadingStore = create<ReadingState>((set, get) => ({
   },
 
   fetchCropTypes: async (municipality, province) => {
-    const state = get();
-    if (state.hasFetchedOverallAverage) return;
-
+    if (get().hasFetchedOverallAverage) return;
     set({ isLoadingCropTypes: true });
+
     const data = await getCropTypes(municipality, province);
     set({
       cropTypes: data,
@@ -167,16 +166,16 @@ export const useReadingStore = create<ReadingState>((set, get) => ({
     municipality,
     province
   ) => {
-    const state = get();
-    if (state.hasFetchedOverallAverage) return;
-
+    if (get().hasFetchedOverallAverage) return;
     set({ isLoadingPlotPerformance: true });
+
     const data = await getPlotPerformanceSummary(
       startDate,
       endDate,
       municipality,
       province
     );
+
     set({
       plotPerformance: data,
       isLoadingPlotPerformance: false,
@@ -185,58 +184,53 @@ export const useReadingStore = create<ReadingState>((set, get) => ({
   },
 
   fetchPlotsByMunicipality: async (municipality, province) => {
-    const state = get();
-    if (state.hasFetchedOverallAverage) return;
-
+    if (get().hasFetchedOverallAverage) return;
     const data = await getPlotsByMunicipality(municipality, province);
     set({ userPlots: data, hasFetchedOverallAverage: true });
   },
 
   fetchPlotNutrients: async (
-    plotId: number,
-    startDate: string,
-    endDate: string,
-    isForTrends: boolean = false
-  ): Promise<void> => {
-    const state = get();
-    if (state.plotNutrientsTrends && state.plotNutrientsTrends[plotId]) return;
+    plotId,
+    startDate,
+    endDate,
+    isForTrends = false
+  ) => {
+    const existing = get().plotNutrientsTrends[plotId];
+    if (existing) return;
 
     set({ isLoadingPlotNutrients: true });
-
-    const data: DailyReading[] =
-      (await getPlotReadingsByDateRange(
-        plotId,
-        startDate,
-        endDate,
-        isForTrends
-      )) ?? [];
+    const data = await getPlotReadingsByDateRange(
+      plotId,
+      startDate,
+      endDate,
+      isForTrends
+    );
 
     set((state) => ({
       plotNutrientsTrends: {
         ...state.plotNutrientsTrends,
-        [plotId]: data,
+        [plotId]: data ?? [],
       },
       isLoadingPlotNutrients: false,
     }));
   },
 
-  fetchChartNutrients: async (
-    plotId: number,
-    startDate: string,
-    endDate: string
-  ) => {
-    const state = get();
-    if (state.chartNutrientTrends && state.chartNutrientTrends[plotId]) return;
+  fetchChartNutrients: async (plotId, startDate, endDate) => {
+    const existing = get().chartNutrientTrends[plotId];
+    if (existing) return;
 
     set({ isLoadingPlotNutrients: true });
-
-    const data: PlotReadingsTrend[] =
-      (await getPlotReadingsByDateRange(plotId, startDate, endDate)) ?? [];
+    const data = await getPlotReadingsByDateRange(
+      plotId,
+      startDate,
+      endDate,
+      true
+    );
 
     set((state) => ({
       chartNutrientTrends: {
         ...state.chartNutrientTrends,
-        [plotId]: data,
+        [plotId]: data ?? [],
       },
       isLoadingPlotNutrients: false,
     }));
@@ -244,36 +238,37 @@ export const useReadingStore = create<ReadingState>((set, get) => ({
 
   fetchCustomDatePlotNutrients: async (plotId, startDate, endDate) => {
     set({ isLoadingPlotNutrients: true });
-    const rawData = await getPlotReadingsByDateRange(
+    const data = await getPlotReadingsByDateRange(
       plotId,
       startDate,
       endDate,
       true
     );
 
-    if (!rawData || rawData.length === 0) {
-      console.warn("No nutrient data found for plot:", plotId);
+    if (!data?.length) {
+      console.warn("No data found for plot:", plotId);
       set({ isLoadingPlotNutrients: false });
       return;
     }
 
     set({
-      customPlotNutrientsTrends: rawData,
+      customPlotNutrientsTrends: data,
       isLoadingPlotNutrients: false,
     });
   },
 
-  fetchAiAnalysis: async (plotId: number) => {
-    const state = get();
-
-    if (state.aiAnalysisByPlotId && state.aiAnalysisByPlotId[plotId]) return;
+  fetchAiAnalysis: async (plotId) => {
+    const exists = get().aiAnalysisByPlotId[plotId];
+    if (exists) return;
 
     set({ isLoadingAiAnalysis: true });
     const data = await getAiSummaryByPlotId(plotId);
+
     if (!data) {
       set({ isLoadingAiAnalysis: false });
       return;
     }
+
     set((state) => ({
       aiAnalysisByPlotId: {
         ...state.aiAnalysisByPlotId,
@@ -284,17 +279,19 @@ export const useReadingStore = create<ReadingState>((set, get) => ({
   },
 
   fetchAnalysisGeneratedCount: async (municipality, province, date) => {
-    const state = get();
-    if (state.hasFetchedAnalysis) return;
+    if (get().hasFetchedAnalysis) return;
 
     const data = await getAnalysisGeneratedCount(municipality, province, date);
-
     const count = data?.[0]?.users_generated_daily_analysis_today ?? 0;
+
     set({ analysisGeneratedCount: count, hasFetchedAnalysis: true });
   },
 
-  setCustomPlotNutrientsTrends: (data) =>
-    set({ customPlotNutrientsTrends: data }),
+  setCustomPlotNutrientsTrends: (data) => {
+    set({ customPlotNutrientsTrends: data });
+  },
 
-  setSelectedPlotId: (plotId) => set({ selectedPlotId: plotId }),
+  setSelectedPlotId: (plotId) => {
+    set({ selectedPlotId: plotId });
+  },
 }));

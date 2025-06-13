@@ -1,5 +1,7 @@
 //src/service/userPageService.ts
 
+import supabase from "../lib/supabase";
+
 async function reverseGeocode(lat: number, lon: number): Promise<string> {
   const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`;
 
@@ -40,35 +42,51 @@ async function reverseGeocode(lat: number, lon: number): Promise<string> {
   return locationParts.join(", ");
 }
 
-export const getUserSummary = (municipality: string, province: string) => {
-  const params = new URLSearchParams();
-  params.append("municipality", municipality);
-  params.append("province", province);
-  return null;
-};
-
-export const insertUserAccount = async (
-  userFname: string,
-  userLname: string,
-  userEmail: string,
-  polygonCoords: { lat: number; lng: number }[][]
+export const getUserSummary = async (
+  municipality: string,
+  province: string
 ) => {
-  const polygonAddresses = await Promise.all(
-    polygonCoords.map(async (polygon) => {
-      const firstCoord = polygon[0];
-      const lat = firstCoord.lat;
-      const lon = firstCoord.lng;
-      return reverseGeocode(lat, lon);
-    })
-  );
+  console.log("Fetching user summary for:", municipality, province);
 
-  const data = {
-    userFname,
-    userLname,
-    userEmail,
-    polygonCoords,
-    polygonAddresses,
-  };
+  if (!municipality || !province) {
+    return console.warn("Municipality or province is not provided.");
+  }
 
-  return null;
+  const { data, error } = await supabase.rpc("get_users_summary", {
+    target_municipality: municipality,
+    target_province: province,
+  });
+
+  if (error) {
+    console.error("Error fetching user summary:", error);
+    throw new Error(error.message);
+  }
+
+  return data;
 };
+
+// export const insertUserAccount = async (
+//   userFname: string,
+//   userLname: string,
+//   userEmail: string,
+//   polygonCoords: { lat: number; lng: number }[][]
+// ) => {
+//   const polygonAddresses = await Promise.all(
+//     polygonCoords.map(async (polygon) => {
+//       const firstCoord = polygon[0];
+//       const lat = firstCoord.lat;
+//       const lon = firstCoord.lng;
+//       return reverseGeocode(lat, lon);
+//     })
+//   );
+
+//   const data = {
+//     userFname,
+//     userLname,
+//     userEmail,
+//     polygonCoords,
+//     polygonAddresses,
+//   };
+
+//   return null;
+// };

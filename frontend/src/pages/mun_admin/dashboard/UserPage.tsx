@@ -7,6 +7,7 @@ import { format } from "date-fns";
 import { UserSummary } from "../../../models/readingStoreModels";
 import { Sidebar } from "../../../components/widgets/Widgets";
 import AddUserWidget from "../../../components/mun_admin/UserPage/AddUserWidget";
+import { useUserStore } from "../../../store/mun_admin/useUserStore";
 
 type SortableColumn =
   | "user_name"
@@ -36,7 +37,9 @@ const formatDate = (dateStr: string) => {
 };
 
 const UserPage = () => {
-  const { userSummary } = useUserPageHook();
+  const { userSummary } = useUserStore();
+  useUserPageHook();
+
   const isGettingUsers = false;
 
   const [sortColumn, setSortColumn] = useState<SortableColumn | null>(null);

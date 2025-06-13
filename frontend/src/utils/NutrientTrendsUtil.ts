@@ -1,9 +1,14 @@
 import { eachDayOfInterval, format } from "date-fns";
-import { PlotReadingsTrend } from "../models/readingStoreModels";
+import { ChartSummaryTrend } from "../models/readingStoreModels";
 
-const nutrients = ["moisture", "nitrogen", "phosphorus", "potassium"] as const;
+const nutrients = [
+  { key: "soil_moisture", label: "Moisture" },
+  { key: "readed_nitrogen", label: "Nitrogen" },
+  { key: "readed_phosphorus", label: "Phosphorus" },
+  { key: "readed_potassium", label: "Potassium" },
+];
 
-export const getTodayHeatMap = (raw: PlotReadingsTrend[]) => {
+export const getTodayHeatMap = (raw: ChartSummaryTrend[]) => {
   if (!raw) return [];
 
   const today = new Date();
@@ -15,26 +20,38 @@ export const getTodayHeatMap = (raw: PlotReadingsTrend[]) => {
   const utcEndOfDay = utcStartOfDay + 24 * 60 * 60 * 1000 - 1;
 
   return nutrients.map((nutrient) => ({
-    name: nutrient.charAt(0).toUpperCase() + nutrient.slice(1),
+    name: nutrient.label,
     values: raw
       .filter((r) => {
-        const readingDate = new Date(r.reading_date).getTime();
+        const readingDate = new Date(r.read_time).getTime();
         return readingDate >= utcStartOfDay && readingDate <= utcEndOfDay;
       })
-      .map((r) => ({
-        value: r[nutrient],
-        time: new Date(r.reading_date).toLocaleTimeString("en-US", {
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: false,
-        }),
-      })),
+      .map((r) => {
+        const rawValue = r[nutrient.key as keyof ChartSummaryTrend];
+        return {
+          value:
+            typeof rawValue === "number"
+              ? rawValue
+              : typeof rawValue === "string"
+              ? parseFloat(rawValue)
+              : null,
+          time: new Date(r.read_time).toLocaleTimeString("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false,
+          }),
+        };
+      }),
   }));
 };
 
 export const getWeeklyHeatmapData = (
-  raw: PlotReadingsTrend[],
-  nutrient: "moisture" | "nitrogen" | "phosphorus" | "potassium"
+  raw: ChartSummaryTrend[],
+  nutrient:
+    | "soil_moisture"
+    | "readed_nitrogen"
+    | "readed_phosphorus"
+    | "readed_potassium"
 ) => {
   if (!raw) return [];
 
@@ -58,16 +75,24 @@ export const getWeeklyHeatmapData = (
     const utcEndOfDay = utcStartOfDay + 24 * 60 * 60 * 1000 - 1;
 
     const matches = raw.filter((r) => {
-      const readingDate = new Date(r.reading_date).getTime();
+      const readingDate = new Date(r.read_time).getTime();
       return readingDate >= utcStartOfDay && readingDate <= utcEndOfDay;
     });
 
     const values = matches
-      .map((r) => ({
-        value: r[nutrient],
-        time: format(new Date(r.reading_date), "HH:mm"),
-      }))
-      .filter((entry) => entry.value !== null && entry.value !== undefined);
+      .map((r) => {
+        const rawValue = r[nutrient];
+        return {
+          value:
+            typeof rawValue === "number"
+              ? rawValue
+              : typeof rawValue === "string"
+              ? parseFloat(rawValue)
+              : null,
+          time: format(new Date(r.read_time), "HH:mm"),
+        };
+      })
+      .filter((entry) => entry.value !== null && !isNaN(entry.value));
 
     return {
       day: format(new Date(utcStartOfDay), "EEEE"),

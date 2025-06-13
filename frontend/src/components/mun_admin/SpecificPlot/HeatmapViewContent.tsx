@@ -9,7 +9,7 @@ type DataPoint = {
 };
 
 type DailyHeatMapData = {
-  name: string; // nutrient name: moisture, nitrogen, etc.
+  name: string;
   values: { value: number | null; time: string }[];
 };
 
@@ -51,8 +51,6 @@ const HeatmapViewContent = (props: HeatmapViewContentProps) => {
         })
       )
     );
-
-    console.log("Daily Heatmap Data:", seriesData);
 
     return <HeatmapChart data={seriesData} variant={props.variant} />;
   } else {

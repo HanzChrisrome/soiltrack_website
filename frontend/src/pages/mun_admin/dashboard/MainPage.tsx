@@ -13,10 +13,12 @@ import PerformanceView from "../../../components/mun_admin/MainPage/PerformanceV
 import { useMainPageHook } from "../../../hooks/useMainPage";
 import { useReadingStore } from "../../../store/mun_admin/useReadingStore";
 import { useUserStore } from "../../../store/mun_admin/useUserStore";
+import useUserPageHook from "../../../hooks/useUserPage";
 
 const MainPage = () => {
   const { authUser } = useAuthStore();
   useMainPageHook();
+  useUserPageHook();
 
   const { userPlots, analysisGeneratedCount } = useReadingStore();
   const { userSummary } = useUserStore();

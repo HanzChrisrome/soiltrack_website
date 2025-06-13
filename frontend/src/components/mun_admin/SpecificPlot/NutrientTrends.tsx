@@ -10,7 +10,7 @@ import CardContainer from "../../widgets/CardContainer";
 import NutrientChart from "./NutrientCharts";
 import GradientHeading from "../../widgets/GradientComponent";
 import { FilterIcon } from "lucide-react";
-import { PlotReadingsTrend } from "../../../models/readingStoreModels";
+import { ChartSummaryTrend } from "../../../models/readingStoreModels";
 
 type NutrientTrendsProps = {
   plotId: number;
@@ -46,12 +46,9 @@ const NutrientTrends = ({ plotId }: NutrientTrendsProps) => {
   }, [customStartDate, customEndDate]);
 
   useEffect(() => {
-    const formatDate = (date: Date) => date.toISOString().split("T")[0];
     const now = new Date();
     const start = new Date();
     start.setMonth(now.getMonth() - 3);
-    const startDate = formatDate(start);
-    const endDate = formatDate(now);
 
     const loadData = async () => {
       if (selectedRange === "Custom" && customStartDate && customEndDate) {
@@ -65,12 +62,6 @@ const NutrientTrends = ({ plotId }: NutrientTrendsProps) => {
 
       if (selectedRange !== "Custom") {
         setCustomPlotNutrientsTrends(null);
-      }
-
-      const hasData =
-        chartNutrientTrends && chartNutrientTrends[plotId]?.length > 0;
-      if (!hasData) {
-        await fetchChartNutrients(plotId, startDate, endDate);
       }
     };
 
@@ -87,22 +78,10 @@ const NutrientTrends = ({ plotId }: NutrientTrendsProps) => {
   ]);
 
   const trendDataForHeatMap = chartNutrientTrends?.[plotId] || [];
-  const trendDataRaw =
+  const trendData =
     selectedRange === "Custom"
       ? customPlotNutrientsTrends
       : chartNutrientTrends?.[plotId];
-
-  console.log("Trend Data Raw:", trendDataRaw);
-
-  const trendData: PlotReadingsTrend[] | undefined = trendDataRaw
-    ? trendDataRaw.map((item: any) => ({
-        reading_date: item.reading_date,
-        moisture: item.avg_moisture ?? null,
-        nitrogen: item.avg_nitrogen ?? null,
-        phosphorus: item.avg_phosphorus ?? null,
-        potassium: item.avg_potassium ?? null,
-      }))
-    : undefined;
 
   const now = new Date();
   let filteredTrendData = trendData ?? [];
@@ -112,7 +91,7 @@ const NutrientTrends = ({ plotId }: NutrientTrendsProps) => {
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
       filteredTrendData = trendData.filter((entry) => {
-        const entryDate = new Date(entry.reading_date);
+        const entryDate = new Date(entry.read_time);
         const entryDay = new Date(
           entryDate.getFullYear(),
           entryDate.getMonth(),
@@ -131,11 +110,21 @@ const NutrientTrends = ({ plotId }: NutrientTrendsProps) => {
       cutoffDate.setDate(now.getDate() - days);
 
       filteredTrendData = trendData.filter((entry) => {
-        const entryDate = new Date(entry.reading_date);
+        const entryDate = new Date(entry.read_time);
         return entryDate >= cutoffDate;
       });
     }
   }
+
+  const nutrientKeyMap: Record<
+    "moisture" | "nitrogen" | "phosphorus" | "potassium",
+    keyof ChartSummaryTrend
+  > = {
+    moisture: "soil_moisture",
+    nitrogen: "readed_nitrogen",
+    phosphorus: "readed_phosphorus",
+    potassium: "readed_potassium",
+  };
 
   return (
     <>
@@ -231,7 +220,7 @@ const NutrientTrends = ({ plotId }: NutrientTrendsProps) => {
                 nutrient="moisture"
                 data={getWeeklyHeatmapData(
                   trendDataForHeatMap ?? [],
-                  "moisture"
+                  "soil_moisture"
                 )}
               />
               <HeatmapViewContent
@@ -239,7 +228,7 @@ const NutrientTrends = ({ plotId }: NutrientTrendsProps) => {
                 nutrient="nitrogen"
                 data={getWeeklyHeatmapData(
                   trendDataForHeatMap ?? [],
-                  "nitrogen"
+                  "readed_nitrogen"
                 )}
               />
               <HeatmapViewContent
@@ -247,7 +236,7 @@ const NutrientTrends = ({ plotId }: NutrientTrendsProps) => {
                 nutrient="potassium"
                 data={getWeeklyHeatmapData(
                   trendDataForHeatMap ?? [],
-                  "potassium"
+                  "readed_potassium"
                 )}
               />
               <HeatmapViewContent
@@ -255,19 +244,19 @@ const NutrientTrends = ({ plotId }: NutrientTrendsProps) => {
                 nutrient="phosphorus"
                 data={getWeeklyHeatmapData(
                   trendDataForHeatMap ?? [],
-                  "phosphorus"
+                  "readed_phosphorus"
                 )}
               />
             </>
           ) : (
-            ["moisture", "nitrogen", "phosphorus", "potassium"].map(
+            (["moisture", "nitrogen", "phosphorus", "potassium"] as const).map(
               (nutrient) => {
                 const nutrientData = filteredTrendData.map((entry) => ({
-                  x: new Date(entry.reading_date).toISOString(),
-                  y: Number(entry[nutrient as keyof typeof entry] ?? 0),
+                  x: new Date(entry.read_time).toISOString(),
+                  y: Number(entry[nutrientKeyMap[nutrient]] ?? 0),
                 }));
 
-                const colorMap: Record<string, string> = {
+                const colorMap: Record<typeof nutrient, string> = {
                   moisture: "#3b82f6",
                   nitrogen: "#fde047",
                   phosphorus: "#a78bfa",

@@ -22,7 +22,8 @@ export default function TopNavBarItemsList() {
         icon={<Boxes size={18} />}
         text="Areas"
         active={
-          currentPath === "/area-page" || currentPath === "/specific-area"
+          currentPath === "/area-page" ||
+          currentPath.startsWith("/specific-area")
         }
         alert={false}
         onClick={() => navigate("/area-page")}

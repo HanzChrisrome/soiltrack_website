@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useReadingStore } from "../../../store/mun_admin/useReadingStore";
 import NutrientTrends from "../../../components/mun_admin/SpecificPlot/NutrientTrends";
 import CardContainer from "../../../components/widgets/CardContainer";
@@ -10,22 +9,25 @@ import { useEffect } from "react";
 import HeatmapViewContent from "../../../components/mun_admin/SpecificPlot/HeatmapViewContent";
 import { getTodayHeatMap } from "../../../utils/NutrientTrendsUtil";
 import GradientHeading from "../../../components/widgets/GradientComponent";
-import { PlotReadingsTrend } from "../../../models/readingStoreModels";
+import { useParams } from "react-router-dom";
 
 const SpecificPlotPage = () => {
+  const { plotId } = useParams();
   const {
     selectedPlotId,
     userPlots,
     chartNutrientTrends,
     fetchChartNutrients,
+    setSelectedPlotId,
   } = useReadingStore();
 
   const selectedPlot = userPlots?.find(
-    (plot) => plot.plot_id === selectedPlotId
+    (plot) => plot.plot_id === Number(plotId)
   );
 
   useEffect(() => {
-    if (!selectedPlotId) return;
+    if (!plotId) return;
+    setSelectedPlotId(Number(plotId));
     const formatDate = (date: Date) => date.toISOString().split("T")[0];
     const now = new Date();
     const start = new Date();
@@ -35,30 +37,19 @@ const SpecificPlotPage = () => {
 
     const fetchData = async () => {
       const hasData =
-        chartNutrientTrends && chartNutrientTrends[selectedPlotId]?.length > 0;
+        chartNutrientTrends && chartNutrientTrends[Number(plotId)]?.length > 0;
       if (!hasData) {
-        await fetchChartNutrients(selectedPlotId, startDate, endDate);
+        await fetchChartNutrients(Number(plotId), startDate, endDate);
       }
     };
+
     fetchData();
-  }, [selectedPlotId, chartNutrientTrends, fetchChartNutrients]);
+  }, [plotId, chartNutrientTrends, fetchChartNutrients, setSelectedPlotId]);
 
   const trendDataRaw =
     selectedPlotId !== null && chartNutrientTrends
       ? chartNutrientTrends[selectedPlotId]
       : undefined;
-
-  const trendData: PlotReadingsTrend[] | undefined = trendDataRaw
-    ? trendDataRaw.map((item: any) => ({
-        reading_date: item.reading_date,
-        moisture: item.avg_moisture ?? null,
-        nitrogen: item.avg_nitrogen ?? null,
-        phosphorus: item.avg_phosphorus ?? null,
-        potassium: item.avg_potassium ?? null,
-      }))
-    : undefined;
-
-  if (!selectedPlotId) return null;
 
   const getAreaInHectares = (coords: number[][]): string => {
     if (!Array.isArray(coords) || coords.length < 3) return "0.00";
@@ -79,8 +70,6 @@ const SpecificPlotPage = () => {
     return hectares.toFixed(2);
   };
   const areaHectares = getAreaInHectares(selectedPlot?.polygons || []);
-
-  console.log(getTodayHeatMap(trendData || []));
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 py-4">
@@ -119,7 +108,7 @@ const SpecificPlotPage = () => {
           </div>
           <HeatmapViewContent
             variant="daily"
-            data={getTodayHeatMap(trendData || [])}
+            data={getTodayHeatMap(trendDataRaw || [])}
           />
         </CardContainer>
 
@@ -172,7 +161,7 @@ const SpecificPlotPage = () => {
         </div>
       </div>
       <div className="col-span-2">
-        <NutrientTrends plotId={selectedPlotId} />
+        <NutrientTrends plotId={selectedPlotId!} />
       </div>
     </div>
   );

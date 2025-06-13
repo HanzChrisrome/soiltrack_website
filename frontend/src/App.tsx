@@ -15,7 +15,7 @@ import ForgotPassword from "./pages/auth/ForgotPassword";
 import ResetPassword from "./pages/auth/ResetPassword";
 import useThemeStore from "./store/useThemeStore";
 import AreaPage from "./pages/mun_admin/dashboard/AreaPage";
-import SpecificPlotPage from "./pages/mun_admin/plots/SpecificPlotPage";
+import SpecificPlotPage from "./pages/mun_admin/dashboard/SpecificPlotPage";
 import AddUserPage from "./components/mun_admin/UserPage/AddUserWidget";
 import SuperAdminDashboard from "./pages/sup_admin/Dashboard";
 
@@ -60,7 +60,7 @@ const App = () => {
           <Route path="dashboard" element={<MainPage />} />
           <Route path="users" element={<UserPage />} />
           <Route path="area-page" element={<AreaPage />} />
-          <Route path="specific-area" element={<SpecificPlotPage />} />
+          <Route path="/specific-area/:plotId" element={<SpecificPlotPage />} />
           <Route path="add-user" element={<AddUserPage />} />
 
           {/* SUPER ADMIN ROUTES */}
