@@ -1,19 +1,12 @@
 import { useState, useMemo } from "react";
-import {
-  Download,
-  PlusIcon,
-  ArrowUp,
-  ArrowDown,
-  ChevronsUpDown,
-  X,
-} from "lucide-react";
-import CardContainer from "../../components/widgets/CardContainer";
-import GradientHeading from "../../components/widgets/GradientComponent";
-import useUserPageHook from "../../hooks/useUserPage";
+import { PlusIcon, ArrowUp, ArrowDown, ChevronsUpDown, X } from "lucide-react";
+import CardContainer from "../../../components/widgets/CardContainer";
+import GradientHeading from "../../../components/widgets/GradientComponent";
+import useUserPageHook from "../../../hooks/useUserPage";
 import { format } from "date-fns";
-import { UserSummary } from "../../models/readingStoreModels";
-import { Sidebar } from "../../components/widgets/Widgets";
-import AddUserWidget from "../../components/UserPage/AddUserWidget";
+import { UserSummary } from "../../../models/readingStoreModels";
+import { Sidebar } from "../../../components/widgets/Widgets";
+import AddUserWidget from "../../../components/mun_admin/UserPage/AddUserWidget";
 
 type SortableColumn =
   | "user_name"

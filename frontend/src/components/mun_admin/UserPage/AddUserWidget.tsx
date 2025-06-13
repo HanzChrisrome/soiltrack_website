@@ -1,10 +1,10 @@
-import GradientHeading from "../widgets/GradientComponent";
+import GradientHeading from "../../widgets/GradientComponent";
 import { Layers2Icon, Mail, User, Users2 } from "lucide-react";
-import CardContainer from "../widgets/CardContainer";
-import { IconInput } from "../widgets/Widgets";
+import CardContainer from "../../widgets/CardContainer";
+import { IconInput } from "../../widgets/Widgets";
 import { useState } from "react";
 import PolygonMap from "./PolygonMap";
-import { useUserStore } from "../../store/useUserStore";
+import { useUserStore } from "../../../store/mun_admin/useUserStore";
 
 const AddUserWidget = () => {
   const [firstName, setFirstName] = useState("");

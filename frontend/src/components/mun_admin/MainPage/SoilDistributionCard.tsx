@@ -1,6 +1,6 @@
 import React from "react";
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
-import CardContainer from "../widgets/CardContainer";
+import CardContainer from "../../widgets/CardContainer";
 
 interface SoilDistributionItem {
   soil_type: string;

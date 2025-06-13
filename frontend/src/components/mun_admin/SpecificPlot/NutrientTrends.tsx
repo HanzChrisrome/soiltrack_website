@@ -1,12 +1,12 @@
 // components/SpecificPlot/NutrientTrends.tsx
 
 import { useEffect, useState } from "react";
-import { useReadingStore } from "../../store/useReadingStore";
+import { useReadingStore } from "../../../store/mun_admin/useReadingStore";
 import HeatmapViewContent from "./HeatmapViewContent";
-import { getWeeklyHeatmapData } from "../../utils/NutrientTrendsUtil";
-import CardContainer from "../widgets/CardContainer";
+import { getWeeklyHeatmapData } from "../../../utils/NutrientTrendsUtil";
+import CardContainer from "../../widgets/CardContainer";
 import NutrientChart from "./NutrientCharts";
-import GradientHeading from "../widgets/GradientComponent";
+import GradientHeading from "../../widgets/GradientComponent";
 import { FilterIcon } from "lucide-react";
 
 type NutrientTrendsProps = {

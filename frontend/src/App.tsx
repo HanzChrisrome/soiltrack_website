@@ -6,17 +6,17 @@ import { Toaster } from "react-hot-toast";
 import { useEffect } from "react";
 import { Loader } from "lucide-react";
 
-import MainPage from "./pages/dashboard/MainPage";
-import UserPage from "./pages/dashboard/UserPage";
+import MainPage from "./pages/mun_admin/dashboard/MainPage";
+import UserPage from "./pages/mun_admin/dashboard/UserPage";
 import AuthLayout from "./pages/AuthLayout";
 import LoginForm from "./pages/auth/LoginForm";
 import SignupForm from "./pages/auth/SignupForm";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import ResetPassword from "./pages/auth/ResetPassword";
 import useThemeStore from "./store/useThemeStore";
-import AreaPage from "./pages/dashboard/AreaPage";
-import SpecificPlotPage from "./pages/plots/SpecificPlotPage";
-import AddUserPage from "./components/UserPage/AddUserWidget";
+import AreaPage from "./pages/mun_admin/dashboard/AreaPage";
+import SpecificPlotPage from "./pages/mun_admin/plots/SpecificPlotPage";
+import AddUserPage from "./components/mun_admin/UserPage/AddUserWidget";
 
 const App = () => {
   const { authUser, checkAuth, isCheckingAuth } = useAuthStore();

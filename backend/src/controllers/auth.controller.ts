@@ -53,9 +53,10 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     const { data: userData, error: userError } = await supabase
       .from("users")
       .select(
-        "user_fname, user_lname, user_email, user_municipality, user_province, user_barangay"
+        "user_fname, user_lname, user_email, user_municipality, user_province, user_barangay, role_id, roles(role_name)"
       )
       .eq("user_email", emailOrUsername)
+      .in("role_id", [1, 2])
       .single();
 
     if (userError || !userData) {
@@ -96,7 +97,7 @@ export const checkAuth = async (req: Request, res: Response): Promise<void> => {
     const { data: userData, error: userError } = await supabase
       .from("users")
       .select(
-        "user_fname, user_lname, user_email, user_municipality, user_province, user_barangay"
+        "user_fname, user_lname, user_email, user_municipality, user_province, user_barangay, role_id, roles(role_name)"
       )
       .eq("user_id", user?.id)
       .single();
@@ -106,6 +107,8 @@ export const checkAuth = async (req: Request, res: Response): Promise<void> => {
       console.error("Error during checkAuth:", userError);
       return;
     }
+
+    console.log("Authenticated user data:", userData);
 
     res.status(200).json(userData);
   } catch (err) {

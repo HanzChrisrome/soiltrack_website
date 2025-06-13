@@ -1,7 +1,7 @@
 import ReactApexChart from "react-apexcharts";
 import type { ApexOptions } from "apexcharts";
-import CardContainer from "../widgets/CardContainer";
-import { Skeleton } from "../widgets/Widgets";
+import CardContainer from "../../widgets/CardContainer";
+import { Skeleton } from "../../widgets/Widgets";
 import { TrendingDown, TrendingUp } from "lucide-react";
 
 interface ChartPoint {

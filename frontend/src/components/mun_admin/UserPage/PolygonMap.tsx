@@ -13,7 +13,7 @@ import "leaflet-draw/dist/leaflet.draw.css";
 import "leaflet-geosearch/dist/geosearch.css";
 import { useRef, useEffect, useState } from "react";
 import { GeoSearchControl, OpenStreetMapProvider } from "leaflet-geosearch";
-import { useReadingStore } from "../../store/useReadingStore";
+import { useReadingStore } from "../../../store/mun_admin/useReadingStore";
 
 type PolygonMapProps = {
   onPolygonDrawn: (coords: { lat: number; lng: number }[][]) => void;

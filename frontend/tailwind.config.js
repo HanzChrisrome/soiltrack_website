@@ -9,11 +9,13 @@ export default {
     themes: [
       {
         darkTheme: {
-          primary: "#134f14",
-          secondary: "#178219",
-          accent: "#78ce1b",
-          neutral: "#1c1c1c",
-          "base-100": "#121212",
+          primary: "#FFFFFF",
+          secondary: "#FFFFFF",
+          accent: "#FFFFFF",
+          neutral: "#f0f0f0",
+          "base-100": "#252525",
+          "base-200": "#1f1f1f",
+          "base-300": "#121212",
           info: "#3a86ff",
           success: "#23d160",
           warning: "#ffcc00",

@@ -1,8 +1,8 @@
 import ReactApexChart from "react-apexcharts";
 import type { ApexOptions } from "apexcharts";
-import { useReadingStore } from "../../store/useReadingStore";
+import { useReadingStore } from "../../../store/mun_admin/useReadingStore";
 import { LucideActivity } from "lucide-react";
-import GradientHeading from "../widgets/GradientComponent";
+import GradientHeading from "../../widgets/GradientComponent";
 
 export default function AreaPerformancesCard() {
   const { overallAverage } = useReadingStore();

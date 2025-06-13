@@ -1,6 +1,6 @@
 import React, { ReactNode } from "react";
-import CardContainer from "../../components/widgets/CardContainer";
-import GradientHeading from "../../components/widgets/GradientComponent";
+import CardContainer from "../../widgets/CardContainer";
+import GradientHeading from "../../widgets/GradientComponent";
 
 interface ReusableCardProps {
   title: string;

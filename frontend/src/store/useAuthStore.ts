@@ -3,16 +3,20 @@ import { axiosInstance } from "../lib/axios";
 import { toast } from "react-hot-toast";
 import { AxiosError } from "axios";
 
+type AuthUser = {
+  user_id: string;
+  user_email: string;
+  user_fname: string;
+  user_lname: string;
+  user_municipality: string;
+  user_province: string;
+  user_barangay: string;
+  role_id: number;
+  role_name: string;
+};
+
 interface AuthState {
-  authUser: {
-    user_id: string;
-    user_email: string;
-    user_fname: string;
-    user_lname: string;
-    user_municipality: string;
-    user_province: string;
-    user_barangay: string;
-  } | null;
+  authUser: AuthUser | null;
   isLoggingIn: boolean;
   isSigningUp: boolean;
   isCheckingAuth: boolean;
@@ -43,10 +47,27 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   checkAuth: async () => {
     set({ isCheckingAuth: true });
+    console.log("Checking authentication...");
 
     try {
       const res = await axiosInstance.post("/auth/check");
-      set({ authUser: res.data });
+      const data = res.data;
+
+      console.log("Auth user data:", data);
+
+      const user: AuthUser = {
+        user_id: data.user_id,
+        user_email: data.user_email,
+        user_fname: data.user_fname,
+        user_lname: data.user_lname,
+        user_municipality: data.user_municipality,
+        user_province: data.user_province,
+        user_barangay: data.user_barangay,
+        role_id: data.role_id,
+        role_name: data.roles?.role_name || "User",
+      };
+
+      set({ authUser: user });
     } catch (err) {
       console.error("Error during checkAuth:", err);
     } finally {
@@ -80,8 +101,21 @@ export const useAuthStore = create<AuthState>((set) => ({
         password,
       });
 
-      console.log("Login response:", res.data);
-      set({ authUser: res.data });
+      const data = res.data;
+
+      const user: AuthUser = {
+        user_id: data.user_id,
+        user_email: data.user_email,
+        user_fname: data.user_fname,
+        user_lname: data.user_lname,
+        user_municipality: data.user_municipality,
+        user_province: data.user_province,
+        user_barangay: data.user_barangay,
+        role_id: data.role_id,
+        role_name: data.roles?.role_name || "User",
+      };
+
+      set({ authUser: user });
       toast.success("Logged in successfully!");
     } catch (err) {
       const error = err as AxiosError;

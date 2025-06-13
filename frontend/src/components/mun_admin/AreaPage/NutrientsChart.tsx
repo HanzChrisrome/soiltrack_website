@@ -1,7 +1,7 @@
 import ReactApexChart from "react-apexcharts";
 import type { ApexOptions } from "apexcharts";
 import { TrendingDown, TrendingUp } from "lucide-react";
-import CardContainer from "../widgets/CardContainer";
+import CardContainer from "../../widgets/CardContainer";
 
 interface ChartSeries {
   name: string;
@@ -9,17 +9,19 @@ interface ChartSeries {
   color?: string; // optional custom color
 }
 
-interface SmallNutrientsChartProps {
+interface NutrientsCardProps {
   title: string;
   chartSeries: ChartSeries[];
   chartCategories?: string[];
+  badgeStyle: string;
 }
 
-const SmallNutrientsChart = ({
+const NutrientsCard = ({
   title,
   chartSeries,
   chartCategories = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-}: SmallNutrientsChartProps) => {
+  badgeStyle,
+}: NutrientsCardProps) => {
   const chartOptions: ApexOptions = {
     chart: {
       type: "area",
@@ -42,32 +44,10 @@ const SmallNutrientsChart = ({
     },
     xaxis: {
       categories: chartCategories,
-      labels: {
-        show: true,
-        offsetY: 3,
-        style: {
-          fontSize: "10px",
-          colors: "#6b7280",
-        },
-      },
-      axisBorder: {
-        show: true,
-        color: "#e5e7eb",
-      },
-      axisTicks: {
-        show: true,
-        color: "#e5e7eb",
-      },
     },
     yaxis: {
-      show: true,
+      show: false,
       labels: {
-        show: true,
-        offsetX: -10,
-        style: {
-          fontSize: "10px",
-          colors: "#6b7280",
-        },
         formatter: (value) => Math.floor(value).toString(),
       },
     },
@@ -78,47 +58,38 @@ const SmallNutrientsChart = ({
     },
     colors: chartSeries.map((s) => s.color || "#22c55e"),
     tooltip: {
-      enabled: true,
       y: {
-        formatter: (value: number) => `${value.toFixed(1)}%`,
+        formatter: (value: number) => `${value}%`,
       },
     },
   };
 
-  const isTrendUp = () => {
-    if (!chartSeries.length) return false;
-
-    const firstSeries = chartSeries[0].data;
-    const data = firstSeries.filter((value) => value !== null);
-
-    if (data.length < 2) return false;
-
-    return data[data.length - 1] > data[0];
-  };
-
   return (
-    <CardContainer padding="p-4" className="border border-base-300 mt-3">
+    <CardContainer padding="p-4">
       <div className="flex items-center gap-2 justify-between">
-        <h2 className="text-md font-semibold text-primary">{title}</h2>
-        <CardContainer padding="p-1">
-          {isTrendUp() ? (
-            <TrendingUp className="h-4 w-4 text-success" />
+        <div className="flex items-center gap-2">
+          <h2 className="text-xl font-semibold text-primary">{title}</h2>
+          {badgeStyle.includes("success") ? (
+            <TrendingUp className="h-6 w-6 text-success" />
           ) : (
-            <TrendingDown className="h-4 w-4 text-error" />
+            <TrendingDown className="h-6 w-6 text-error" />
           )}
-        </CardContainer>
+        </div>
       </div>
+      <p className="text-sm font-light text-base-content/70">
+        Here are the analyzed data plots.
+      </p>
 
       <div className="mt-5">
         <ReactApexChart
           options={chartOptions}
           series={chartSeries.map(({ name, data }) => ({ name, data }))}
           type="area"
-          height={50}
+          height={100}
         />
       </div>
     </CardContainer>
   );
 };
 
-export default SmallNutrientsChart;
+export default NutrientsCard;

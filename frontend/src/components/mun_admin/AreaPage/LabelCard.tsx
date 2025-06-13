@@ -1,5 +1,5 @@
 import React from "react";
-import CardContainer from "../widgets/CardContainer";
+import CardContainer from "../../widgets/CardContainer";
 
 interface LabelCardProps {
   icon: React.ReactNode;

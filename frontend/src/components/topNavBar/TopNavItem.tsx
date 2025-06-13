@@ -15,7 +15,7 @@ export default function TopNavItem({ text, active, onClick }: TopNavItemProps) {
       className={`flex items-center rounded-full cursor-pointer px-5 py-3 transition-all duration-200 ${
         active
           ? "bg-gradient-to-r from-primary to-secondary text-base-100"
-          : "text-gray-600 hover:text-primary bg-base-100"
+          : "text-secondary hover:text-primary bg-base-100"
       }`}
     >
       <span className="text-md font-medium">{text}</span>

@@ -1,10 +1,10 @@
-import MapView from "../../components/MapView";
-import useMainPage from "../../hooks/useMainPage";
-import ReusableCard from "../../components/AreaPage/ReusableCard";
-import DataBarChart from "../../components/AreaPage/DataBarChart";
-import DonutChart from "../../components/AreaPage/DonutChart";
+import MapView from "../../../components/mun_admin/MapView";
+import useMainPage from "../../../hooks/useMainPage";
+import ReusableCard from "../../../components/mun_admin/AreaPage/ReusableCard";
+import DataBarChart from "../../../components/mun_admin/AreaPage/DataBarChart";
+import DonutChart from "../../../components/mun_admin/AreaPage/DonutChart";
 import { LandPlot, Leaf } from "lucide-react";
-import LabelCard from "../../components/AreaPage/LabelCard";
+import LabelCard from "../../../components/mun_admin/AreaPage/LabelCard";
 
 const AreaPage = () => {
   const { soilTypes, cropTypes, userPlots } = useMainPage();

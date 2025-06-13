@@ -4,17 +4,19 @@ import { useAuthStore } from "../../store/useAuthStore";
 import { TooltipIconButton } from "../widgets/Widgets";
 import { Bell, LogOut, Settings, TestTubeIcon } from "lucide-react";
 import { useWidgetStore } from "../../store/useWidgetStore";
-import soiltrackLogo from "/DARK HORIZONTAL.png";
+import soiltrackLightLogo from "/DARK HORIZONTAL.png";
+import soiltrackDarkLogo from "/LIGHT HORIZONTAL.png";
 import useUserPageHook from "../../hooks/useUserPage";
-import { useReadingStore } from "../../store/useReadingStore";
+import { useReadingStore } from "../../store/mun_admin/useReadingStore";
 import useMainPageHook from "../../hooks/useMainPage";
+import useThemeStore from "../../store/useThemeStore";
 
 interface TopNavBarProps {
   children: ReactNode;
 }
 
 export default function TopNavBar({ children }: TopNavBarProps) {
-  const { logout } = useAuthStore();
+  const { logout, authUser } = useAuthStore();
   const { userSummary } = useUserPageHook();
   const { analysisGeneratedCount } = useMainPageHook();
   const { aiAnalysisByPlotId } = useReadingStore();
@@ -30,18 +32,24 @@ export default function TopNavBar({ children }: TopNavBarProps) {
     });
   };
 
+  const theme = useThemeStore((state) => state.theme);
+
   return (
     <nav className="w-full flex items-center justify-between border-b py-4">
       {/* Logo and nav links */}
       <div className="flex items-center space-x-6">
-        <img src={soiltrackLogo} className="w-32 h-auto" alt="Logo" />
+        <img
+          src={theme === "darkTheme" ? soiltrackDarkLogo : soiltrackLightLogo}
+          className="w-32 h-auto"
+          alt="Logo"
+        />
       </div>
 
       <ul className="flex items-center space-x-2">{children}</ul>
       {/* User Info and Logout */}
       <div className="flex items-center space-x-2">
         <TooltipIconButton
-          onClick={() => console.log("User summary: ", analysisGeneratedCount)}
+          onClick={() => console.log("User summary: ", authUser?.role_name)}
           tooltip="Notifications"
         >
           <div className="p-3 bg-white rounded-full">

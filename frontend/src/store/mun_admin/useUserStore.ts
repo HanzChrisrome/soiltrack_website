@@ -1,8 +1,11 @@
 import { create } from "zustand";
-import safeAsync from "../utils/safeAsync";
-import { UserSummary } from "../models/readingStoreModels";
-import { getUserSummary, insertUserAccount } from "../service/userPageService";
-import { getAxiosErrorMessage } from "../utils/AxiosError";
+import safeAsync from "../../utils/safeAsync";
+import { UserSummary } from "../../models/readingStoreModels";
+import {
+  getUserSummary,
+  insertUserAccount,
+} from "../../service/userPageService";
+import { getAxiosErrorMessage } from "../../utils/AxiosError";
 import toast from "react-hot-toast";
 
 interface UserState {
@@ -10,10 +13,8 @@ interface UserState {
 
   userSummary: UserSummary[] | null;
 
-  //FUNCTIONS
   fetchUserSummary: (municipality: string, province: string) => Promise<void>;
 
-  //INSERT FUNCTIONS
   insertUserAccount: (
     userFname: string,
     userLname: string,

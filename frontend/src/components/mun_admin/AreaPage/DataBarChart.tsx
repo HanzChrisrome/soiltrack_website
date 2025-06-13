@@ -1,5 +1,5 @@
 import ReactApexChart from "react-apexcharts";
-import CardContainer from "../widgets/CardContainer";
+import CardContainer from "../../widgets/CardContainer";
 
 interface DataItem {
   name: string;

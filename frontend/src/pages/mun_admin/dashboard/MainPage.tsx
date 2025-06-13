@@ -3,15 +3,15 @@ import { ArrowUpRight, Cpu, Grid2X2, UserCheck } from "lucide-react";
 import "react-circular-progressbar/dist/styles.css";
 
 // Components
-import CardContainer from "../../components/widgets/CardContainer";
-import useMainPageHook from "../../hooks/useMainPage";
-import { useAuthStore } from "../../store/useAuthStore";
+import CardContainer from "../../../components/widgets/CardContainer";
+import useMainPageHook from "../../../hooks/useMainPage";
+import { useAuthStore } from "../../../store/useAuthStore";
 
 // Assets
-import AreaPerformancesCard from "../../components/MainPage/RadarChart";
-import GradientHeading from "../../components/widgets/GradientComponent";
-import PerformanceView from "../../components/MainPage/PerformanceView";
-import useUserPageHook from "../../hooks/useUserPage";
+import AreaPerformancesCard from "../../../components/mun_admin/MainPage/RadarChart";
+import GradientHeading from "../../../components/widgets/GradientComponent";
+import PerformanceView from "../../../components/mun_admin/MainPage/PerformanceView";
+import useUserPageHook from "../../../hooks/useUserPage";
 
 const MainPage = () => {
   const { userPlots, analysisGeneratedCount } = useMainPageHook();

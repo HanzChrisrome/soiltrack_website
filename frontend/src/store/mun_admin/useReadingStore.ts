@@ -8,7 +8,7 @@ import {
   getPlotReadingsByDateRange,
   getAiSummaryByPlotId,
   getAnalysisGeneratedCount,
-} from "../service/readingService";
+} from "../../service/readingService";
 import {
   AnalysisSummary,
   CropStat,
@@ -18,8 +18,8 @@ import {
   PlotReadingsTrend,
   SoilTypeStat,
   UserPlots,
-} from "../models/readingStoreModels";
-import safeAsync from "../utils/safeAsync";
+} from "../../models/readingStoreModels";
+import safeAsync from "../../utils/safeAsync";
 
 interface ReadingState {
   overallAverage: OverallAverage | null;

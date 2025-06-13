@@ -1,6 +1,6 @@
 import ReactApexChart from "react-apexcharts";
 import type { ApexOptions } from "apexcharts";
-import CardContainer from "./widgets/CardContainer";
+import CardContainer from "../widgets/CardContainer";
 import SmallNutrientsChart from "./MainPage/SmallNutrientsChart";
 
 interface ChartSeries {

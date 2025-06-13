@@ -1,14 +1,14 @@
-import { useReadingStore } from "../../store/useReadingStore";
-import NutrientTrends from "../../components/SpecificPlot/NutrientTrends";
-import CardContainer from "../../components/widgets/CardContainer";
-import LabelCard from "../../components/AreaPage/LabelCard";
+import { useReadingStore } from "../../../store/mun_admin/useReadingStore";
+import NutrientTrends from "../../../components/mun_admin/SpecificPlot/NutrientTrends";
+import CardContainer from "../../../components/widgets/CardContainer";
+import LabelCard from "../../../components/mun_admin/AreaPage/LabelCard";
 import { TractorIcon, User, User2Icon } from "lucide-react";
 import * as turf from "@turf/turf";
-import PlotMap from "../../components/SpecificPlot/MapPlot";
+import PlotMap from "../../../components/mun_admin/SpecificPlot/MapPlot";
 import { useEffect } from "react";
-import HeatmapViewContent from "../../components/SpecificPlot/HeatmapViewContent";
-import { getTodayHeatMap } from "../../utils/NutrientTrendsUtil";
-import GradientHeading from "../../components/widgets/GradientComponent";
+import HeatmapViewContent from "../../../components/mun_admin/SpecificPlot/HeatmapViewContent";
+import { getTodayHeatMap } from "../../../utils/NutrientTrendsUtil";
+import GradientHeading from "../../../components/widgets/GradientComponent";
 
 const SpecificPlotPage = () => {
   const {

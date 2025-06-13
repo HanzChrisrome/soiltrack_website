@@ -1,9 +1,9 @@
 import { useState } from "react";
 import PerformanceCard from "../AreaChart";
-import { useReadingStore } from "../../store/useReadingStore";
+import { useReadingStore } from "../../../store/mun_admin/useReadingStore";
 import { LandPlotIcon, Layers } from "lucide-react";
-import CardContainer from "../widgets/CardContainer";
-import { Skeleton, ToggleSelector } from "../widgets/Widgets";
+import CardContainer from "../../widgets/CardContainer";
+import { Skeleton, ToggleSelector } from "../../widgets/Widgets";
 
 export default function PerformanceView() {
   const [viewType, setViewType] = useState<"improved" | "declined">("improved");
