@@ -6,20 +6,11 @@ import { Toaster } from "react-hot-toast";
 import { useEffect } from "react";
 import { Loader } from "lucide-react";
 
-import MainPage from "./pages/mun_admin/dashboard/MainPage";
-import UserPage from "./pages/mun_admin/dashboard/UserPage";
-import AuthLayout from "./pages/AuthLayout";
-import LoginForm from "./pages/auth/LoginForm";
-import SignupForm from "./pages/auth/SignupForm";
-import ForgotPassword from "./pages/auth/ForgotPassword";
-import ResetPassword from "./pages/auth/ResetPassword";
 import useThemeStore from "./store/useThemeStore";
-import AreaPage from "./pages/mun_admin/dashboard/AreaPage";
-import SpecificPlotPage from "./pages/mun_admin/dashboard/SpecificPlotPage";
-import AddUserPage from "./components/mun_admin/UserPage/AddUserWidget";
-import SuperAdminDashboard from "./pages/sup_admin/Dashboard";
-import RoleProtectedRoute from "./helper/ProtectedRoute";
-import Unauthorized from "./helper/Unauthorized";
+import Unauthorized from "./pages/UnauthorizedPage";
+import AuthRoutes from "./routes/AuthRoutes";
+import AdminRoutes from "./routes/AdminRoutes";
+import SuperAdminRoutes from "./routes/SuperAdminRoutes";
 
 const App = () => {
   const { authUser, checkAuth, isAuthLoaded } = useAuthStore();
@@ -58,70 +49,11 @@ const App = () => {
             }
           />
 
-          {/* MUNICIPALITY ADMIN ROUTES */}
-          <Route
-            path="admin/dashboard"
-            element={
-              <RoleProtectedRoute allowedRoles={["MUNICIPALITY ADMIN"]}>
-                <MainPage />
-              </RoleProtectedRoute>
-            }
-          />
-          <Route
-            path="admin/residents"
-            element={
-              <RoleProtectedRoute allowedRoles={["MUNICIPALITY ADMIN"]}>
-                <UserPage />
-              </RoleProtectedRoute>
-            }
-          />
-          <Route
-            path="admin/area-page"
-            element={
-              <RoleProtectedRoute allowedRoles={["MUNICIPALITY ADMIN"]}>
-                <AreaPage />
-              </RoleProtectedRoute>
-            }
-          />
-          <Route
-            path="admin/specific-area/:plotId"
-            element={
-              <RoleProtectedRoute allowedRoles={["MUNICIPALITY ADMIN"]}>
-                <SpecificPlotPage />
-              </RoleProtectedRoute>
-            }
-          />
-          <Route
-            path="add-user"
-            element={
-              <RoleProtectedRoute allowedRoles={["MUNICIPALITY ADMIN"]}>
-                <AddUserPage />
-              </RoleProtectedRoute>
-            }
-          />
-
-          {/* SUPER ADMIN ROUTES */}
-          <Route
-            path="master/dashboard"
-            element={
-              <RoleProtectedRoute allowedRoles={["SUPER ADMIN"]}>
-                <SuperAdminDashboard />
-              </RoleProtectedRoute>
-            }
-          />
+          {AdminRoutes()}
+          {SuperAdminRoutes()}
         </Route>
 
-        <Route
-          path="/"
-          element={!authUser ? <AuthLayout /> : <Navigate to="/" />}
-        >
-          <Route index element={<Navigate to="login" />} />
-          <Route path="login" element={<LoginForm />} />
-          <Route path="signup" element={<SignupForm />} />
-          <Route path="forgot-password" element={<ForgotPassword />} />
-          <Route path="reset-password" element={<ResetPassword />} />
-        </Route>
-
+        {AuthRoutes(authUser)}
         <Route path="/unauthorized" element={<Unauthorized />} />
       </Routes>
 

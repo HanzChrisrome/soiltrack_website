@@ -3,7 +3,7 @@ import { toast } from "react-hot-toast";
 import { AxiosError } from "axios";
 import supabase from "../lib/supabase";
 
-type AuthUser = {
+export type AuthUser = {
   user_id: string;
   user_email: string;
   user_fname: string;
