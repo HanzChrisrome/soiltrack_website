@@ -1,7 +1,7 @@
 import React from "react";
 import { ChevronsUpDown } from "lucide-react"; // You need to install lucide-react
 import CardContainer from "../../widgets/CardContainer";
-import { useReadingStore } from "../../../store/mun_admin/useReadingStore";
+import { useReadingStore } from "../../../store/AdminStore/useReadingStore";
 
 const PatientTable = () => {
   const { userSummary } = useReadingStore();

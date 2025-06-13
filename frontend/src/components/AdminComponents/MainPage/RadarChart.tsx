@@ -1,6 +1,6 @@
 import ReactApexChart from "react-apexcharts";
 import type { ApexOptions } from "apexcharts";
-import { useReadingStore } from "../../../store/mun_admin/useReadingStore";
+import { useReadingStore } from "../../../store/AdminStore/useReadingStore";
 import { LucideActivity } from "lucide-react";
 import GradientHeading from "../../widgets/GradientComponent";
 

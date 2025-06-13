@@ -1,10 +1,10 @@
-import MapView from "../../../components/mun_admin/MapView";
-import ReusableCard from "../../../components/mun_admin/AreaPage/ReusableCard";
-import DataBarChart from "../../../components/mun_admin/AreaPage/DataBarChart";
-import DonutChart from "../../../components/mun_admin/AreaPage/DonutChart";
+import MapView from "../../../components/AdminComponents/MapView";
+import ReusableCard from "../../../components/AdminComponents/AreaPage/ReusableCard";
+import DataBarChart from "../../../components/AdminComponents/AreaPage/DataBarChart";
+import DonutChart from "../../../components/AdminComponents/AreaPage/DonutChart";
 import { LandPlot, Leaf } from "lucide-react";
-import LabelCard from "../../../components/mun_admin/AreaPage/LabelCard";
-import { useReadingStore } from "../../../store/mun_admin/useReadingStore";
+import LabelCard from "../../../components/AdminComponents/AreaPage/LabelCard";
+import { useReadingStore } from "../../../store/AdminStore/useReadingStore";
 import { useMainPageHook } from "../../../hooks/useMainPage";
 
 const AreaPage = () => {

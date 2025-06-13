@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from "react";
-import { useReadingStore } from "../store/mun_admin/useReadingStore";
+import { useReadingStore } from "../store/AdminStore/useReadingStore";
 import { useAuthStore } from "../store/useAuthStore";
 
 export const useMainPageHook = () => {

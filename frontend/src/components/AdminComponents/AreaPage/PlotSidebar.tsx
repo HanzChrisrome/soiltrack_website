@@ -1,6 +1,6 @@
 import CardContainer from "../../widgets/CardContainer";
 import NutrientsCard from "./NutrientsChart";
-import { useReadingStore } from "../../../store/mun_admin/useReadingStore";
+import { useReadingStore } from "../../../store/AdminStore/useReadingStore";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import {

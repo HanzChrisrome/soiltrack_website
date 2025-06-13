@@ -13,7 +13,7 @@ import * as turf from "@turf/turf";
 import icon from "leaflet/dist/images/marker-icon.png";
 import iconShadow from "leaflet/dist/images/marker-shadow.png";
 import PlotSidebar from "./AreaPage/PlotSidebar";
-import { useReadingStore } from "../../store/mun_admin/useReadingStore";
+import { useReadingStore } from "../../store/AdminStore/useReadingStore";
 
 type LatLng = [number, number];
 

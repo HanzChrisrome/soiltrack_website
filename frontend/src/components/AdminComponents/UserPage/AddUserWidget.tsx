@@ -4,7 +4,7 @@ import CardContainer from "../../widgets/CardContainer";
 import { IconInput } from "../../widgets/Widgets";
 import { useState } from "react";
 import PolygonMap from "./PolygonMap";
-import { useUserStore } from "../../../store/mun_admin/useUserStore";
+import { useUserStore } from "../../../store/AdminStore/useUserStore";
 
 const AddUserWidget = () => {
   const [firstName, setFirstName] = useState("");

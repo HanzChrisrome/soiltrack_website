@@ -7,12 +7,12 @@ import CardContainer from "../../../components/widgets/CardContainer";
 import { useAuthStore } from "../../../store/useAuthStore";
 
 // Assets
-import AreaPerformancesCard from "../../../components/mun_admin/MainPage/RadarChart";
+import AreaPerformancesCard from "../../../components/AdminComponents/MainPage/RadarChart";
 import GradientHeading from "../../../components/widgets/GradientComponent";
-import PerformanceView from "../../../components/mun_admin/MainPage/PerformanceView";
+import PerformanceView from "../../../components/AdminComponents/MainPage/PerformanceView";
 import { useMainPageHook } from "../../../hooks/useMainPage";
-import { useReadingStore } from "../../../store/mun_admin/useReadingStore";
-import { useUserStore } from "../../../store/mun_admin/useUserStore";
+import { useReadingStore } from "../../../store/AdminStore/useReadingStore";
+import { useUserStore } from "../../../store/AdminStore/useUserStore";
 import useUserPageHook from "../../../hooks/useUserPage";
 
 const MainPage = () => {

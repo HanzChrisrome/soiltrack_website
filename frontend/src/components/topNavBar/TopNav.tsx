@@ -6,9 +6,7 @@ import { Bell, LogOut, Settings, TestTubeIcon } from "lucide-react";
 import { useWidgetStore } from "../../store/useWidgetStore";
 import soiltrackLightLogo from "/DARK HORIZONTAL.png";
 import soiltrackDarkLogo from "/LIGHT HORIZONTAL.png";
-import useUserPageHook from "../../hooks/useUserPage";
-import { useReadingStore } from "../../store/mun_admin/useReadingStore";
-import useMainPageHook from "../../hooks/useMainPage";
+import { useReadingStore } from "../../store/AdminStore/useReadingStore";
 import useThemeStore from "../../store/useThemeStore";
 
 interface TopNavBarProps {

@@ -3,7 +3,7 @@
 // components/SpecificPlot/NutrientTrends.tsx
 
 import { useEffect, useState } from "react";
-import { useReadingStore } from "../../../store/mun_admin/useReadingStore";
+import { useReadingStore } from "../../../store/AdminStore/useReadingStore";
 import HeatmapViewContent from "./HeatmapViewContent";
 import { getWeeklyHeatmapData } from "../../../utils/NutrientTrendsUtil";
 import CardContainer from "../../widgets/CardContainer";

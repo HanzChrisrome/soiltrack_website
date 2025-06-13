@@ -6,8 +6,8 @@ import useUserPageHook from "../../../hooks/useUserPage";
 import { format } from "date-fns";
 import { UserSummary } from "../../../models/readingStoreModels";
 import { Sidebar } from "../../../components/widgets/Widgets";
-import AddUserWidget from "../../../components/mun_admin/UserPage/AddUserWidget";
-import { useUserStore } from "../../../store/mun_admin/useUserStore";
+import AddUserWidget from "../../../components/AdminComponents/UserPage/AddUserWidget";
+import { useUserStore } from "../../../store/AdminStore/useUserStore";
 
 type SortableColumn =
   | "user_name"

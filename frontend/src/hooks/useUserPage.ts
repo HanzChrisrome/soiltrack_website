@@ -1,7 +1,7 @@
 //useUserPage.ts
 import { useEffect } from "react";
 import { useAuthStore } from "../store/useAuthStore";
-import { useUserStore } from "../store/mun_admin/useUserStore";
+import { useUserStore } from "../store/AdminStore/useUserStore";
 
 const useUserPageHook = () => {
   const { authUser } = useAuthStore();

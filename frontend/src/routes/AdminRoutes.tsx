@@ -1,9 +1,9 @@
 import { Route } from "react-router-dom";
-import MainPage from "../pages/mun_admin/dashboard/MainPage";
-import UserPage from "../pages/mun_admin/dashboard/UserPage";
-import AreaPage from "../pages/mun_admin/dashboard/AreaPage";
-import SpecificPlotPage from "../pages/mun_admin/dashboard/SpecificPlotPage";
-import AddUserPage from "../components/mun_admin/UserPage/AddUserWidget";
+import MainPage from "../pages/AdminPages/dashboard/MainPage";
+import UserPage from "../pages/AdminPages/dashboard/UserPage";
+import AreaPage from "../pages/AdminPages/dashboard/AreaPage";
+import SpecificPlotPage from "../pages/AdminPages/dashboard/SpecificPlotPage";
+import AddUserPage from "../components/AdminComponents/UserPage/AddUserWidget";
 import RoleProtectedRoute from "../helper/ProtectedRoute";
 
 const AdminRoutes = () => (
