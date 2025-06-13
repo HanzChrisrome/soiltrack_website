@@ -1,19 +1,27 @@
-// src/components/ProtectedRoute.tsx
-import { Navigate, Outlet } from "react-router-dom";
+// src/components/RoleProtectedRoute.tsx
+import { Navigate } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore";
 
-interface ProtectedRouteProps {
+interface RoleProtectedRouteProps {
+  children: JSX.Element;
   allowedRoles: string[];
 }
 
-const ProtectedRoute = ({ allowedRoles }: ProtectedRouteProps) => {
+const RoleProtectedRoute = ({
+  children,
+  allowedRoles,
+}: RoleProtectedRouteProps) => {
   const { authUser } = useAuthStore();
 
-  if (!authUser) return <Navigate to="/login" />;
-  if (!allowedRoles.includes(authUser.role_name))
-    return <Navigate to="/login" />;
+  if (!authUser) {
+    return <Navigate to="/login" replace />;
+  }
 
-  return <Outlet />;
+  if (!allowedRoles.includes(authUser.role_name)) {
+    return <Navigate to="/unauthorized" replace />;
+  }
+
+  return children;
 };
 
-export default ProtectedRoute;
+export default RoleProtectedRoute;

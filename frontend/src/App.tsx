@@ -18,6 +18,8 @@ import AreaPage from "./pages/mun_admin/dashboard/AreaPage";
 import SpecificPlotPage from "./pages/mun_admin/dashboard/SpecificPlotPage";
 import AddUserPage from "./components/mun_admin/UserPage/AddUserWidget";
 import SuperAdminDashboard from "./pages/sup_admin/Dashboard";
+import RoleProtectedRoute from "./helper/ProtectedRoute";
+import Unauthorized from "./helper/Unauthorized";
 
 const App = () => {
   const { authUser, checkAuth, isAuthLoaded } = useAuthStore();
@@ -57,17 +59,56 @@ const App = () => {
           />
 
           {/* MUNICIPALITY ADMIN ROUTES */}
-          <Route path="admin/dashboard" element={<MainPage />} />
-          <Route path="admin/residents" element={<UserPage />} />
-          <Route path="admin/area-page" element={<AreaPage />} />
+          <Route
+            path="admin/dashboard"
+            element={
+              <RoleProtectedRoute allowedRoles={["MUNICIPALITY ADMIN"]}>
+                <MainPage />
+              </RoleProtectedRoute>
+            }
+          />
+          <Route
+            path="admin/residents"
+            element={
+              <RoleProtectedRoute allowedRoles={["MUNICIPALITY ADMIN"]}>
+                <UserPage />
+              </RoleProtectedRoute>
+            }
+          />
+          <Route
+            path="admin/area-page"
+            element={
+              <RoleProtectedRoute allowedRoles={["MUNICIPALITY ADMIN"]}>
+                <AreaPage />
+              </RoleProtectedRoute>
+            }
+          />
           <Route
             path="admin/specific-area/:plotId"
-            element={<SpecificPlotPage />}
+            element={
+              <RoleProtectedRoute allowedRoles={["MUNICIPALITY ADMIN"]}>
+                <SpecificPlotPage />
+              </RoleProtectedRoute>
+            }
           />
-          <Route path="add-user" element={<AddUserPage />} />
+          <Route
+            path="add-user"
+            element={
+              <RoleProtectedRoute allowedRoles={["MUNICIPALITY ADMIN"]}>
+                <AddUserPage />
+              </RoleProtectedRoute>
+            }
+          />
 
           {/* SUPER ADMIN ROUTES */}
-          <Route path="master/dashboard" element={<SuperAdminDashboard />} />
+          <Route
+            path="master/dashboard"
+            element={
+              <RoleProtectedRoute allowedRoles={["SUPER ADMIN"]}>
+                <SuperAdminDashboard />
+              </RoleProtectedRoute>
+            }
+          />
         </Route>
 
         <Route
@@ -80,6 +121,8 @@ const App = () => {
           <Route path="forgot-password" element={<ForgotPassword />} />
           <Route path="reset-password" element={<ResetPassword />} />
         </Route>
+
+        <Route path="/unauthorized" element={<Unauthorized />} />
       </Routes>
 
       <Toaster />
