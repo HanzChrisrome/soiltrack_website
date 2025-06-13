@@ -49,25 +49,25 @@ const App = () => {
             index
             element={
               authUser?.role_name === "SUPER ADMIN" ? (
-                <Navigate to="super-admin-dashboard" />
+                <Navigate to="master/dashboard" />
               ) : (
-                <Navigate to="dashboard" />
+                <Navigate to="admin/dashboard" />
               )
             }
           />
 
           {/* MUNICIPALITY ADMIN ROUTES */}
-          <Route path="dashboard" element={<MainPage />} />
-          <Route path="users" element={<UserPage />} />
-          <Route path="area-page" element={<AreaPage />} />
-          <Route path="/specific-area/:plotId" element={<SpecificPlotPage />} />
+          <Route path="admin/dashboard" element={<MainPage />} />
+          <Route path="admin/residents" element={<UserPage />} />
+          <Route path="admin/area-page" element={<AreaPage />} />
+          <Route
+            path="admin/specific-area/:plotId"
+            element={<SpecificPlotPage />}
+          />
           <Route path="add-user" element={<AddUserPage />} />
 
           {/* SUPER ADMIN ROUTES */}
-          <Route
-            path="super-admin-dashboard"
-            element={<SuperAdminDashboard />}
-          />
+          <Route path="master/dashboard" element={<SuperAdminDashboard />} />
         </Route>
 
         <Route

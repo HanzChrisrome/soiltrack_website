@@ -110,7 +110,7 @@ export default function PlotSidebar({
                     tooltip="View more details"
                     onClick={() => {
                       setSelectedPlotId(plot.id);
-                      navigate(`/specific-area/${plot.id}`);
+                      navigate(`/admin/specific-area/${plot.id}`);
                     }}
                     tooltipRoundedClass="rounded-sm"
                   >

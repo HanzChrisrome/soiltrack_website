@@ -9,31 +9,33 @@ export default function TopNavBarItemsList() {
   const navigate = useNavigate();
   const currentPath = location.pathname;
 
+  console.log("Current Path:", currentPath);
+
   return (
     <TopNavBar>
       <TabNavItem
         icon={<LayoutDashboard size={18} />}
         text="Dashboard"
-        active={currentPath === "/dashboard"}
+        active={currentPath === "/admin/dashboard"}
         alert={false}
-        onClick={() => navigate("/dashboard")}
+        onClick={() => navigate("admin/dashboard")}
       />
       <TabNavItem
         icon={<Boxes size={18} />}
         text="Areas"
         active={
-          currentPath === "/area-page" ||
-          currentPath.startsWith("/specific-area")
+          currentPath === "/admin/area-page" ||
+          currentPath.startsWith("/admin/specific-area")
         }
         alert={false}
-        onClick={() => navigate("/area-page")}
+        onClick={() => navigate("admin/area-page")}
       />
       <TabNavItem
         icon={<UserCircle2 size={18} />}
         text="Users"
-        active={currentPath === "/users"}
+        active={currentPath === "/admin/residents"}
         alert={false}
-        onClick={() => navigate("/users")}
+        onClick={() => navigate("admin/residents")}
       />
     </TopNavBar>
   );
