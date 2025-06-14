@@ -93,7 +93,12 @@ export interface AnalysisSummary {
   id: number;
   plot_id: number;
   analysis_date: string;
-  analysis: Record<string, unknown>;
+  analysis: {
+    AI_Analysis: {
+      headline?: string;
+      short_summary?: string;
+    }
+  }
   analysis_type: string;
   created_at: string;
   language_type: string;

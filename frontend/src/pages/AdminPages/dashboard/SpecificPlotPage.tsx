@@ -2,7 +2,7 @@ import { useReadingStore } from "../../../store/AdminStore/useReadingStore";
 import NutrientTrends from "../../../components/AdminComponents/SpecificPlot/NutrientTrends";
 import CardContainer from "../../../components/widgets/CardContainer";
 import LabelCard from "../../../components/AdminComponents/AreaPage/LabelCard";
-import { TractorIcon, User, User2Icon } from "lucide-react";
+import { LandPlot, TractorIcon, User, User2Icon } from "lucide-react";
 import * as turf from "@turf/turf";
 import PlotMap from "../../../components/AdminComponents/SpecificPlot/MapPlot";
 import { useEffect } from "react";
@@ -17,6 +17,9 @@ const SpecificPlotPage = () => {
     selectedPlotId,
     userPlots,
     chartNutrientTrends,
+    aiAnalysisByPlotId,
+    isLoadingAiAnalysis,
+    fetchAiAnalysis,
     fetchChartNutrients,
     setSelectedPlotId,
   } = useReadingStore();
@@ -27,7 +30,8 @@ const SpecificPlotPage = () => {
 
   useEffect(() => {
     if (!plotId) return;
-    setSelectedPlotId(Number(plotId));
+    const numericPlotId = Number(plotId);
+    setSelectedPlotId(numericPlotId);
     const formatDate = (date: Date) => date.toISOString().split("T")[0];
     const now = new Date();
     const start = new Date();
@@ -41,6 +45,7 @@ const SpecificPlotPage = () => {
       if (!hasData) {
         await fetchChartNutrients(Number(plotId), startDate, endDate);
       }
+      await fetchAiAnalysis(numericPlotId);
     };
 
     fetchData();
@@ -69,11 +74,46 @@ const SpecificPlotPage = () => {
 
     return hectares.toFixed(2);
   };
+
   const areaHectares = getAreaInHectares(selectedPlot?.polygons || []);
+
+ const headline =
+  typeof selectedPlotId === "number"
+    ? aiAnalysisByPlotId[selectedPlotId]?.[0]?.analysis?.AI_Analysis?.headline ?? "No insight available."
+    : "No insight available.";
+
+    console.log("AI Headline:", headline);
+    console.log("Full:", aiAnalysisByPlotId[selectedPlotId]);
+
+  
+
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 py-4">
       <div className="flex flex-col gap-2">
+        
+        <CardContainer className="p-4 rounded-2xl shadow-md bg-white">
+          {/* Top row with user and plot name */}
+          <div className="my-2 flex flex-wrap items-center space-x-6 mb-3">
+            <div className="flex items-center space-x-2 text-sm text-gray-700">
+              <User className="w-4 h-4 text-gray-500" />
+              <span>{selectedPlot?.user_fname} {selectedPlot?.user_lname}</span>
+            </div>
+            <div className="flex items-center space-x-2 text-sm text-gray-700">
+              <LandPlot className="w-4 h-4" />
+              <span>{selectedPlot?.plot_name}</span>
+            </div>
+          </div>
+          <div className="leading-none tracking-tighter mb-2">
+            <h2 className="text-3xl font-semibold text-primary tracking-tighter">
+              {aiAnalysisByPlotId[selectedPlotId]?.[0]?.analysis?.AI_Analysis?.headline ?? "No insight available."}
+            </h2>
+            <span className="text-sm leading-none tracking-tighter">
+              {aiAnalysisByPlotId[selectedPlotId]?.[0]?.analysis?.AI_Analysis?.short_summary ?? "No insight available."}
+            </span>
+          </div>
+        </CardContainer>
+        
         <CardContainer className="">
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
@@ -147,6 +187,7 @@ const SpecificPlotPage = () => {
             <PlotMap coords={selectedPlot?.polygons || []} />
           </div>
         </CardContainer>
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
           <LabelCard
             icon={<User className="w-6 h-6 text-primary" />}
@@ -160,6 +201,7 @@ const SpecificPlotPage = () => {
           />
         </div>
       </div>
+
       <div className="col-span-2">
         <NutrientTrends plotId={selectedPlotId!} />
       </div>
