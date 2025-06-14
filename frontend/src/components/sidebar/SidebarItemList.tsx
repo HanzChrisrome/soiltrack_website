@@ -20,9 +20,7 @@ export default function SidebarItemsList() {
       confirmText: "Logout",
       icon: <LogOut className="w-4 h-4 text-white" />,
       cancelText: "Cancel",
-      onConfirm: () => {
-        logout();
-      },
+      onConfirm: logout,
     });
   };
 
@@ -56,7 +54,7 @@ export default function SidebarItemsList() {
           text="Logout"
           active={false}
           alert={false}
-          onClick={() => handleLogout}
+          onClick={handleLogout}
         />
       </Sidebar>
     </>
