@@ -1,6 +1,6 @@
 //src/service/userPageService.ts
 
-import supabase from "../lib/supabase";
+import supabase from "../../lib/supabase";
 
 async function reverseGeocode(lat: number, lon: number): Promise<string> {
   const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`;

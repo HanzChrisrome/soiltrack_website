@@ -8,7 +8,7 @@ import {
   getPlotReadingsByDateRange,
   getAiSummaryByPlotId,
   getAnalysisGeneratedCount,
-} from "../../service/readingService";
+} from "../../service/AdminService/readingService";
 
 import {
   AnalysisSummary,
