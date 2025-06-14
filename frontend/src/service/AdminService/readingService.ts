@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/services/readingService.ts
-import supabase from "../lib/supabase";
-import { AnalysisSummary } from "../models/readingStoreModels";
+import supabase from "../../lib/supabase";
+import { AnalysisSummary } from "../../models/readingStoreModels";
 
 export const getOverallAverage = async (
   startDate?: string,

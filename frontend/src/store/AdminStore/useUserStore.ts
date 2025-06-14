@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { UserSummary } from "../../models/readingStoreModels";
 import toast from "react-hot-toast";
-import { getUserSummary } from "../../service/userPageService";
+import { getUserSummary } from "../../service/AdminService/userPageService";
 
 interface UserState {
   //DATA
