@@ -14,16 +14,18 @@ const HomePage = () => {
         className={
           authUserRole === "SUPER ADMIN"
             ? "flex h-screen bg-base-300"
-            : "sticky mx-auto container mt-2"
+            : "flex flex-col min-h-screen h-full bg-base-300"
         }
       >
         {authUserRole === "SUPER ADMIN" ? (
           <SidebarItemsList />
         ) : (
-          <TopNavBarItemsList />
+          <div className="sticky mx-auto container mt-2">
+            <TopNavBarItemsList />
+          </div>
         )}
 
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1">
           <div className="mx-auto container">
             <Outlet />
           </div>

@@ -6,7 +6,6 @@ import { Bell, LogOut, Settings, TestTubeIcon } from "lucide-react";
 import { useWidgetStore } from "../../store/useWidgetStore";
 import soiltrackLightLogo from "/DARK HORIZONTAL.png";
 import soiltrackDarkLogo from "/LIGHT HORIZONTAL.png";
-import { useReadingStore } from "../../store/AdminStore/useReadingStore";
 import useThemeStore from "../../store/useThemeStore";
 
 interface TopNavBarProps {
@@ -17,7 +16,6 @@ export default function TopNavBar({ children }: TopNavBarProps) {
   const { logout, authUser } = useAuthStore();
   // const { userSummary } = useUserPageHook();
   // const { analysisGeneratedCount } = useMainPageHook();
-  const { aiAnalysisByPlotId } = useReadingStore();
   const { openModal } = useWidgetStore();
 
   const handleLogout = () => {
