@@ -13,7 +13,7 @@ const HomePage = () => {
       <div
         className={
           authUserRole === "SUPER ADMIN"
-            ? "flex h-screen bg-base-300"
+            ? "flex h-screen overflow-y-hidden"
             : "flex flex-col min-h-screen h-full bg-base-300"
         }
       >
@@ -25,8 +25,8 @@ const HomePage = () => {
           </div>
         )}
 
-        <div className="flex-1">
-          <div className="mx-auto container">
+        <div className="flex-1 overflow-y-auto bg-base-100">
+          <div className="container mx-auto">
             <Outlet />
           </div>
         </div>

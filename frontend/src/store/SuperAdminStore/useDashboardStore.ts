@@ -7,18 +7,24 @@ import {
 } from "../../service/SuperAdminStore/useDashboardService";
 
 type DashboardState = {
-  metrics: Metrics[];
+  databaseMetrics: Metrics[];
+  realTimeMetrics: Metrics[];
   fetchLatestMetrics: (limit?: number) => Promise<void>;
   subscribeToMetrics: () => ReturnType<typeof subscribeToMetrics>;
   fetchLiveMetric: () => Promise<void>;
+
+  lastFetchedAt: Date | null;
 };
 
 export const useDashboardStore = create<DashboardState>((set, get) => ({
-  metrics: [],
+  databaseMetrics: [],
+  realTimeMetrics: [],
+  lastFetchedAt: null,
+
   fetchLatestMetrics: async (limit = 10) => {
     const data = await fetchLatestMetrics(limit);
     if (data) {
-      set({ metrics: data });
+      set({ databaseMetrics: data, lastFetchedAt: new Date() });
     } else {
       console.error("❌ Failed to fetch latest metrics");
     }
@@ -26,8 +32,11 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
 
   subscribeToMetrics: () => {
     const channel = subscribeToMetrics((newMetric) => {
-      const currentMetrics = get().metrics;
-      set({ metrics: [newMetric, ...currentMetrics.slice(0, 9)] });
+      const currentMetrics = get().databaseMetrics;
+      set({
+        databaseMetrics: [newMetric, ...currentMetrics.slice(0, 9)],
+        lastFetchedAt: new Date(),
+      });
     });
 
     return channel;
@@ -39,7 +48,7 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
       console.error("❌ Failed to fetch live metric");
       return;
     }
-    const currentMetrics = get().metrics;
-    set({ metrics: [newMetric, ...currentMetrics.slice(0, 9)] });
+    const currentMetrics = get().realTimeMetrics;
+    set({ realTimeMetrics: [newMetric, ...currentMetrics.slice(0, 9)] });
   },
 }));

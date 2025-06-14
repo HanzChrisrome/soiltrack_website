@@ -6,6 +6,8 @@ import { Metrics } from "../../models/SuperAdminModels";
 export async function fetchLatestMetrics(
   limit = 10
 ): Promise<Metrics[] | null> {
+  console.log("Fetching latest metrics with limit:", limit);
+
   const { data, error } = await supabase.rpc("get_latest_server_metrics", {
     limit_count: limit,
   });
@@ -41,11 +43,13 @@ export function subscribeToMetrics(callback: (metric: Metrics) => void) {
 export async function fetchLatestServerMetrics(): Promise<Metrics | null> {
   try {
     const { data } = await axiosInstance.get("/server-metrics/server-data");
+
     return {
       cpu_usage: data.cpuUsagePercent || 0,
       free_memory: data.freeMemory || 0,
       total_memory: data.totalMemory || 0,
       system_uptime: data.systemUptimeSeconds || 0,
+      load_average: data.loadAverage || 0,
       timestamp: new Date().toISOString(),
     };
   } catch (error) {
@@ -55,6 +59,7 @@ export async function fetchLatestServerMetrics(): Promise<Metrics | null> {
       free_memory: 0,
       total_memory: 0,
       system_uptime: 0,
+      load_average: 0,
       timestamp: new Date().toISOString(),
     };
   }

@@ -4,5 +4,6 @@ export type Metrics = {
   cpu_usage: number;
   free_memory: number;
   total_memory: number;
+  load_average: number;
   system_uptime: number;
 };

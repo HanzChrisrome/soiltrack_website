@@ -82,12 +82,11 @@ const UserPage = () => {
       }
 
       return sortDirection === "asc"
-        ? String(aVal).localeCompare(String(bVal)) // ascending (A → Z)
-        : String(bVal).localeCompare(String(aVal)); // descending (Z → A)
+        ? String(aVal).localeCompare(String(bVal))
+        : String(bVal).localeCompare(String(aVal));
     });
   }, [userSummary, sortColumn, sortDirection]);
 
-  // Helper to show arrow icon in headers
   const SortIcon = ({ column }: { column: SortableColumn }) => {
     if (sortColumn !== column) {
       return <ChevronsUpDown className="inline w-4 ml-1 text-neutral-400" />;

@@ -31,9 +31,9 @@ export default function SidebarItemsList() {
         <SidebarItem
           icon={<LayoutDashboard size={20} />}
           text="Dashboard"
-          active={currentPath === "/dashboard"}
+          active={currentPath === "/master/dashboard"}
           alert={false}
-          onClick={() => navigate("/dashboard")}
+          onClick={() => navigate("/master/dashboard")}
         />
         <SidebarItem
           icon={<UserCircle2 size={20} />}

@@ -1,43 +1,42 @@
 import type { ApexOptions } from "apexcharts";
-import { useDashboardStore } from "../../../store/SuperAdminStore/useDashboardStore";
 import ReactApexChart from "react-apexcharts";
-import { parseTimestamp } from "../../../utils/TimeParser";
-import CardContainer from "../../widgets/CardContainer";
 
-const ServerMetricsChart = () => {
-  const metrics = useDashboardStore((s) => s.metrics);
+type ReusableMetricChartProps = {
+  timestamps: string[];
+  data: number[];
+  label: string;
+  unit?: string;
+  color?: string;
+  width?: number | string;
+  height?: number | string;
+};
 
-  const timestamps = metrics.map((m) => {
-    const utcDate = parseTimestamp(m.timestamp);
-    return utcDate.toLocaleString("en-PH", {
-      timeZone: "Asia/Manila",
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-    });
-  });
-  const cpuData = metrics.map((m) => parseFloat(m.cpu_usage.toFixed(2)));
-
+const ReusableMetricChart = ({
+  timestamps,
+  data,
+  label,
+  unit = "%",
+  color = "#22c55e",
+  width = "100%",
+  height = 300,
+}: ReusableMetricChartProps) => {
   const options: ApexOptions = {
     chart: {
-      id: "server-metrics-chart",
+      id: `${label.toLowerCase().replace(/\s+/g, "-")}-chart`,
       animations: {
         enabled: true,
-        dynamicAnimation: {
-          speed: 500,
-        },
+        dynamicAnimation: { speed: 500 },
       },
       sparkline: { enabled: false },
       zoom: { enabled: true },
       toolbar: { show: false },
+      offsetY: 5,
     },
-    dataLabels: {
-      enabled: false,
-    },
+    dataLabels: { enabled: false },
     xaxis: {
       categories: timestamps,
       labels: {
-        show: true,
+        show: false,
         offsetY: 3,
         style: {
           fontSize: "10px",
@@ -47,7 +46,7 @@ const ServerMetricsChart = () => {
     },
     yaxis: {
       labels: {
-        formatter: (value) => `${value}%`,
+        formatter: (value) => `${value}${unit ?? ""}`,
         offsetX: -10,
         style: {
           fontSize: "10px",
@@ -55,10 +54,15 @@ const ServerMetricsChart = () => {
         },
       },
     },
+    tooltip: {
+      y: {
+        formatter: (value) => `${value}${unit ?? ""}`,
+      },
+    },
     stroke: {
       curve: "smooth",
       width: 5,
-      colors: ["#22c55e"], // green-500
+      colors: [color],
     },
     fill: {
       type: "gradient",
@@ -71,7 +75,7 @@ const ServerMetricsChart = () => {
           [
             {
               offset: 0,
-              color: "#22c55e",
+              color: color,
               opacity: 0.9,
             },
             {
@@ -82,41 +86,38 @@ const ServerMetricsChart = () => {
           ],
         ],
       },
-      colors: ["#22c55e"],
+      colors: [color],
     },
     grid: {
       show: true,
       borderColor: "#e5e7eb",
       strokeDashArray: 4,
       padding: {
-        left: 25,
+        left: 15,
         right: 0,
         top: 0,
         bottom: 0,
       },
     },
-    colors: ["#22c55e"], // green-500
+    colors: [color],
   };
 
   const series = [
     {
-      name: "CPU Usage",
-      data: cpuData,
+      name: label,
+      data,
     },
   ];
 
   return (
-    <>
-      <CardContainer padding="p-2" className="mt-2 border border-base-300">
-        <ReactApexChart
-          options={options}
-          series={series}
-          type="area"
-          height={400}
-        />
-      </CardContainer>
-    </>
+    <ReactApexChart
+      options={options}
+      series={series}
+      type="area"
+      height={height ?? 400}
+      width={width ?? "100%"}
+    />
   );
 };
 
-export default ServerMetricsChart;
+export default ReusableMetricChart;
