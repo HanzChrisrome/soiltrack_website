@@ -89,25 +89,38 @@ export interface CropStat {
   percentage: number;
 }
 
+export interface AIWarnings {
+  drought_risks?: string;
+  nutrient_imbalances?: string;
+}
+
+export interface AISummaryDetails {
+  findings?: string;
+  predictions?: string;
+  recommendations?: string;
+}
+
+export interface AIAnalysis {
+  headline?: string;
+  short_summary?: string;
+  summary?: AISummaryDetails;
+  warnings?: AIWarnings;
+  today_focus?: string[];
+  predictive_insights?: Record<string, any>;
+  summary_of_findings?: Record<string, any>;
+  recommended_fertilizers?: Record<string, any>;
+  final_actionable_recommendations?: string[];
+  date?: string;
+  status?: string;
+}
+
 export interface AnalysisSummary {
   id: number;
   plot_id: number;
   analysis_date: string;
   analysis: {
-    AI_Analysis: {
-      headline?: string;
-      short_summary?: string;
-      summary: {
-        findings?: string;
-        predictions?: string;
-        recommendations?: string;
-      } | null;
-      warnings: {
-        drought_risks?: string;
-        nutrient_imbalances?: string;
-      } | null;
-    }
-  }
+    AI_Analysis: AIAnalysis;
+  };
   analysis_type: string;
   created_at: string;
   language_type: string;

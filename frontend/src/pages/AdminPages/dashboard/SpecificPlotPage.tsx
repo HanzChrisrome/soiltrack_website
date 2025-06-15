@@ -42,17 +42,9 @@ const SpecificPlotPage = () => {
     const startDate = formatDate(start);
     const endDate = formatDate(now);
 
-    const fetchData = async () => {
-      const hasData =
-        chartNutrientTrends && chartNutrientTrends[Number(plotId)]?.length > 0;
-      if (!hasData) {
-        await fetchChartNutrients(Number(plotId), startDate, endDate);
-      }
-      await fetchAiAnalysis(numericPlotId);
-    };
-
-    fetchData();
-  }, [plotId, chartNutrientTrends, fetchChartNutrients, setSelectedPlotId]);
+    fetchChartNutrients(Number(plotId), startDate, endDate);
+    fetchAiAnalysis(numericPlotId);
+  }, [plotId]);
 
   const trendDataRaw =
     selectedPlotId !== null && chartNutrientTrends
@@ -84,20 +76,22 @@ const SpecificPlotPage = () => {
     return <div>Please select a plot.</div>;
   }
 
-  const aiData = aiAnalysisByPlotId[selectedPlotId];
+  const aiData = aiAnalysisByPlotId[Number(plotId)];
   const summary = aiData?.analysis?.AI_Analysis?.summary;
+  const warnings = aiData?.analysis?.AI_Analysis?.warnings;
 
   const findings = summary?.findings ?? "No findings available.";
   const predictions = summary?.predictions ?? "No predictions available.";
-  const recommendations = summary?.recommendations ?? "No recommendations available.";
-  const shortSummary = aiData?.analysis?.AI_Analysis?.short_summary ?? "No insight available.";
-  const headline = aiData?.analysis?.AI_Analysis?.headline ?? "No insight available.";
-  
-  console.log("shortSummary", shortSummary);
-  console.log("headline", headline);
-  console.log("summmary", summary);
-  console.log("aiData", aiData);
-  
+  const recommendations =
+    summary?.recommendations ?? "No recommendations available.";
+  const shortSummary =
+    aiData?.analysis?.AI_Analysis?.short_summary ?? "No insight available.";
+  const headline =
+    aiData?.analysis?.AI_Analysis?.headline ?? "No insight available.";
+  const nutrient_imbalances =
+    warnings?.drought_risks ?? "No nutrient imbalances available.";
+  const drought_risks =
+    warnings?.drought_risks ?? "No drought risks available.";
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 py-4">
@@ -106,7 +100,9 @@ const SpecificPlotPage = () => {
           <div className="my-2 flex flex-wrap items-center space-x-6 mb-3">
             <div className="flex items-center space-x-2 text-sm text-gray-700">
               <User className="w-4 h-4 text-gray-500" />
-              <span>{selectedPlot?.user_fname} {selectedPlot?.user_lname}</span>
+              <span>
+                {selectedPlot?.user_fname} {selectedPlot?.user_lname}
+              </span>
             </div>
             <div className="flex items-center space-x-2 text-sm text-gray-700">
               <LandPlot className="w-4 h-4" />
@@ -131,7 +127,9 @@ const SpecificPlotPage = () => {
                 Plot Nutrients
               </GradientHeading>
               <CardContainer padding="px-2 py-0.5 border border-base-200">
-                <span className="text-sm text-neutral">Over the last 7 days</span>
+                <span className="text-sm text-neutral">
+                  Over the last 7 days
+                </span>
               </CardContainer>
             </div>
             <hr className="my-2 border-t border-base-200" />
@@ -210,22 +208,38 @@ const SpecificPlotPage = () => {
         </div>
       </div>
 
-
-
       <div className="col-span-2">
         {isLoadingAiAnalysis ? (
           <CardContainer className="flex items-center justify-center h-48">
-            <div className="text-gray-500 animate-pulse">Loading AI analysis...</div>
+            <div className="text-gray-500 animate-pulse">
+              Loading AI analysis...
+            </div>
           </CardContainer>
-        ) : (
-          <AIInsightModule
-            summary={{
-              findings,
-              predictions,
-              recommendations,
-            }}
-          />
-        )}
+        ) : aiData ? (
+          <>
+            {summary && (
+              <AIInsightModule
+                title="Plot Findings"
+                type="summary"
+                data={{
+                  findings,
+                  predictions,
+                  recommendations,
+                }}
+              />
+            )}
+            {warnings && (
+              <AIInsightModule
+                title="Plot Warnings"
+                type="warnings"
+                data={{
+                  drought_risks,
+                  nutrient_imbalances,
+                }}
+              />
+            )}
+          </>
+        ) : null}
         <NutrientTrends plotId={selectedPlotId!} />
       </div>
     </div>

@@ -9,8 +9,6 @@ export default function TopNavBarItemsList() {
   const navigate = useNavigate();
   const currentPath = location.pathname;
 
-  console.log("Current Path:", currentPath);
-
   return (
     <TopNavBar>
       <TabNavItem

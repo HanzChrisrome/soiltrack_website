@@ -57,13 +57,21 @@ export default function PlotSidebar({
         const startDate = dayjs().subtract(6, "day").format("YYYY-MM-DD");
         fetchPlotNutrients(plot.id, startDate, endDate);
         fetchAiAnalysis(plot.id);
+      }
+    }
+    fetchData();
+  }, [plot, fetchPlotNutrients, fetchAiAnalysis]);
+
+  useEffect(() => {
+    async function fetchData() {
+      if (plot && visible) {
         const nutrientData = plotNutrientsTrends?.[plot.id] ?? null;
         setReadings(nutrientData);
       }
     }
 
     fetchData();
-  }, [plot, visible, fetchPlotNutrients, fetchAiAnalysis, plotNutrientsTrends]);
+  }, [plot, visible, plotNutrientsTrends]);
 
   const readingsArray = readings ?? [];
 
@@ -80,14 +88,12 @@ export default function PlotSidebar({
 
   const backgroundStyle = {
     backgroundImage:
-    aiSummary === null ||
-    (Array.isArray(aiSummary) && aiSummary.length === 0)
-      ? 'url("/sidebar_ai_no.png")'
-      : 'url("/sidebar_ai_gen.png")',
+      aiSummary === null || (Array.isArray(aiSummary) && aiSummary.length === 0)
+        ? 'url("/sidebar_ai_no.png")'
+        : 'url("/sidebar_ai_gen.png")',
     backgroundSize: "cover",
     backgroundPosition: "center",
   };
-      
 
   return (
     <>
@@ -162,16 +168,15 @@ export default function PlotSidebar({
               {isLoadingAiAnalysis ? (
                 <Skeleton className="h-24 w-full" />
               ) : (
-                <CardContainer className="mt-4 p-12 h-52" style={backgroundStyle}>
+                <CardContainer
+                  className="mt-4 p-12 h-52"
+                  style={backgroundStyle}
+                >
                   {aiSummary === null ||
                   (Array.isArray(aiSummary) && aiSummary.length === 0) ? (
-                    <span className="text-white font-semibold text-4xl max-w-md block">
-
-                    </span>
+                    <span className="text-white font-semibold text-4xl max-w-md block"></span>
                   ) : (
-                    <span className="text-white font-semibold text-4xl max-w-md block">
- 
-                    </span>
+                    <span className="text-white font-semibold text-4xl max-w-md block"></span>
                   )}
                 </CardContainer>
               )}

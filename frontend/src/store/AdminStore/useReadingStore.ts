@@ -33,7 +33,7 @@ interface ReadingState {
   plotNutrientsTrends: Record<number, PlotReadingsTrend[]>;
   chartNutrientTrends: Record<number, ChartSummaryTrend[]>;
   customPlotNutrientsTrends: ChartSummaryTrend[] | null;
-  aiAnalysisByPlotId: Record<number, AnalysisSummary>;
+  aiAnalysisByPlotId: Record<number, AnalysisSummary | null>;
 
   // UI State
   selectedPlotId: number | null;
@@ -259,14 +259,25 @@ export const useReadingStore = create<ReadingState>((set, get) => ({
 
   fetchAiAnalysis: async (plotId) => {
     const exists = get().aiAnalysisByPlotId[plotId];
-    if (exists) return;
+    if (exists !== undefined) return;
 
     set({ isLoadingAiAnalysis: true });
-    const data = await getAiSummaryByPlotId(plotId);
-    console.log("data", data);
 
-    if (!data) {
-      set({ isLoadingAiAnalysis: false });
+    const data = await getAiSummaryByPlotId(plotId);
+
+    console.log("Data fetched: ", data);
+
+    if (!data || !data.analysis?.AI_Analysis) {
+      console.warn("Invalid or missing AI_Analysis data");
+
+      set((state) => ({
+        aiAnalysisByPlotId: {
+          ...state.aiAnalysisByPlotId,
+          [plotId]: null,
+        },
+        isLoadingAiAnalysis: false,
+      }));
+
       return;
     }
 

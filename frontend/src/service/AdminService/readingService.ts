@@ -205,7 +205,23 @@ export const getAiSummaryByPlotId = async (
     return null;
   }
 
-  return data;
+  if (!data || !Array.isArray(data) || data.length === 0) {
+    console.warn("No AI summary found for plot ID:", plotId);
+    return null;
+  }
+
+  const result = data[0];
+
+  if (typeof result.analysis === "string") {
+    try {
+      result.analysis = JSON.parse(result.analysis);
+    } catch (e) {
+      console.error("Failed to parse analysis JSON", e);
+      return null;
+    }
+  }
+
+  return result as AnalysisSummary;
 };
 
 export const getAnalysisGeneratedCount = async (
