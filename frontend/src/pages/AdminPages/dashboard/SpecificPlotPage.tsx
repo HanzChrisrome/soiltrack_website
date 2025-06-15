@@ -10,9 +10,12 @@ import HeatmapViewContent from "../../../components/AdminComponents/SpecificPlot
 import { getTodayHeatMap } from "../../../utils/NutrientTrendsUtil";
 import GradientHeading from "../../../components/widgets/GradientComponent";
 import { useParams } from "react-router-dom";
+import AIInsightModule from "../../../components/AdminComponents/SpecificPlot/AIInsightModule";
+import { useMainPageHook } from "../../../hooks/useMainPage";
 
 const SpecificPlotPage = () => {
   const { plotId } = useParams();
+  useMainPageHook();
   const {
     selectedPlotId,
     userPlots,
@@ -77,23 +80,29 @@ const SpecificPlotPage = () => {
 
   const areaHectares = getAreaInHectares(selectedPlot?.polygons || []);
 
- const headline =
-  typeof selectedPlotId === "number"
-    ? aiAnalysisByPlotId[selectedPlotId]?.[0]?.analysis?.AI_Analysis?.headline ?? "No insight available."
-    : "No insight available.";
+  if (!selectedPlotId) {
+    return <div>Please select a plot.</div>;
+  }
 
-    console.log("AI Headline:", headline);
-    console.log("Full:", aiAnalysisByPlotId[selectedPlotId]);
+  const aiData = aiAnalysisByPlotId[selectedPlotId];
+  const summary = aiData?.analysis?.AI_Analysis?.summary;
 
+  const findings = summary?.findings ?? "No findings available.";
+  const predictions = summary?.predictions ?? "No predictions available.";
+  const recommendations = summary?.recommendations ?? "No recommendations available.";
+  const shortSummary = aiData?.analysis?.AI_Analysis?.short_summary ?? "No insight available.";
+  const headline = aiData?.analysis?.AI_Analysis?.headline ?? "No insight available.";
   
-
+  console.log("shortSummary", shortSummary);
+  console.log("headline", headline);
+  console.log("summmary", summary);
+  console.log("aiData", aiData);
+  
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 py-4">
       <div className="flex flex-col gap-2">
-        
         <CardContainer className="p-4 rounded-2xl shadow-md bg-white">
-          {/* Top row with user and plot name */}
           <div className="my-2 flex flex-wrap items-center space-x-6 mb-3">
             <div className="flex items-center space-x-2 text-sm text-gray-700">
               <User className="w-4 h-4 text-gray-500" />
@@ -106,24 +115,23 @@ const SpecificPlotPage = () => {
           </div>
           <div className="leading-none tracking-tighter mb-2">
             <h2 className="text-3xl font-semibold text-primary tracking-tighter">
-              {aiAnalysisByPlotId[selectedPlotId]?.[0]?.analysis?.AI_Analysis?.headline ?? "No insight available."}
+              {headline}
             </h2>
-            <span className="text-sm leading-none tracking-tighter">
-              {aiAnalysisByPlotId[selectedPlotId]?.[0]?.analysis?.AI_Analysis?.short_summary ?? "No insight available."}
+            <span className="text-sm leading-none tracking-tight">
+              {shortSummary}
             </span>
           </div>
         </CardContainer>
-        
+
         <CardContainer className="">
+          {/* Nutrient legend and heatmap */}
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
               <GradientHeading className="text-2xl font-bold">
                 Plot Nutrients
               </GradientHeading>
               <CardContainer padding="px-2 py-0.5 border border-base-200">
-                <span className="text-sm text-neutral">
-                  Over the last 7 days
-                </span>
+                <span className="text-sm text-neutral">Over the last 7 days</span>
               </CardContainer>
             </div>
             <hr className="my-2 border-t border-base-200" />
@@ -202,7 +210,22 @@ const SpecificPlotPage = () => {
         </div>
       </div>
 
+
+
       <div className="col-span-2">
+        {isLoadingAiAnalysis ? (
+          <CardContainer className="flex items-center justify-center h-48">
+            <div className="text-gray-500 animate-pulse">Loading AI analysis...</div>
+          </CardContainer>
+        ) : (
+          <AIInsightModule
+            summary={{
+              findings,
+              predictions,
+              recommendations,
+            }}
+          />
+        )}
         <NutrientTrends plotId={selectedPlotId!} />
       </div>
     </div>

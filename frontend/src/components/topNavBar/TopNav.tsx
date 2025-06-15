@@ -7,6 +7,8 @@ import { useWidgetStore } from "../../store/useWidgetStore";
 import soiltrackLightLogo from "/DARK HORIZONTAL.png";
 import soiltrackDarkLogo from "/LIGHT HORIZONTAL.png";
 import useThemeStore from "../../store/useThemeStore";
+import { useReadingStore } from "../../store/AdminStore/useReadingStore";
+
 
 interface TopNavBarProps {
   children: ReactNode;
@@ -14,6 +16,7 @@ interface TopNavBarProps {
 
 export default function TopNavBar({ children }: TopNavBarProps) {
   const { logout, authUser } = useAuthStore();
+  const { aiAnalysisByPlotId } = useReadingStore();
   // const { userSummary } = useUserPageHook();
   // const { analysisGeneratedCount } = useMainPageHook();
   const { openModal } = useWidgetStore();
@@ -45,7 +48,7 @@ export default function TopNavBar({ children }: TopNavBarProps) {
       {/* User Info and Logout */}
       <div className="flex items-center space-x-2">
         <TooltipIconButton
-          onClick={() => console.log("User summary: ", authUser?.role_name)}
+          onClick={() => console.log("User summary: ", aiAnalysisByPlotId)}
           tooltip="Notifications"
         >
           <div className="p-3 bg-white rounded-full">

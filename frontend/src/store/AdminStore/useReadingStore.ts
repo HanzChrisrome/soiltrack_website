@@ -263,6 +263,7 @@ export const useReadingStore = create<ReadingState>((set, get) => ({
 
     set({ isLoadingAiAnalysis: true });
     const data = await getAiSummaryByPlotId(plotId);
+    console.log("data", data);
 
     if (!data) {
       set({ isLoadingAiAnalysis: false });

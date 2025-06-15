@@ -97,6 +97,15 @@ export interface AnalysisSummary {
     AI_Analysis: {
       headline?: string;
       short_summary?: string;
+      summary: {
+        findings?: string;
+        predictions?: string;
+        recommendations?: string;
+      } | null;
+      warnings: {
+        drought_risks?: string;
+        nutrient_imbalances?: string;
+      } | null;
     }
   }
   analysis_type: string;
