@@ -125,3 +125,8 @@ export interface AnalysisSummary {
   created_at: string;
   language_type: string;
 }
+
+export interface IrrigationLogSummary {
+  irrigation_date: string;
+  irrigation_count: number;
+}

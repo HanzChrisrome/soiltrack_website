@@ -2,6 +2,7 @@
 // src/services/readingService.ts
 import supabase from "../../lib/supabase";
 import { AnalysisSummary } from "../../models/readingStoreModels";
+import { IrrigationLogSummary } from "../../models/readingStoreModels";
 
 export const getOverallAverage = async (
   startDate?: string,
@@ -256,4 +257,19 @@ export const getAnalysisGeneratedCount = async (
   }
 
   return data || [];
+};
+
+export const getIrrigationSummaryByPlotId = async (
+  plotId: number
+): Promise<IrrigationLogSummary[] | null> => {
+  const { data, error } = await supabase.rpc("get_daily_irrigation_count", {
+    plot: plotId,
+  });
+
+  if (error) {
+    console.error("Error fetching irrigation summary:", error.message);
+    return null;
+  }
+
+  return data;
 };

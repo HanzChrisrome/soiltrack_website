@@ -22,6 +22,9 @@ const SpecificPlotPage = () => {
     chartNutrientTrends,
     aiAnalysisByPlotId,
     isLoadingAiAnalysis,
+    irrigationSummaryByPlotId,
+    isLoadingIrrigationSummary,
+    fetchIrrigationSummaryByPlotId,
     fetchAiAnalysis,
     fetchChartNutrients,
     setSelectedPlotId,
@@ -41,7 +44,7 @@ const SpecificPlotPage = () => {
     start.setMonth(now.getMonth() - 3);
     const startDate = formatDate(start);
     const endDate = formatDate(now);
-
+    fetchIrrigationSummaryByPlotId(numericPlotId);
     fetchChartNutrients(Number(plotId), startDate, endDate);
     fetchAiAnalysis(numericPlotId);
   }, [plotId]);
@@ -92,6 +95,7 @@ const SpecificPlotPage = () => {
     warnings?.drought_risks ?? "No nutrient imbalances available.";
   const drought_risks =
     warnings?.drought_risks ?? "No drought risks available.";
+  const irrigationData = irrigationSummaryByPlotId[Number(plotId)] ?? [];
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 py-4">
@@ -206,6 +210,33 @@ const SpecificPlotPage = () => {
             title="Soil Type"
           />
         </div>
+        <CardContainer className="p-4 bg-white rounded-xl">
+          <h2 className="text-lg font-semibold text-primary mb-2">
+            Daily Irrigation History
+          </h2>
+          {isLoadingIrrigationSummary ? (
+            <p>Loading irrigation data...</p>
+          ) : irrigationData.length === 0 ? (
+            <p>No irrigation records found for this plot.</p>
+          ) : (
+            <table className="w-full text-sm text-left">
+              <thead>
+                <tr className="text-gray-600 border-b">
+                  <th className="py-1">Date</th>
+                  <th className="py-1">Total Irrigations</th>
+                </tr>
+              </thead>
+              <tbody>
+                {irrigationData.map((log) => (
+                  <tr key={log.irrigation_date}>
+                    <td className="py-1">{log.irrigation_date}</td>
+                    <td className="py-1">{log.irrigation_count}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </CardContainer>
       </div>
 
       <div className="col-span-2">
