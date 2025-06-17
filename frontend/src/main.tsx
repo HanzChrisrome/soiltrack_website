@@ -7,9 +7,9 @@ import "leaflet-draw/dist/leaflet.draw.css";
 import { StrictMode } from "react";
 
 createRoot(document.getElementById("root")!).render(
-  //<StrictMode>
-  <BrowserRouter>
-    <App />
-  </BrowserRouter>
-  //</StrictMode>
+  <StrictMode>
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+  </StrictMode>
 );

@@ -8,11 +8,17 @@ interface AIInsightModuleProps {
   data: Record<string, string | undefined> | null;
 }
 
-const AIInsightModule: React.FC<AIInsightModuleProps> = ({ title, type, data }) => {
+const AIInsightModule: React.FC<AIInsightModuleProps> = ({
+  title,
+  type,
+  data,
+}) => {
   const [showInsights, setShowInsights] = useState(true);
 
   const filteredEntries = data
-    ? Object.entries(data).filter(([, value]) => value !== undefined && value !== "")
+    ? Object.entries(data).filter(
+        ([, value]) => value !== undefined && value !== ""
+      )
     : [];
 
   if (filteredEntries.length === 0) {
@@ -24,7 +30,11 @@ const AIInsightModule: React.FC<AIInsightModuleProps> = ({ title, type, data }) 
   }
 
   const titleColorClass =
-    type === "summary" ? "text-green-600" : type === "warnings" ? "text-red-600" : "text-gray-800";
+    type === "summary"
+      ? "text-primary"
+      : type === "warnings"
+      ? "text-red-800"
+      : "text-gray-800";
 
   const getGridColsClass = (count: number) => {
     if (count === 1) return "grid-cols-1";
@@ -50,9 +60,14 @@ const AIInsightModule: React.FC<AIInsightModuleProps> = ({ title, type, data }) 
             showInsights ? "max-h-[2000px] mt-4" : "max-h-0"
           }`}
         >
-          <div className={`grid gap-4 ${getGridColsClass(filteredEntries.length)}`}>
+          <div
+            className={`grid gap-4 ${getGridColsClass(filteredEntries.length)}`}
+          >
             {filteredEntries.map(([key, value]) => (
-              <CardContainer key={key} className="p-4 rounded-2xl shadow-md bg-gray-50 h-full">
+              <CardContainer
+                key={key}
+                className="p-4 rounded-2xl shadow-md bg-gray-50 h-full"
+              >
                 <h3 className="text-base font-semibold text-gray-700 capitalize">
                   {key.replace(/_/g, " ")}
                 </h3>
