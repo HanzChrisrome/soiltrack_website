@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // services/metricsService.ts
 import { axiosInstance } from "../../lib/axios";
 import supabase from "../../lib/supabase";
-import { Metrics } from "../../models/SuperAdminModels";
+import { Metrics, UsersData } from "../../models/SuperAdminModels";
 
 export async function fetchLatestMetrics(
   limit = 10
@@ -53,7 +54,7 @@ export async function fetchLatestServerMetrics(): Promise<Metrics | null> {
       timestamp: new Date().toISOString(),
     };
   } catch (error) {
-    console.error("❌ Failed to fetch latest server metrics:", error);
+    // console.error("❌ Failed to fetch latest server metrics:", error);
     return {
       cpu_usage: 0,
       free_memory: 0,
@@ -63,4 +64,22 @@ export async function fetchLatestServerMetrics(): Promise<Metrics | null> {
       timestamp: new Date().toISOString(),
     };
   }
+}
+
+export async function fetchUsersData(
+  currentUserId: string
+): Promise<UsersData[] | null> {
+  console.log("Fetching users data...");
+  const { data, error } = await supabase.rpc("get_users_data", {
+    exclude_user_id: currentUserId,
+  });
+
+  if (error) {
+    console.error("❌ Failed to fetch users data:", error);
+    return null;
+  }
+
+  console.log("✅ Users data fetched successfully:", data);
+
+  return data as UsersData[];
 }

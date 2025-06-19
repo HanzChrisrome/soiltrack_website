@@ -7,3 +7,12 @@ export type Metrics = {
   load_average: number;
   system_uptime: number;
 };
+
+export type UsersData = {
+  user_id: string;
+  user_name: string;
+  user_email: string;
+  user_address: string;
+  mac_address: string;
+  device_status: string;
+};

@@ -25,7 +25,7 @@ const HomePage = () => {
           </div>
         )}
 
-        <div className="flex-1 overflow-y-auto bg-base-100">
+        <div className="flex-1 overflow-y-auto bg-base-300">
           <div className="container mx-auto">
             <Outlet />
           </div>

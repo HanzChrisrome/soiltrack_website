@@ -6,18 +6,30 @@ import { useAuthStore } from "../../store/useAuthStore";
 import GradientHeading from "../../components/widgets/GradientComponent";
 import ServerHealth from "../../components/SuperAdminComponents/DashboardComponents/ServerHealth";
 import MetricCard from "../../components/SuperAdminComponents/DashboardComponents/ReusableComponents/MetricCard";
-import { FileInput } from "lucide-react";
+import { FileInput, Users2 } from "lucide-react";
+import CardContainer from "../../components/widgets/CardContainer";
 
 const DashboardPage = () => {
+  const authUser = useAuthStore((s) => s.authUser);
+
+  //FOR METRICS
   const databaseMetrics = useDashboardStore((s) => s.databaseMetrics);
   const latestMetric = databaseMetrics?.[0];
   const previousMetric = databaseMetrics?.[1];
   const fetchLiveMetric = useDashboardStore((s) => s.fetchLiveMetric);
   const fetchLatestMetrics = useDashboardStore((s) => s.fetchLatestMetrics);
   const lastFetchedAt = useDashboardStore((s) => s.lastFetchedAt);
-  const authUser = useAuthStore((s) => s.authUser);
+
+  //FOR USERS DATA
+  const fetchUsersData = useDashboardStore((s) => s.fetchUsersData);
+  const usersData = useDashboardStore((s) => s.usersData);
+  const onlineDevices = usersData.filter(
+    (user) => user.device_status === "online"
+  );
 
   useEffect(() => {
+    fetchUsersData(authUser?.user_id || "");
+
     fetchLatestMetrics(10);
     fetchLiveMetric();
 
@@ -25,7 +37,7 @@ const DashboardPage = () => {
       fetchLiveMetric();
     }, 30_000);
 
-    return () => clearInterval(interval); // clean up when component unmounts
+    return () => clearInterval(interval);
   }, []);
 
   return (
@@ -60,7 +72,7 @@ const DashboardPage = () => {
           </div>
         </div>
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-5 mt-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3">
         {latestMetric && previousMetric ? (
           <>
             <MetricCard
@@ -99,8 +111,48 @@ const DashboardPage = () => {
           <p>Loading...</p>
         )}
       </div>
-
       <ServerHealth />
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 mt-3">
+        <CardContainer className="col-span-1">
+          <div className="flex items-center space-x-3 mb-4">
+            <CardContainer
+              padding="p-1"
+              className="bg-primary border border-none"
+            >
+              <Users2 className="w-5 h-5 text-accent" />
+            </CardContainer>
+            <GradientHeading className="text-2xl font-semibold leading-tight">
+              Active Devices
+            </GradientHeading>
+          </div>
+          {onlineDevices.length > 0 ? (
+            onlineDevices.map((user) => (
+              <div
+                key={user.user_id}
+                className="bg-base-100 border border-base-200 p-4 rounded-lg shadow-sm mb-1"
+              >
+                <h2 className="text-md font-semibold text-neutral-800">
+                  {user.user_name}
+                </h2>
+                <p className="text-sm text-neutral-600">
+                  Email: {user.user_email}
+                </p>
+                <p className="text-sm text-neutral-600">
+                  Address: {user.user_address}
+                </p>
+                <p className="text-sm text-neutral-600">
+                  Device Status: {user.device_status}
+                </p>
+              </div>
+            ))
+          ) : (
+            <div className="border-2 border-dashed border-neutral-300 rounded-lg p-8 text-center">
+              <p>No devices are active.</p>
+            </div>
+          )}
+        </CardContainer>
+      </div>
     </div>
   );
 };

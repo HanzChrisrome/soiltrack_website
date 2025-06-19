@@ -13,7 +13,7 @@ export default function Sidebar({ children }: SidebarProps) {
 
   return (
     <aside className="h-screen">
-      <nav className="h-full flex flex-col bg-base-300 border-r">
+      <nav className="h-full flex flex-col bg-base-100 border-r">
         <div className="px-4 py-6 flex justify-between items-center">
           <img
             src={soiltrackLogo}
