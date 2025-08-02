@@ -31,7 +31,7 @@ const MainPage = () => {
           {authUser?.user_lname || ""}
         </GradientHeading>
         <p className="text-sm text-neutral leading-tight">
-          Here’s a quick overview of the plots in your municipality.
+          Here’s a quick overview of the plots.
         </p>
       </div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-5">
