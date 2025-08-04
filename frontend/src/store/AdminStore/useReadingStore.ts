@@ -8,6 +8,7 @@ import {
   getPlotReadingsByDateRange,
   getAiSummaryByPlotId,
   getAnalysisGeneratedCount,
+  getIrrigationSummaryByPlotId,
 } from "../../service/AdminService/readingService";
 
 import {
@@ -19,6 +20,7 @@ import {
   PlotReadingsTrend,
   SoilTypeStat,
   UserPlots,
+  IrrigationLogSummary,
 } from "../../models/readingStoreModels";
 
 interface ReadingState {
@@ -33,7 +35,8 @@ interface ReadingState {
   plotNutrientsTrends: Record<number, PlotReadingsTrend[]>;
   chartNutrientTrends: Record<number, ChartSummaryTrend[]>;
   customPlotNutrientsTrends: ChartSummaryTrend[] | null;
-  aiAnalysisByPlotId: Record<number, AnalysisSummary>;
+  aiAnalysisByPlotId: Record<number, AnalysisSummary | null>;
+  irrigationSummaryByPlotId: Record<number, IrrigationLogSummary[]>;
 
   // UI State
   selectedPlotId: number | null;
@@ -45,6 +48,7 @@ interface ReadingState {
   isLoadingPlotPerformance: boolean;
   isLoadingPlotNutrients: boolean;
   isLoadingAiAnalysis: boolean;
+  isLoadingIrrigationSummary: boolean;
 
   // Fetch Control Flags
   hasFetchedOverallAverage: boolean;
@@ -54,6 +58,7 @@ interface ReadingState {
   fetchOverallAverage: (startDate?: string, endDate?: string) => Promise<void>;
   fetchSoilTypes: (municipality: string, province: string) => Promise<void>;
   fetchCropTypes: (municipality: string, province: string) => Promise<void>;
+  fetchIrrigationSummaryByPlotId: (plotId: number) => Promise<void>;
   fetchPlotPerformanceSummary: (
     startDate: string,
     endDate: string,
@@ -109,6 +114,7 @@ export const useReadingStore = create<ReadingState>((set, get) => ({
   customPlotNutrientsTrends: null,
   aiAnalysisByPlotId: {},
   selectedPlotId: null,
+  irrigationSummaryByPlotId: {},
 
   // Loading
   isLoadingOverallAverage: false,
@@ -117,6 +123,7 @@ export const useReadingStore = create<ReadingState>((set, get) => ({
   isLoadingPlotPerformance: false,
   isLoadingPlotNutrients: false,
   isLoadingAiAnalysis: false,
+  isLoadingIrrigationSummary: false,
 
   // Flags
   hasFetchedOverallAverage: false,
@@ -259,13 +266,25 @@ export const useReadingStore = create<ReadingState>((set, get) => ({
 
   fetchAiAnalysis: async (plotId) => {
     const exists = get().aiAnalysisByPlotId[plotId];
-    if (exists) return;
+    if (exists !== undefined) return;
 
     set({ isLoadingAiAnalysis: true });
+
     const data = await getAiSummaryByPlotId(plotId);
 
-    if (!data) {
-      set({ isLoadingAiAnalysis: false });
+    console.log("Data fetched: ", data);
+
+    if (!data || !data.analysis?.AI_Analysis) {
+      console.warn("Invalid or missing AI_Analysis data");
+
+      set((state) => ({
+        aiAnalysisByPlotId: {
+          ...state.aiAnalysisByPlotId,
+          [plotId]: null,
+        },
+        isLoadingAiAnalysis: false,
+      }));
+
       return;
     }
 
@@ -293,5 +312,19 @@ export const useReadingStore = create<ReadingState>((set, get) => ({
 
   setSelectedPlotId: (plotId) => {
     set({ selectedPlotId: plotId });
+  },
+
+  fetchIrrigationSummaryByPlotId: async (plotId) => {
+    set({ isLoadingIrrigationSummary: true });
+
+    const data = await getIrrigationSummaryByPlotId(plotId);
+
+    set((state) => ({
+      irrigationSummaryByPlotId: {
+        ...state.irrigationSummaryByPlotId,
+        [plotId]: data ?? [],
+      },
+      isLoadingIrrigationSummary: false,
+    }));
   },
 }));
