@@ -10,7 +10,7 @@ import { useMainPageHook } from "../../../hooks/useMainPage";
 const AreaPage = () => {
   useMainPageHook();
 
-  //STORE DATA
+  //STORE DATAS
   const { soilTypes, cropTypes, userPlots } = useReadingStore();
 
   return (
