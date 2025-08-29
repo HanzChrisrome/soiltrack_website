@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X, PlusIcon } from "lucide-react";
 import GradientHeading from "../../../components/widgets/GradientComponent";
 import useUserPageHook from "../../../hooks/useUserPage";
 import { useUserStore } from "../../../store/AdminStore/useUserStore";
+import { useNotificationStore } from "../../../store/AdminStore/useNotificationStore";
 import { UserSummary } from "../../../models/readingStoreModels";
+import { useAuthStore } from "../../../store/useAuthStore";
 
 // Modal Component
 const Modal = ({
@@ -19,9 +21,7 @@ const Modal = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center p-6">
-      {/* Gray overlay */}
       <div className="fixed inset-0 bg-black bg-opacity-50" onClick={onClose} />
-      {/* Modal content */}
       <div className="relative w-full max-w-lg bg-white rounded-xl shadow-xl p-6 z-10 mt-10">
         <div className="flex justify-between items-center mb-4">
           <GradientHeading className="text-3xl">
@@ -30,7 +30,6 @@ const Modal = ({
           <button
             onClick={onClose}
             className="p-2 rounded-full hover:bg-gray-200 focus:outline-none"
-            aria-label="Close"
           >
             <X className="w-6 h-6 text-gray-600" />
           </button>
@@ -46,14 +45,20 @@ const NotificationPage = () => {
   const [message, setMessage] = useState("");
   const [scope, setScope] = useState<"all" | "specific">("all");
   const [selectedFarmers, setSelectedFarmers] = useState<string[]>([]);
-  const [isSending, setIsSending] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [history, setHistory] = useState<
-    { title: string; message: string; scope: string; timestamp: string }[]
-  >([]);
 
   const { userSummary } = useUserStore();
+  const { authUser } = useAuthStore(); // ✅ use authUser instead of user
+  const { notifications, fetchNotifications, sendNotification, loading } =
+    useNotificationStore();
+
   useUserPageHook();
+
+  useEffect(() => {
+    if (authUser?.user_id) {
+      fetchNotifications(authUser.user_id);
+    }
+  }, [authUser?.user_id, fetchNotifications]);
 
   const handleSendNotification = async () => {
     if (!title.trim() || !message.trim()) {
@@ -61,40 +66,35 @@ const NotificationPage = () => {
       return;
     }
 
-    setIsSending(true);
+    if (!authUser) {
+      alert("❌ You must be logged in to send notifications.");
+      console.error("❌ authUser is null — cannot send notification.");
+      return;
+    }
 
     try {
-      // Simulate API
-      await new Promise((resolve) => setTimeout(resolve, 1200));
+      await sendNotification({
+        title,
+        message,
+        scope,
+        recipient_ids: scope === "specific" ? selectedFarmers : [],
+        sender_id: authUser.user_id, // ✅ correct field
+      });
 
-      setHistory((prev) => [
-        {
-          title,
-          message,
-          scope: scope === "all" ? "All Farmers" : selectedFarmers.join(", "),
-          timestamp: new Date().toLocaleString(),
-        },
-        ...prev,
-      ]);
-
-      // Reset
       setTitle("");
       setMessage("");
       setSelectedFarmers([]);
       setScope("all");
       setIsModalOpen(false);
-
       alert("✅ Notification sent successfully!");
-    } catch (error) {
-      alert("❌ Failed to send notification.");
-    } finally {
-      setIsSending(false);
+    } catch (err: any) {
+      console.error("❌ Failed to send notification. Full error:", err);
+      alert("❌ Failed to send notification. Check console for details.");
     }
   };
 
   return (
     <div className="p-6 space-y-6">
-      {/* Header with button */}
       <div className="flex items-center justify-between">
         <div>
           <GradientHeading className="text-3xl text-neutral-800 font-bold leading-tight">
@@ -117,16 +117,17 @@ const NotificationPage = () => {
         </button>
       </div>
 
-      {/* History Section */}
       <div className="p-4 border rounded-lg shadow bg-white">
         <h2 className="text-lg font-semibold mb-2">Notification History</h2>
-        {history.length === 0 ? (
-          <p className="text-sm text-gray-500">No notifications sent yet.</p>
+        {loading ? (
+          <p className="text-sm text-gray-500">Loading...</p>
+        ) : notifications.length === 0 ? (
+          <p className="text-sm text-gray-500">No notifications found.</p>
         ) : (
           <ul className="space-y-3">
-            {history.map((item, index) => (
+            {notifications.map((item) => (
               <li
-                key={index}
+                key={item.id}
                 className="p-3 border rounded bg-gray-50 text-sm space-y-1"
               >
                 <p>
@@ -136,10 +137,15 @@ const NotificationPage = () => {
                   <span className="font-bold">Message:</span> {item.message}
                 </p>
                 <p>
-                  <span className="font-bold">Recipients:</span> {item.scope}
+                  <span className="font-bold">Recipients:</span>{" "}
+                  {item.scope === "all"
+                    ? "All Farmers"
+                    : item.recipient_ids?.length
+                    ? item.recipient_ids.join(", ")
+                    : "No recipients"}
                 </p>
                 <p className="text-xs text-gray-500">
-                  Sent at {item.timestamp}
+                  Sent at {new Date(item.created_at).toLocaleString()}
                 </p>
               </li>
             ))}
@@ -147,10 +153,8 @@ const NotificationPage = () => {
         )}
       </div>
 
-      {/* Modal */}
       <Modal visible={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <div className="space-y-4">
-          {/* Recipient Scope */}
           <div>
             <h2 className="text-lg font-semibold mb-2">Recipients</h2>
             <div className="flex items-center gap-4">
@@ -191,16 +195,16 @@ const NotificationPage = () => {
                       >
                         <input
                           type="checkbox"
-                          checked={selectedFarmers.includes(user.user_name)}
+                          checked={selectedFarmers.includes(user.user_id)}
                           onChange={(e) => {
                             if (e.target.checked) {
                               setSelectedFarmers((prev) => [
                                 ...prev,
-                                user.user_name,
+                                user.user_id,
                               ]);
                             } else {
                               setSelectedFarmers((prev) =>
-                                prev.filter((name) => name !== user.user_name)
+                                prev.filter((id) => id !== user.user_id)
                               );
                             }
                           }}
@@ -216,7 +220,6 @@ const NotificationPage = () => {
             )}
           </div>
 
-          {/* Notification Content */}
           <div>
             <label className="block text-sm font-medium">Title</label>
             <input
@@ -240,10 +243,10 @@ const NotificationPage = () => {
 
           <button
             onClick={handleSendNotification}
-            disabled={isSending}
+            disabled={loading}
             className="btn btn-primary btn-md flex items-center rounded-full py-0 px-7 hover:text-secondary"
           >
-            {isSending ? "Sending..." : "Send Notification"}
+            {loading ? "Sending..." : "Send Notification"}
           </button>
         </div>
       </Modal>
