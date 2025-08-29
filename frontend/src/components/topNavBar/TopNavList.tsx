@@ -37,7 +37,7 @@ export default function TopNavBarItemsList() {
       />
       <TabNavItem
         icon={<UserCircle2 size={18} />}
-        text="Notifciations"
+        text="Notifications"
         active={currentPath === "/admin/notifications"}
         alert={false}
         onClick={() => navigate("admin/notifications")}
