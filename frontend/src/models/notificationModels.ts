@@ -4,6 +4,7 @@ export interface Notification {
   message: string;
   scope: "all" | "specific";
   recipient_ids: string[];
+  recipients: string[]; // resolved names from DB
   sender_id: string;
   created_at: string;
 }

@@ -4,7 +4,6 @@ import GradientHeading from "../../../components/widgets/GradientComponent";
 import useUserPageHook from "../../../hooks/useUserPage";
 import { useUserStore } from "../../../store/AdminStore/useUserStore";
 import { useNotificationStore } from "../../../store/AdminStore/useNotificationStore";
-import { UserSummary } from "../../../models/readingStoreModels";
 import { useAuthStore } from "../../../store/useAuthStore";
 
 // Modal Component
@@ -48,29 +47,21 @@ const NotificationPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { userSummary } = useUserStore();
-  const { authUser } = useAuthStore(); // ✅ use authUser instead of user
+  const { authUser } = useAuthStore();
   const { notifications, fetchNotifications, sendNotification, loading } =
     useNotificationStore();
 
   useUserPageHook();
 
   useEffect(() => {
-    if (authUser?.user_id) {
-      fetchNotifications(authUser.user_id);
-    }
-  }, [authUser?.user_id, fetchNotifications]);
+    if (authUser?.user_id) fetchNotifications(authUser.user_id);
+  }, [authUser?.user_id]);
 
   const handleSendNotification = async () => {
-    if (!title.trim() || !message.trim()) {
-      alert("Title and Message are required.");
-      return;
-    }
-
-    if (!authUser) {
-      alert("❌ You must be logged in to send notifications.");
-      console.error("❌ authUser is null — cannot send notification.");
-      return;
-    }
+    if (!title.trim() || !message.trim())
+      return alert("Title and Message are required.");
+    if (!authUser)
+      return alert("❌ You must be logged in to send notifications.");
 
     try {
       await sendNotification({
@@ -78,17 +69,16 @@ const NotificationPage = () => {
         message,
         scope,
         recipient_ids: scope === "specific" ? selectedFarmers : [],
-        sender_id: authUser.user_id, // ✅ correct field
+        sender_id: authUser.user_id,
       });
-
       setTitle("");
       setMessage("");
       setSelectedFarmers([]);
       setScope("all");
       setIsModalOpen(false);
       alert("✅ Notification sent successfully!");
-    } catch (err: any) {
-      console.error("❌ Failed to send notification. Full error:", err);
+    } catch (err) {
+      console.error("❌ Failed to send notification:", err);
       alert("❌ Failed to send notification. Check console for details.");
     }
   };
@@ -140,8 +130,8 @@ const NotificationPage = () => {
                   <span className="font-bold">Recipients:</span>{" "}
                   {item.scope === "all"
                     ? "All Farmers"
-                    : item.recipient_ids?.length
-                    ? item.recipient_ids.join(", ")
+                    : item.recipients.length
+                    ? item.recipients.join(", ")
                     : "No recipients"}
                 </p>
                 <p className="text-xs text-gray-500">
@@ -161,20 +151,20 @@ const NotificationPage = () => {
               <div className="rounded-full bg-gray-100 border p-2 flex">
                 <button
                   onClick={() => setScope("all")}
-                  className={`px-4 py-2 rounded ${
+                  className={`px-4 py-2 rounded-full ${
                     scope === "all"
-                      ? "bg-green-900 rounded-full text-white"
-                      : "bg-gray-100 rounded-full text-gray-700"
+                      ? "bg-green-900 text-white"
+                      : "bg-gray-100 text-gray-700"
                   }`}
                 >
                   All Farmers
                 </button>
                 <button
                   onClick={() => setScope("specific")}
-                  className={`px-4 py-2 rounded ${
+                  className={`px-4 py-2 rounded-full ${
                     scope === "specific"
-                      ? "bg-green-900 rounded-full text-white"
-                      : "bg-gray-100 rounded-full text-gray-700"
+                      ? "bg-green-900 text-white"
+                      : "bg-gray-100 text-gray-700"
                   }`}
                 >
                   Specific Farmers
@@ -188,7 +178,7 @@ const NotificationPage = () => {
                   <p className="text-gray-500">No farmers found.</p>
                 ) : (
                   <ul className="space-y-2">
-                    {userSummary.map((user: UserSummary) => (
+                    {userSummary.map((user) => (
                       <li
                         key={user.user_id}
                         className="flex items-center gap-2"
@@ -197,16 +187,15 @@ const NotificationPage = () => {
                           type="checkbox"
                           checked={selectedFarmers.includes(user.user_id)}
                           onChange={(e) => {
-                            if (e.target.checked) {
+                            if (e.target.checked)
                               setSelectedFarmers((prev) => [
                                 ...prev,
                                 user.user_id,
                               ]);
-                            } else {
+                            else
                               setSelectedFarmers((prev) =>
                                 prev.filter((id) => id !== user.user_id)
                               );
-                            }
                           }}
                         />
                         <span>
