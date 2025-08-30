@@ -64,6 +64,9 @@ export const useAnnouncementStore = create<AnnouncementState>((set) => ({
           ...a,
           recipient_ids,
           recipients,
+          type: a.type, // new
+          status: a.status, // new
+          expiry: a.expiry, // new
         };
       });
 
@@ -81,12 +84,25 @@ export const useAnnouncementStore = create<AnnouncementState>((set) => ({
     scope,
     recipient_ids,
     sender_id,
+    type,
+    status,
+    expiry,
   }) => {
     set({ loading: true });
     try {
       const { data: ann, error: annError } = await supabase
         .from("announcements")
-        .insert([{ title, message, scope, sender_id }])
+        .insert([
+          {
+            title,
+            message,
+            scope,
+            sender_id,
+            type, // new
+            status, // new
+            expiry, // new
+          },
+        ])
         .select()
         .single();
 

@@ -5,6 +5,7 @@ import useUserPageHook from "../../../hooks/useUserPage";
 import { useUserStore } from "../../../store/AdminStore/useUserStore";
 import { useAnnouncementStore } from "../../../store/AdminStore/useAnnouncementStore";
 import { useAuthStore } from "../../../store/useAuthStore";
+import useAnnouncementPageHook from "../../../hooks/useAnnouncementPage";
 
 // Modal Component
 const Modal = ({
@@ -27,6 +28,7 @@ const Modal = ({
         className={`relative w-full max-w-lg bg-white rounded-xl shadow-xl p-6 z-10 mt-10 transform transition-all duration-300 ${
           visible ? "opacity-100 scale-100" : "opacity-0 scale-95"
         }`}
+        style={{ maxHeight: "80vh" }} // 👈 limit height relative to screen
       >
         <div className="flex justify-between items-center mb-4">
           <GradientHeading className="text-3xl">
@@ -39,7 +41,11 @@ const Modal = ({
             <X className="w-6 h-6 text-gray-600" />
           </button>
         </div>
-        {children}
+
+        {/* 👇 make children scrollable if taller than max height */}
+        <div className="overflow-y-auto pr-2" style={{ maxHeight: "65vh" }}>
+          {children}
+        </div>
       </div>
     </div>
   );
@@ -50,6 +56,10 @@ const AnnouncementPage = () => {
   const [message, setMessage] = useState("");
   const [scope, setScope] = useState<"all" | "specific">("all");
   const [selectedFarmers, setSelectedFarmers] = useState<string[]>([]);
+  const [type, setType] = useState<
+    "Information" | "Warning" | "Reminder" | "Event" | "Other"
+  >("Information");
+  const [expiry, setExpiry] = useState<string>("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [feedback, setFeedback] = useState<{
     visible: boolean;
@@ -57,16 +67,18 @@ const AnnouncementPage = () => {
     message: string;
   }>({ visible: false, success: true, message: "" });
 
+  // Filters
+  const [filterDate, setFilterDate] = useState<string>("");
+  const [filterStatus, setFilterStatus] = useState<string>("All");
+  const [filterType, setFilterType] = useState<string>("All");
+
   const { userSummary } = useUserStore();
   const { authUser } = useAuthStore();
   const { announcements, fetchAnnouncements, sendAnnouncement, loading } =
     useAnnouncementStore();
 
   useUserPageHook();
-
-  useEffect(() => {
-    if (authUser?.user_id) fetchAnnouncements(authUser.user_id);
-  }, [authUser?.user_id]);
+  useAnnouncementPageHook();
 
   const handleSendAnnouncement = async () => {
     if (!title.trim() || !message.trim()) {
@@ -93,11 +105,16 @@ const AnnouncementPage = () => {
         scope,
         recipient_ids: scope === "specific" ? selectedFarmers : [],
         sender_id: authUser.user_id,
+        type,
+        status: "Ongoing", // 👈 default
+        expiry: expiry ? new Date(expiry).toISOString() : null,
       });
       setTitle("");
       setMessage("");
       setSelectedFarmers([]);
       setScope("all");
+      setType("Information");
+      setExpiry("");
       setIsModalOpen(false);
 
       setFeedback({
@@ -119,6 +136,16 @@ const AnnouncementPage = () => {
       );
     }
   };
+
+  // Apply filters
+  const filteredAnnouncements = announcements.filter((item) => {
+    const matchesDate =
+      !filterDate || new Date(item.created_at) >= new Date(filterDate);
+    const matchesStatus =
+      filterStatus === "All" || item.status === filterStatus;
+    const matchesType = filterType === "All" || item.type === filterType;
+    return matchesDate && matchesStatus && matchesType;
+  });
 
   return (
     <div className="p-6 space-y-6">
@@ -145,16 +172,57 @@ const AnnouncementPage = () => {
         </button>
       </div>
 
+      {/* Filters */}
+      <div className="flex flex-wrap gap-4 bg-gray-50 p-4 rounded-lg border">
+        <div>
+          <label className="text-sm font-medium">Date</label>
+          <input
+            type="date"
+            className="border rounded p-1 ml-2"
+            value={filterDate}
+            onChange={(e) => setFilterDate(e.target.value)}
+          />
+        </div>
+        <div>
+          <label className="text-sm font-medium">Status</label>
+          <select
+            className="border rounded p-1 ml-2"
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+          >
+            <option>All</option>
+            <option>Ongoing</option>
+            <option>Expired</option>
+            <option>Archived</option>
+          </select>
+        </div>
+        <div>
+          <label className="text-sm font-medium">Type</label>
+          <select
+            className="border rounded p-1 ml-2"
+            value={filterType}
+            onChange={(e) => setFilterType(e.target.value)}
+          >
+            <option>All</option>
+            <option>Information</option>
+            <option>Warning</option>
+            <option>Reminder</option>
+            <option>Event</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
+
       {/* Announcement History */}
       <div className="p-4 border rounded-lg shadow bg-white">
         <h2 className="text-lg font-semibold mb-2">Announcement History</h2>
         {loading ? (
           <p className="text-sm text-gray-500">Loading...</p>
-        ) : announcements.length === 0 ? (
+        ) : filteredAnnouncements.length === 0 ? (
           <p className="text-sm text-gray-500">No announcements found.</p>
         ) : (
           <ul className="space-y-3">
-            {announcements.map((item) => (
+            {filteredAnnouncements.map((item) => (
               <li
                 key={item.id}
                 className="p-3 border rounded bg-gray-50 text-sm space-y-1"
@@ -166,6 +234,18 @@ const AnnouncementPage = () => {
                   <span className="font-bold">Message:</span> {item.message}
                 </p>
                 <p>
+                  <span className="font-bold">Type:</span> {item.type}
+                </p>
+                <p>
+                  <span className="font-bold">Status:</span> {item.status}
+                </p>
+                {item.expiry && (
+                  <p>
+                    <span className="font-bold">Expiry:</span>{" "}
+                    {new Date(item.expiry).toLocaleDateString()}
+                  </p>
+                )}
+                <p>
                   <span className="font-bold">Recipients:</span>{" "}
                   {item.scope === "all"
                     ? "All Farmers"
@@ -174,7 +254,9 @@ const AnnouncementPage = () => {
                     : "No recipients"}
                 </p>
                 <p className="text-xs text-gray-500">
-                  Sent at {new Date(item.created_at).toLocaleString()}
+                  Sent at {new Date(item.created_at).toLocaleString()}{" "}
+                  {item.expiry &&
+                    `| Expires: ${new Date(item.expiry).toLocaleDateString()}`}
                 </p>
               </li>
             ))}
@@ -240,7 +322,7 @@ const AnnouncementPage = () => {
                           }
                           className={`cursor-pointer flex items-center justify-between p-2 transition-colors duration-200 ${
                             isSelected
-                              ? "bg-green-700 text-white"
+                              ? "bg-green-900 text-white"
                               : index % 2 === 0
                               ? "bg-white"
                               : "bg-gray-100"
@@ -277,6 +359,33 @@ const AnnouncementPage = () => {
               onChange={(e) => setMessage(e.target.value)}
               placeholder="Enter your message"
               rows={4}
+            />
+          </div>
+
+          {/* Type Dropdown */}
+          <div>
+            <label className="block text-sm font-medium">Type</label>
+            <select
+              className="w-full border rounded p-2 mt-1"
+              value={type}
+              onChange={(e) => setType(e.target.value as any)}
+            >
+              <option value="Information">Information</option>
+              <option value="Warning">Warning</option>
+              <option value="Reminder">Reminder</option>
+              <option value="Event">Event</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          {/* Expiry Date Picker */}
+          <div>
+            <label className="block text-sm font-medium">Expiry Date</label>
+            <input
+              type="date"
+              className="w-full border rounded p-2 mt-1"
+              value={expiry}
+              onChange={(e) => setExpiry(e.target.value)}
             />
           </div>
 
