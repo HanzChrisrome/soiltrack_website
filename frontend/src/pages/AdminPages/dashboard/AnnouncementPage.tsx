@@ -3,7 +3,7 @@ import { X, PlusIcon } from "lucide-react";
 import GradientHeading from "../../../components/widgets/GradientComponent";
 import useUserPageHook from "../../../hooks/useUserPage";
 import { useUserStore } from "../../../store/AdminStore/useUserStore";
-import { useNotificationStore } from "../../../store/AdminStore/useNotificationStore";
+import { useAnnouncementStore } from "../../../store/AdminStore/useAnnouncementStore";
 import { useAuthStore } from "../../../store/useAuthStore";
 
 // Modal Component
@@ -16,15 +16,21 @@ const Modal = ({
   onClose: () => void;
   children: React.ReactNode;
 }) => {
-  if (!visible) return null;
-
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center p-6">
+    <div
+      className={`fixed inset-0 z-50 flex items-start justify-center p-6 transition-opacity duration-300 ${
+        visible ? "opacity-100" : "opacity-0 pointer-events-none"
+      }`}
+    >
       <div className="fixed inset-0 bg-black bg-opacity-50" onClick={onClose} />
-      <div className="relative w-full max-w-lg bg-white rounded-xl shadow-xl p-6 z-10 mt-10">
+      <div
+        className={`relative w-full max-w-lg bg-white rounded-xl shadow-xl p-6 z-10 mt-10 transform transition-all duration-300 ${
+          visible ? "opacity-100 scale-100" : "opacity-0 scale-95"
+        }`}
+      >
         <div className="flex justify-between items-center mb-4">
           <GradientHeading className="text-3xl">
-            Send New Notification
+            Send New Announcement
           </GradientHeading>
           <button
             onClick={onClose}
@@ -39,32 +45,49 @@ const Modal = ({
   );
 };
 
-const NotificationPage = () => {
+const AnnouncementPage = () => {
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
   const [scope, setScope] = useState<"all" | "specific">("all");
   const [selectedFarmers, setSelectedFarmers] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [feedback, setFeedback] = useState<{
+    visible: boolean;
+    success: boolean;
+    message: string;
+  }>({ visible: false, success: true, message: "" });
 
   const { userSummary } = useUserStore();
   const { authUser } = useAuthStore();
-  const { notifications, fetchNotifications, sendNotification, loading } =
-    useNotificationStore();
+  const { announcements, fetchAnnouncements, sendAnnouncement, loading } =
+    useAnnouncementStore();
 
   useUserPageHook();
 
   useEffect(() => {
-    if (authUser?.user_id) fetchNotifications(authUser.user_id);
+    if (authUser?.user_id) fetchAnnouncements(authUser.user_id);
   }, [authUser?.user_id]);
 
-  const handleSendNotification = async () => {
-    if (!title.trim() || !message.trim())
-      return alert("Title and Message are required.");
-    if (!authUser)
-      return alert("❌ You must be logged in to send notifications.");
+  const handleSendAnnouncement = async () => {
+    if (!title.trim() || !message.trim()) {
+      setFeedback({
+        visible: true,
+        success: false,
+        message: "⚠️ Title and Message are required.",
+      });
+      return;
+    }
+    if (!authUser) {
+      setFeedback({
+        visible: true,
+        success: false,
+        message: "❌ You must be logged in to send announcements.",
+      });
+      return;
+    }
 
     try {
-      await sendNotification({
+      await sendAnnouncement({
         title,
         message,
         scope,
@@ -76,22 +99,37 @@ const NotificationPage = () => {
       setSelectedFarmers([]);
       setScope("all");
       setIsModalOpen(false);
-      alert("✅ Notification sent successfully!");
+
+      setFeedback({
+        visible: true,
+        success: true,
+        message: "✅ Announcement sent successfully!",
+      });
     } catch (err) {
-      console.error("❌ Failed to send notification:", err);
-      alert("❌ Failed to send notification. Check console for details.");
+      console.error("❌ Failed to send announcement:", err);
+      setFeedback({
+        visible: true,
+        success: false,
+        message: "❌ Failed to send announcement. Check console for details.",
+      });
+    } finally {
+      setTimeout(
+        () => setFeedback((prev) => ({ ...prev, visible: false })),
+        3000
+      );
     }
   };
 
   return (
     <div className="p-6 space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <GradientHeading className="text-3xl text-neutral-800 font-bold leading-tight">
-            Notifications
+            Announcements
           </GradientHeading>
           <p className="text-sm text-neutral leading-tight">
-            Review sent notifications and send new ones.
+            Review sent announcements and send new ones.
           </p>
         </div>
         <button
@@ -102,20 +140,21 @@ const NotificationPage = () => {
             <PlusIcon />
           </span>
           <span className="px-2 text-white font-normal">
-            Send New Notification
+            Send New Announcement
           </span>
         </button>
       </div>
 
+      {/* Announcement History */}
       <div className="p-4 border rounded-lg shadow bg-white">
-        <h2 className="text-lg font-semibold mb-2">Notification History</h2>
+        <h2 className="text-lg font-semibold mb-2">Announcement History</h2>
         {loading ? (
           <p className="text-sm text-gray-500">Loading...</p>
-        ) : notifications.length === 0 ? (
-          <p className="text-sm text-gray-500">No notifications found.</p>
+        ) : announcements.length === 0 ? (
+          <p className="text-sm text-gray-500">No announcements found.</p>
         ) : (
           <ul className="space-y-3">
-            {notifications.map((item) => (
+            {announcements.map((item) => (
               <li
                 key={item.id}
                 className="p-3 border rounded bg-gray-50 text-sm space-y-1"
@@ -143,15 +182,17 @@ const NotificationPage = () => {
         )}
       </div>
 
+      {/* Send Announcement Modal */}
       <Modal visible={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <div className="space-y-4">
+          {/* Recipients Section */}
           <div>
             <h2 className="text-lg font-semibold mb-2">Recipients</h2>
             <div className="flex items-center gap-4">
               <div className="rounded-full bg-gray-100 border p-2 flex">
                 <button
                   onClick={() => setScope("all")}
-                  className={`px-4 py-2 rounded-full ${
+                  className={`px-4 py-2 rounded-full transition-colors duration-300 ${
                     scope === "all"
                       ? "bg-green-900 text-white"
                       : "bg-gray-100 text-gray-700"
@@ -161,7 +202,7 @@ const NotificationPage = () => {
                 </button>
                 <button
                   onClick={() => setScope("specific")}
-                  className={`px-4 py-2 rounded-full ${
+                  className={`px-4 py-2 rounded-full transition-colors duration-300 ${
                     scope === "specific"
                       ? "bg-green-900 text-white"
                       : "bg-gray-100 text-gray-700"
@@ -172,53 +213,62 @@ const NotificationPage = () => {
               </div>
             </div>
 
-            {scope === "specific" && (
-              <div className="mt-3 max-h-40 overflow-y-auto border p-2 rounded">
+            {/* Smooth transition between scopes */}
+            <div
+              className={`transition-all duration-500 ${
+                scope === "specific"
+                  ? "opacity-100 max-h-60 mt-3"
+                  : "opacity-0 max-h-0 overflow-hidden"
+              }`}
+            >
+              <div className="mt-3 max-h-40 overflow-y-auto border rounded">
                 {!userSummary || userSummary.length === 0 ? (
-                  <p className="text-gray-500">No farmers found.</p>
+                  <p className="text-gray-500 p-2">No farmers found.</p>
                 ) : (
-                  <ul className="space-y-2">
-                    {userSummary.map((user) => (
-                      <li
-                        key={user.user_id}
-                        className="flex items-center gap-2"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={selectedFarmers.includes(user.user_id)}
-                          onChange={(e) => {
-                            if (e.target.checked)
-                              setSelectedFarmers((prev) => [
-                                ...prev,
-                                user.user_id,
-                              ]);
-                            else
-                              setSelectedFarmers((prev) =>
-                                prev.filter((id) => id !== user.user_id)
-                              );
-                          }}
-                        />
-                        <span>
-                          {user.user_name} ({user.user_email})
-                        </span>
-                      </li>
-                    ))}
+                  <ul className="divide-y">
+                    {userSummary.map((user, index) => {
+                      const isSelected = selectedFarmers.includes(user.user_id);
+                      return (
+                        <li
+                          key={user.user_id}
+                          onClick={() =>
+                            setSelectedFarmers((prev) =>
+                              prev.includes(user.user_id)
+                                ? prev.filter((id) => id !== user.user_id)
+                                : [...prev, user.user_id]
+                            )
+                          }
+                          className={`cursor-pointer flex items-center justify-between p-2 transition-colors duration-200 ${
+                            isSelected
+                              ? "bg-green-700 text-white"
+                              : index % 2 === 0
+                              ? "bg-white"
+                              : "bg-gray-100"
+                          }`}
+                        >
+                          <span>{user.user_name}</span>
+                          <span>{user.user_email}</span>
+                        </li>
+                      );
+                    })}
                   </ul>
                 )}
               </div>
-            )}
+            </div>
           </div>
 
+          {/* Title Input */}
           <div>
             <label className="block text-sm font-medium">Title</label>
             <input
               className="w-full border rounded p-2 mt-1"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Enter notification title"
+              placeholder="Enter announcement title"
             />
           </div>
 
+          {/* Message Input */}
           <div>
             <label className="block text-sm font-medium">Message</label>
             <textarea
@@ -230,17 +280,34 @@ const NotificationPage = () => {
             />
           </div>
 
+          {/* Send Button */}
           <button
-            onClick={handleSendNotification}
+            onClick={handleSendAnnouncement}
             disabled={loading}
             className="btn btn-primary btn-md flex items-center rounded-full py-0 px-7 hover:text-secondary"
           >
-            {loading ? "Sending..." : "Send Notification"}
+            {loading ? "Sending..." : "Send Announcement"}
           </button>
+        </div>
+      </Modal>
+
+      {/* Feedback Modal */}
+      <Modal
+        visible={feedback.visible}
+        onClose={() => setFeedback((prev) => ({ ...prev, visible: false }))}
+      >
+        <div className="text-center">
+          <p
+            className={`text-lg font-semibold ${
+              feedback.success ? "text-green-600" : "text-red-600"
+            }`}
+          >
+            {feedback.message}
+          </p>
         </div>
       </Modal>
     </div>
   );
 };
 
-export default NotificationPage;
+export default AnnouncementPage;

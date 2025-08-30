@@ -1,4 +1,4 @@
-export interface Notification {
+export interface Announcement {
   id: string;
   title: string;
   message: string;
@@ -9,7 +9,7 @@ export interface Notification {
   created_at: string;
 }
 
-export interface NotificationInput {
+export interface AnnouncementInput {
   title: string;
   message: string;
   scope: "all" | "specific";

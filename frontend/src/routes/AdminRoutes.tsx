@@ -4,8 +4,8 @@ import UserPage from "../pages/AdminPages/dashboard/UserPage";
 import AreaPage from "../pages/AdminPages/dashboard/AreaPage";
 import SpecificPlotPage from "../pages/AdminPages/dashboard/SpecificPlotPage";
 import AddUserPage from "../components/AdminComponents/UserPage/AddUserWidget";
-import NotificationPage from "../pages/AdminPages/dashboard/NotificationPage";
 import RoleProtectedRoute from "../helper/ProtectedRoute";
+import AnnouncementPage from "../pages/AdminPages/dashboard/AnnouncementPage";
 
 const AdminRoutes = () => (
   <>
@@ -26,10 +26,10 @@ const AdminRoutes = () => (
       }
     />
     <Route
-      path="admin/notifications"
+      path="admin/announcements"
       element={
         <RoleProtectedRoute allowedRoles={["MUNICIPALITY ADMIN"]}>
-          <NotificationPage />
+          <AnnouncementPage />
         </RoleProtectedRoute>
       }
     />
