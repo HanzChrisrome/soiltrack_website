@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { X, PlusIcon } from "lucide-react";
+import { useState } from "react";
+import { X, PlusIcon, MoreVertical } from "lucide-react";
 import GradientHeading from "../../../components/widgets/GradientComponent";
 import useUserPageHook from "../../../hooks/useUserPage";
 import { useUserStore } from "../../../store/AdminStore/useUserStore";
@@ -28,7 +28,7 @@ const Modal = ({
         className={`relative w-full max-w-lg bg-white rounded-xl shadow-xl p-6 z-10 mt-10 transform transition-all duration-300 ${
           visible ? "opacity-100 scale-100" : "opacity-0 scale-95"
         }`}
-        style={{ maxHeight: "80vh" }} // 👈 limit height relative to screen
+        style={{ maxHeight: "80vh" }}
       >
         <div className="flex justify-between items-center mb-4">
           <GradientHeading className="text-3xl">
@@ -42,7 +42,6 @@ const Modal = ({
           </button>
         </div>
 
-        {/* 👇 make children scrollable if taller than max height */}
         <div className="overflow-y-auto pr-2" style={{ maxHeight: "65vh" }}>
           {children}
         </div>
@@ -61,6 +60,9 @@ const AnnouncementPage = () => {
   >("Information");
   const [expiry, setExpiry] = useState<string>("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
+
   const [feedback, setFeedback] = useState<{
     visible: boolean;
     success: boolean;
@@ -74,8 +76,13 @@ const AnnouncementPage = () => {
 
   const { userSummary } = useUserStore();
   const { authUser } = useAuthStore();
-  const { announcements, fetchAnnouncements, sendAnnouncement, loading } =
-    useAnnouncementStore();
+  const {
+    announcements,
+    sendAnnouncement,
+    updateAnnouncement,
+    archiveAnnouncement,
+    loading,
+  } = useAnnouncementStore();
 
   useUserPageHook();
   useAnnouncementPageHook();
@@ -85,7 +92,7 @@ const AnnouncementPage = () => {
       setFeedback({
         visible: true,
         success: false,
-        message: "⚠️ Title and Message are required.",
+        message: "Title and Message are required.",
       });
       return;
     }
@@ -93,43 +100,99 @@ const AnnouncementPage = () => {
       setFeedback({
         visible: true,
         success: false,
-        message: "❌ You must be logged in to send announcements.",
+        message: "You must be logged in to send announcements.",
       });
       return;
     }
 
     try {
-      await sendAnnouncement({
-        title,
-        message,
-        scope,
-        recipient_ids: scope === "specific" ? selectedFarmers : [],
-        sender_id: authUser.user_id,
-        type,
-        status: "Ongoing", // 👈 default
-        expiry: expiry ? new Date(expiry).toISOString() : null,
-      });
+      if (editingId) {
+        // Update existing announcement
+        await updateAnnouncement(editingId, {
+          title,
+          message,
+          scope,
+          recipient_ids: scope === "specific" ? selectedFarmers : [],
+          type,
+          expiry: expiry ? new Date(expiry).toISOString() : null,
+        });
+        setFeedback({
+          visible: true,
+          success: true,
+          message: "Announcement updated successfully!",
+        });
+      } else {
+        // Send new announcement
+        await sendAnnouncement({
+          title,
+          message,
+          scope,
+          recipient_ids: scope === "specific" ? selectedFarmers : [],
+          sender_id: authUser.user_id,
+          type,
+          status: "Ongoing",
+          expiry: expiry ? new Date(expiry).toISOString() : null,
+        });
+        setFeedback({
+          visible: true,
+          success: true,
+          message: "Announcement sent successfully!",
+        });
+      }
+
+      // Reset fields
       setTitle("");
       setMessage("");
       setSelectedFarmers([]);
       setScope("all");
       setType("Information");
       setExpiry("");
+      setEditingId(null);
       setIsModalOpen(false);
-
-      setFeedback({
-        visible: true,
-        success: true,
-        message: "✅ Announcement sent successfully!",
-      });
     } catch (err) {
-      console.error("❌ Failed to send announcement:", err);
+      console.error("Failed to save announcement:", err);
       setFeedback({
         visible: true,
         success: false,
-        message: "❌ Failed to send announcement. Check console for details.",
+        message: "Failed to save announcement. Check console for details.",
       });
     } finally {
+      setTimeout(
+        () => setFeedback((prev) => ({ ...prev, visible: false })),
+        3000
+      );
+    }
+  };
+
+  const handleEdit = (item: any) => {
+    setEditingId(item.id);
+    setTitle(item.title);
+    setMessage(item.message);
+    setScope(item.scope);
+    setSelectedFarmers(item.recipient_ids || []);
+    setType(item.type);
+    setExpiry(item.expiry ? item.expiry.split("T")[0] : "");
+    setIsModalOpen(true);
+    setMenuOpenId(null);
+  };
+
+  const handleArchive = async (id: string) => {
+    try {
+      await archiveAnnouncement(id);
+      setFeedback({
+        visible: true,
+        success: true,
+        message: "Announcement archived successfully!",
+      });
+    } catch (err) {
+      console.error("Failed to archive announcement:", err);
+      setFeedback({
+        visible: true,
+        success: false,
+        message: "Failed to archive announcement.",
+      });
+    } finally {
+      setMenuOpenId(null);
       setTimeout(
         () => setFeedback((prev) => ({ ...prev, visible: false })),
         3000
@@ -225,8 +288,36 @@ const AnnouncementPage = () => {
             {filteredAnnouncements.map((item) => (
               <li
                 key={item.id}
-                className="p-3 border rounded bg-gray-50 text-sm space-y-1"
+                className="p-3 border rounded bg-gray-50 text-sm space-y-1 relative"
               >
+                {/* Meatball Menu */}
+                <div className="absolute top-2 right-2">
+                  <button
+                    onClick={() =>
+                      setMenuOpenId(menuOpenId === item.id ? null : item.id)
+                    }
+                    className="p-1 rounded-full hover:bg-gray-200"
+                  >
+                    <MoreVertical size={18} />
+                  </button>
+                  {menuOpenId === item.id && (
+                    <div className="absolute right-0 mt-2 w-32 bg-white border rounded shadow-md z-20">
+                      <button
+                        onClick={() => handleEdit(item)}
+                        className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleArchive(item.id)}
+                        className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100"
+                      >
+                        Archive
+                      </button>
+                    </div>
+                  )}
+                </div>
+
                 <p>
                   <span className="font-bold">Title:</span> {item.title}
                 </p>
@@ -276,7 +367,7 @@ const AnnouncementPage = () => {
                   onClick={() => setScope("all")}
                   className={`px-4 py-2 rounded-full transition-colors duration-300 ${
                     scope === "all"
-                      ? "bg-green-900 text-white"
+                      ? "bg-primary text-white"
                       : "bg-gray-100 text-gray-700"
                   }`}
                 >
@@ -286,7 +377,7 @@ const AnnouncementPage = () => {
                   onClick={() => setScope("specific")}
                   className={`px-4 py-2 rounded-full transition-colors duration-300 ${
                     scope === "specific"
-                      ? "bg-green-900 text-white"
+                      ? "bg-primary text-white"
                       : "bg-gray-100 text-gray-700"
                   }`}
                 >
@@ -322,7 +413,7 @@ const AnnouncementPage = () => {
                           }
                           className={`cursor-pointer flex items-center justify-between p-2 transition-colors duration-200 ${
                             isSelected
-                              ? "bg-green-900 text-white"
+                              ? "bg-primary text-white"
                               : index % 2 === 0
                               ? "bg-white"
                               : "bg-gray-100"
@@ -395,7 +486,11 @@ const AnnouncementPage = () => {
             disabled={loading}
             className="btn btn-primary btn-md flex items-center rounded-full py-0 px-7 hover:text-secondary"
           >
-            {loading ? "Sending..." : "Send Announcement"}
+            {loading
+              ? "Saving..."
+              : editingId
+              ? "Update Announcement"
+              : "Send Announcement"}
           </button>
         </div>
       </Modal>
