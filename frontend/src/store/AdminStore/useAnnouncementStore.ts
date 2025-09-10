@@ -34,7 +34,7 @@ export const useAnnouncementStore = create<AnnouncementState>((set) => ({
 
       if (error) throw error;
 
-      console.log("📢 Announcements fetched:", announcementsData);
+      console.log("Announcements fetched:", announcementsData);
 
       if (!announcementsData?.length) {
         set({ announcements: [] });
@@ -50,7 +50,7 @@ export const useAnnouncementStore = create<AnnouncementState>((set) => ({
 
       if (recipsError) throw recipsError;
 
-      console.log("👥 Recipients fetched:", recipientsData);
+      console.log("Recipients fetched:", recipientsData);
 
       const { userSummary } = useUserStore.getState();
 
@@ -120,7 +120,7 @@ export const useAnnouncementStore = create<AnnouncementState>((set) => ({
           recipient_id: id,
         }));
 
-        console.log("📝 Inserting recipients:", recipientsData);
+        console.log("Inserting recipients:", recipientsData);
 
         const { error: recipsError } = await supabase
           .from("announcement_recipients")
@@ -131,7 +131,7 @@ export const useAnnouncementStore = create<AnnouncementState>((set) => ({
 
       await useAnnouncementStore.getState().fetchAnnouncements(sender_id);
     } catch (err) {
-      console.error("❌ Error sending announcement:", err);
+      console.error("Error sending announcement:", err);
       throw err;
     } finally {
       set({ loading: false });
@@ -141,22 +141,21 @@ export const useAnnouncementStore = create<AnnouncementState>((set) => ({
   archiveAnnouncement: async (id, sender_id) => {
     set({ loading: true });
     try {
-      // Only update status field
+
       const allowedUpdates = { status: "Archived" };
 
-      console.log("📦 Archiving announcement:", id, allowedUpdates);
+      console.log("Archiving announcement:", id, allowedUpdates);
 
       const { error } = await supabase
         .from("announcements")
         .update(allowedUpdates)
-        .eq("id", id); // only filter by id (RLS already protects ownership)
+        .eq("id", id); 
 
       if (error) throw error;
 
-      // Refresh list
       await useAnnouncementStore.getState().fetchAnnouncements(sender_id);
     } catch (err) {
-      console.error("❌ Error archiving announcement:", err);
+      console.error("Error archiving announcement:", err);
       throw err;
     } finally {
       set({ loading: false });
@@ -166,7 +165,7 @@ export const useAnnouncementStore = create<AnnouncementState>((set) => ({
   updateAnnouncement: async (id, updates, sender_id) => {
     set({ loading: true });
     try {
-      // Only keep the fields that exist in announcements
+
       const allowedUpdates = (({ title, message, type, status, expiry }) => ({
         title,
         message,
@@ -175,25 +174,24 @@ export const useAnnouncementStore = create<AnnouncementState>((set) => ({
         expiry,
       }))(updates);
 
-      // 🧹 Remove keys with undefined values
       Object.keys(allowedUpdates).forEach((key) => {
         if (allowedUpdates[key as keyof typeof allowedUpdates] === undefined) {
           delete allowedUpdates[key as keyof typeof allowedUpdates];
         }
       });
 
-      console.log("🔍 Cleaned update payload:", allowedUpdates);
+      console.log("Cleaned update payload:", allowedUpdates);
 
       const { error } = await supabase
         .from("announcements")
         .update(allowedUpdates)
-        .eq("id", id); // or "announcement_id" if that's your PK
+        .eq("id", id); 
 
       if (error) throw error;
 
       await useAnnouncementStore.getState().fetchAnnouncements(sender_id);
     } catch (err) {
-      console.error("❌ Error updating announcement:", err);
+      console.error("Error updating announcement:", err);
       throw err;
     } finally {
       set({ loading: false });

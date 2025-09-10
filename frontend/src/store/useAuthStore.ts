@@ -3,18 +3,20 @@ import { toast } from "react-hot-toast";
 import { AxiosError } from "axios";
 import supabase from "../lib/supabase";
 
+// AuthUser shape for your session state
 export type AuthUser = {
   user_id: string;
   user_email: string;
   user_fname: string;
   user_lname: string;
-  user_municipality: string;
-  user_province: string;
-  user_barangay: string;
+  user_municipality: string; // stored in UPPERCASE
+  user_province: string; // stored in UPPERCASE
+  user_barangay: string; // stored in UPPERCASE
   role_id: number;
   role_name: string;
 };
 
+// Raw Supabase user data shape
 type SupabaseUserData = {
   user_id: string;
   user_email: string;
@@ -38,7 +40,23 @@ interface AuthState {
   isChangingPassword: boolean;
 
   checkAuth: () => Promise<void>;
-  signup: (data: { email: string; password: string }) => Promise<void>;
+  signup: (data: {
+    user_fname: string;
+    user_lname: string;
+    email: string;
+    password: string;
+    phone_number: string;
+    region: string;
+    region_name: string;
+    province: string;
+    province_name: string;
+    city: string;
+    city_name: string;
+    barangay: string;
+    barangay_name: string;
+    street: string;
+  }) => Promise<void>;
+
   login: (email: string, password: string) => Promise<void>;
   forgotPassword: (email: string) => Promise<void>;
   resetPassword: (
@@ -115,20 +133,66 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ isSigningUp: true });
 
     try {
-      await axiosInstance.post("/auth/signup", data);
+      // Step 1: Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: data.email,
+        password: data.password,
+      });
+
+      if (authError) throw authError;
+      if (!authData.user) throw new Error("User not created");
+
+      const user_id = authData.user.id;
+
+      // Step 2: Insert into users (UPPERCASE + default role_id = 3)
+      const { error: userError } = await supabase.from("users").insert([
+        {
+          user_id,
+          user_email: data.email,
+          user_fname: data.user_fname,
+          user_lname: data.user_lname,
+          user_municipality: data.city_name.toUpperCase(),
+          user_province: data.province_name.toUpperCase(),
+          user_barangay: data.barangay_name.toUpperCase(),
+          role_id: 3,
+          phone_number: data.phone_number,
+        },
+      ]);
+
+      if (userError) throw userError;
+
+      // Step 3: Insert shipping address (store both codes + names)
+      const { error: addressError } = await supabase
+        .from("shipping_addresses")
+        .insert([
+          {
+            user_id,
+            region_code: data.region,
+            region_name: data.region_name,
+            province_code: data.province,
+            province_name: data.province_name,
+            city_code: data.city,
+            city_name: data.city_name,
+            barangay_code: data.barangay,
+            barangay_name: data.barangay_name,
+            street: data.street,
+            is_default: true,
+          },
+        ]);
+
+      if (addressError) throw addressError;
+
       toast.success("Signed up successfully!");
     } catch (err) {
-      const error = err as AxiosError;
-      const errorMessage =
-        (error.response?.data as { message: string }).message ||
-        "Failed to sign up!";
-      toast.error(errorMessage);
+      console.error("Signup error:", err);
+      const error = err as { message?: string };
+      toast.error(error.message || "Failed to sign up!");
     } finally {
       set({ isSigningUp: false });
     }
   },
 
-  login: async (emailOrUsername: string, password: string) => {
+  login: async (email: string, password: string) => {
     set({ isLoggingIn: true });
 
     const { data, error: userError } = await supabase
@@ -136,16 +200,13 @@ export const useAuthStore = create<AuthState>((set) => ({
       .select(
         "user_id, user_email, user_fname, user_lname, user_municipality, user_province, user_barangay, role_id, roles(role_name)"
       )
-      .eq("user_email", emailOrUsername)
+      .eq("user_email", email)
       .in("role_id", [1, 2])
       .single();
 
     if (userError) {
-      console.error(
-        "Full Supabase error object:",
-        JSON.stringify(userError, null, 2)
-      );
-      toast.error("No user found with this email or username.");
+      console.error("Supabase error:", userError);
+      toast.error("No user found with this email.");
       set({ authUser: null, isLoggingIn: false });
       return;
     }
@@ -153,7 +214,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     const userData = data as SupabaseUserData;
 
     const { error } = await supabase.auth.signInWithPassword({
-      email: emailOrUsername,
+      email,
       password,
     });
 
