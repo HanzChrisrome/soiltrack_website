@@ -10,6 +10,7 @@ const SignupForm = () => {
 
   const [showPassword, setShowPassword] = useState(false);
   const [step, setStep] = useState(1);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const [formData, setFormData] = useState({
     user_fname: "",
@@ -67,12 +68,16 @@ const SignupForm = () => {
     if (validateStepOne() === true) setStep(2);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validateStepTwo() === true) {
-      await signup(formData);
-      toast.success("Account created successfully!");
+      setShowConfirm(true); // open confirmation modal
     }
+  };
+
+  const handleConfirmSignup = async () => {
+    setShowConfirm(false);
+    await signup(formData); // single success toast handled in store
   };
 
   return (
@@ -85,7 +90,6 @@ const SignupForm = () => {
         {/* Step 1: Account Info */}
         {step === 1 && (
           <form onSubmit={handleNext} className="flex flex-col space-y-6">
-            {/* First Name */}
             <input
               type="text"
               className="input input-bordered rounded-xl w-full"
@@ -97,7 +101,6 @@ const SignupForm = () => {
               required
             />
 
-            {/* Last Name */}
             <input
               type="text"
               className="input input-bordered rounded-xl w-full"
@@ -109,7 +112,6 @@ const SignupForm = () => {
               required
             />
 
-            {/* Email */}
             <div className="form-control">
               <div className="relative">
                 <Mail className="absolute left-3 top-3 h-5 w-5 text-base-content/40" />
@@ -126,7 +128,6 @@ const SignupForm = () => {
               </div>
             </div>
 
-            {/* Password */}
             <div className="form-control">
               <div className="relative">
                 <Lock className="absolute left-3 top-3 h-5 w-5 text-base-content/40" />
@@ -184,9 +185,8 @@ const SignupForm = () => {
               </div>
             </div>
 
-            {/* Address Section */}
+            {/* Location Selects */}
             <div className="form-control space-y-3">
-              {/* Region */}
               <select
                 className="select select-bordered w-full"
                 value={formData.region}
@@ -217,7 +217,6 @@ const SignupForm = () => {
                 ))}
               </select>
 
-              {/* Province */}
               <select
                 className="select select-bordered w-full"
                 value={formData.province}
@@ -246,7 +245,6 @@ const SignupForm = () => {
                 ))}
               </select>
 
-              {/* City */}
               <select
                 className="select select-bordered w-full"
                 value={formData.city}
@@ -273,7 +271,6 @@ const SignupForm = () => {
                 ))}
               </select>
 
-              {/* Barangay */}
               <select
                 className="select select-bordered w-full"
                 value={formData.barangay}
@@ -297,7 +294,6 @@ const SignupForm = () => {
                 ))}
               </select>
 
-              {/* Street */}
               <input
                 type="text"
                 className="input input-bordered w-full"
@@ -337,10 +333,61 @@ const SignupForm = () => {
         )}
       </div>
 
+      {/* Confirmation Modal */}
+      {showConfirm && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
+          <div className="bg-white rounded-xl shadow-lg p-6 w-96 space-y-4">
+            <h3 className="text-xl font-semibold">Confirm Registration</h3>
+            <p className="text-sm text-gray-600">
+              Please confirm that your details are correct before finishing
+              registration.
+            </p>
+            <ul className="text-left text-sm space-y-1">
+              <li>
+                <strong>Name:</strong> {formData.user_fname}{" "}
+                {formData.user_lname}
+              </li>
+              <li>
+                <strong>Email:</strong> {formData.email}
+              </li>
+              <li>
+                <strong>Phone:</strong> {formData.phone_number}
+              </li>
+              <li>
+                <strong>Address:</strong> {formData.street},{" "}
+                {formData.barangay_name}, {formData.city_name},{" "}
+                {formData.province_name}, {formData.region_name}
+              </li>
+            </ul>
+
+            <div className="flex justify-end space-x-3">
+              <button
+                className="btn bg-gray-200 text-black"
+                onClick={() => setShowConfirm(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="btn bg-primary text-white"
+                onClick={handleConfirmSignup}
+                disabled={isSigningUp}
+              >
+                {isSigningUp ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  "Confirm"
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Sign In Section */}
       <div className="text-center font-semibold mt-6">
-        <p className="text-center">
-          By creating an account you agree to Tap In's{" "}
+        <p className="text-center font-light">
+          By creating an account you agree to{" "}
+          <span className="font-semibold">SoilTrack's</span>{" "}
           <span className="text-secondary font-semibold">
             Terms of Services
           </span>{" "}

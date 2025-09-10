@@ -144,45 +144,55 @@ export const useAuthStore = create<AuthState>((set) => ({
 
       const user_id = authData.user.id;
 
-      // Step 2: Insert into users (UPPERCASE + default role_id = 3)
-      const { error: userError } = await supabase.from("users").insert([
-        {
-          user_id,
-          user_email: data.email,
-          user_fname: data.user_fname,
-          user_lname: data.user_lname,
-          user_municipality: data.city_name.toUpperCase(),
-          user_province: data.province_name.toUpperCase(),
-          user_barangay: data.barangay_name.toUpperCase(),
-          role_id: 3,
-          phone_number: data.phone_number,
-        },
-      ]);
-
-      if (userError) throw userError;
-
-      // Step 3: Insert shipping address (store both codes + names)
-      const { error: addressError } = await supabase
-        .from("shipping_addresses")
-        .insert([
+      try {
+        // Step 2: Insert into users (UPPERCASE + default role_id = 3)
+        const { error: userError } = await supabase.from("users").insert([
           {
             user_id,
-            region_code: data.region,
-            region_name: data.region_name,
-            province_code: data.province,
-            province_name: data.province_name,
-            city_code: data.city,
-            city_name: data.city_name,
-            barangay_code: data.barangay,
-            barangay_name: data.barangay_name,
-            street: data.street,
-            is_default: true,
+            user_email: data.email,
+            user_fname: data.user_fname,
+            user_lname: data.user_lname,
+            user_municipality: data.city_name.toUpperCase(),
+            user_province: data.province_name.toUpperCase(),
+            user_barangay: data.barangay_name.toUpperCase(),
+            role_id: 3,
+            phone_number: data.phone_number,
           },
         ]);
 
-      if (addressError) throw addressError;
+        if (userError) throw userError;
 
-      toast.success("Signed up successfully!");
+        // Step 3: Insert shipping address (store both codes + names, adjust if schema differs)
+        const { error: addressError } = await supabase
+          .from("shipping_addresses")
+          .insert([
+            {
+              user_id,
+              region_code: data.region,
+              region_name: data.region_name,
+              province_code: data.province,
+              province_name: data.province_name,
+              city_code: data.city,
+              city_name: data.city_name,
+              barangay_code: data.barangay,
+              barangay_name: data.barangay_name,
+              street: data.street,
+              is_default: true,
+            },
+          ]);
+
+        if (addressError) throw addressError;
+
+        // ✅ Success
+        toast.success("Signed up successfully!");
+      } catch (dbError) {
+        // ❌ Rollback: delete auth user if DB insert fails
+        await supabase.auth.admin.deleteUser(user_id).catch((cleanupErr) => {
+          console.error("Failed to cleanup orphaned auth user:", cleanupErr);
+        });
+
+        throw dbError;
+      }
     } catch (err) {
       console.error("Signup error:", err);
       const error = err as { message?: string };
