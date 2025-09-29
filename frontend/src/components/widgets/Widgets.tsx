@@ -23,6 +23,12 @@ type IconButtonProps = {
   tabIndex?: number;
 };
 
+type TooltipIcon = {
+  content: string;
+  icon?: React.ReactNode;
+  widthClass?: string; // Optional Tailwind width class, e.g., "w-40"
+};
+
 type TooltipIconButtonProps = {
   tooltip: string;
   children: React.ReactNode;
@@ -102,6 +108,25 @@ export const TooltipIconButton: React.FC<TooltipIconButtonProps> = ({
   );
 };
 
+export const TooltipIcon: React.FC<TooltipIcon> = ({
+  content,
+  icon,
+  widthClass,
+}) => {
+  return (
+    <div className="relative group inline-block">
+      <div className="cursor-pointer text-neutral-500">{icon}</div>
+      <div
+        className={`absolute left-1/2 -translate-x-1/2 mt-2 ${
+          widthClass || "w-max"
+        } px-2 py-1 rounded bg-neutral-800 text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity z-50 break-words whitespace-normal`}
+      >
+        {content}
+      </div>
+    </div>
+  );
+};
+
 export const Skeleton = ({ className = "" }: SkeletonProps) => {
   return <div className={`animate-pulse bg-base-200 rounded ${className}`} />;
 };
@@ -115,7 +140,46 @@ export const ToggleSelector = ({
 }: ToggleSelectorProps) => {
   return (
     <CardContainer
-      padding="px-1 py-0.5"
+      padding="px-1 py-1"
+      className={`flex flex-row items-center gap-1 bg-base-200 border-none rounded-xl ${className}`}
+    >
+      {options.map((option) => {
+        const isSelected = option === selected;
+        return isSelected ? (
+          <CardContainer
+            key={option}
+            padding="px-3 py-1.5"
+            className="text-sm text-neutral-800"
+          >
+            {" "}
+            {labelMap?.[option] || option}{" "}
+          </CardContainer>
+        ) : (
+          <div
+            key={option}
+            className="px-3 py-1 cursor-pointer"
+            onClick={() => onSelect(option)}
+          >
+            <span className="text-sm text-neutral-500">
+              {labelMap?.[option] || option}
+            </span>
+          </div>
+        );
+      })}
+    </CardContainer>
+  );
+};
+
+export const GreenToggleSelector = ({
+  options,
+  selected,
+  onSelect,
+  className = "",
+  labelMap,
+}: ToggleSelectorProps) => {
+  return (
+    <CardContainer
+      padding="px-1 py-1"
       className={`flex flex-row items-center gap-1 bg-primary border-none rounded-xl ${className}`}
     >
       {options.map((option) => {
@@ -123,7 +187,7 @@ export const ToggleSelector = ({
         return isSelected ? (
           <CardContainer
             key={option}
-            padding="px-3 py-1"
+            padding="px-3 py-1.5"
             className="text-sm text-primary"
           >
             {" "}

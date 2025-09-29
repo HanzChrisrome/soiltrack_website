@@ -19,7 +19,7 @@ export default function CardContainer({
 }: CardContainerProps) {
   return (
     <div
-      className={`bg-base-100 shadow-sm overflow-hidden ${padding} ${
+      className={`bg-base-100 border border-base-200 shadow-sm overflow-visible ${padding} ${
         rounded ? "rounded-lg" : ""
       } ${className}`}
       style={style}
